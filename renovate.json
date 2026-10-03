@@ -3,5 +3,21 @@
   "extends": [
     "config:recommended"
   ],
-  "forkProcessing": "enabled"
+  "forkProcessing": "enabled",
+  "packageRules": [
+    {
+      "matchDatasources": [
+        "maven"
+      ],
+      "registryUrls": [
+        "https://repo.maven.apache.org/maven2",
+        "https://repo.papermc.io/repository/maven-public/",
+        "https://repo.extendedclip.com/content/repositories/placeholderapi/",
+        "https://repo.opencollab.dev/main/",
+        "https://repo.viaversion.com/",
+        "https://repo.codemc.io/repository/maven-public/",
+        "https://maven.fabricmc.net/"
+      ]
+    }
+  ]
 }
