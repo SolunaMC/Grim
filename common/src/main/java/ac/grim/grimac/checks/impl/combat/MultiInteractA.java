@@ -19,6 +19,8 @@ import java.util.ArrayList;
 public class MultiInteractA extends Check implements PacketReceiveListener, PostPredictionListener {
     private static final Verbose V =
             Verbose.of("lastEntity={sint}, entity={sint}, lastSneaking={bool}, sneaking={bool}");
+    // Deferred flags are only drained on a movement packet, don't let a client that stops sending them grow this forever
+    private static final int MAX_DEFERRED_FLAGS = 32;
 
     private final ArrayList<FlagData> flags = new ArrayList<>();
     private int lastEntity;
@@ -61,7 +63,7 @@ public class MultiInteractA extends Check implements PacketReceiveListener, Post
                     player.onPacketCancel();
                 }
             } else {
-                flags.add(new FlagData(lastEntity, entity, lastSneaking, sneaking));
+                if (flags.size() < MAX_DEFERRED_FLAGS) flags.add(new FlagData(lastEntity, entity, lastSneaking, sneaking));
             }
         }
 

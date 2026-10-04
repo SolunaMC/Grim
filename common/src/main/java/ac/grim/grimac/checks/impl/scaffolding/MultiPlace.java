@@ -21,6 +21,8 @@ import java.util.List;
 @CheckData(name = "MultiPlace", stableKey = "grim.scaffolding.multi_place", description = "Placed multiple blocks in a tick", experimental = true)
 public class MultiPlace extends BlockPlaceCheck implements PacketReceiveListener, PostPredictionListener, BlockPlaceListener {
     private static final Verbose V = Verbose.of("face={face}, lastFace={face}, cursor={cursor}, lastCursor={cursor}, pos={mcpos}, lastPos={mcpos}");
+    // Deferred flags are only drained on a movement packet, don't let a client that stops sending them grow this forever
+    private static final int MAX_DEFERRED_FLAGS = 32;
 
     private final List<FlagData> flags = new ArrayList<>();
     private boolean hasPlaced;
@@ -52,7 +54,7 @@ public class MultiPlace extends BlockPlaceCheck implements PacketReceiveListener
                     place.resync();
                 }
             } else {
-                flags.add(new FlagData(faceId, lastFaceId, cursor, lastCursor, pos, lastPos));
+                if (flags.size() < MAX_DEFERRED_FLAGS) flags.add(new FlagData(faceId, lastFaceId, cursor, lastCursor, pos, lastPos));
             }
         }
 

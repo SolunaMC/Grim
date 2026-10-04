@@ -22,6 +22,8 @@ import java.util.List;
 public class MultiBreak extends Check implements BlockBreakListener, PreViaPacketReceiveListener, PostPredictionListener {
     private static final Verbose V =
             Verbose.of("face={face}, lastFace={face}, pos={mcpos}, lastPos={mcpos}");
+    // Deferred flags are only drained on a movement packet, don't let a client that stops sending them grow this forever
+    private static final int MAX_DEFERRED_FLAGS = 32;
 
     private final List<FlagData> flags = new ArrayList<>();
     private boolean hasBroken;
@@ -49,7 +51,7 @@ public class MultiBreak extends Check implements BlockBreakListener, PreViaPacke
                     blockBreak.cancel();
                 }
             } else {
-                flags.add(new FlagData(face, previousFace, blockBreak.position, lastPos));
+                if (flags.size() < MAX_DEFERRED_FLAGS) flags.add(new FlagData(face, previousFace, blockBreak.position, lastPos));
             }
         }
 

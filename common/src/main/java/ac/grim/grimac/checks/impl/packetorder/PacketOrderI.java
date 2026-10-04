@@ -41,6 +41,8 @@ public class PacketOrderI extends Check implements PacketReceiveListener, PostPr
     private boolean cancelledDigging;
     private WrappedBlockState startedDiggingBlock;
     private boolean digging;
+    // Deferred flags are only drained on a movement packet, don't let a client that stops sending them grow this forever
+    private static final int MAX_DEFERRED_FLAGS = 32;
     private final ArrayDeque<FlagData> flags = new ArrayDeque<>();
 
     static String typeName(int type) {
@@ -90,7 +92,7 @@ public class PacketOrderI extends Check implements PacketReceiveListener, PostPr
                         player.onPacketCancel();
                     }
                 } else {
-                    flags.add(new FlagData(TYPE_INTERACT, false, false, false, releasing, digging));
+                    if (flags.size() < MAX_DEFERRED_FLAGS) flags.add(new FlagData(TYPE_INTERACT, false, false, false, releasing, digging));
                 }
             }
         }
@@ -117,7 +119,7 @@ public class PacketOrderI extends Check implements PacketReceiveListener, PostPr
                         player.onPacketCancel();
                     }
                 } else {
-                    flags.add(new FlagData(TYPE_PLACE_USE, false, false, false, releasing, digging));
+                    if (flags.size() < MAX_DEFERRED_FLAGS) flags.add(new FlagData(TYPE_PLACE_USE, false, false, false, releasing, digging));
                 }
             }
         }
@@ -142,7 +144,7 @@ public class PacketOrderI extends Check implements PacketReceiveListener, PostPr
                                 setback = true;
                             }
                         } else {
-                            flags.add(new FlagData(TYPE_RELEASE, attacking, rightClicking, picking, false, digging));
+                            if (flags.size() < MAX_DEFERRED_FLAGS) flags.add(new FlagData(TYPE_RELEASE, attacking, rightClicking, picking, false, digging));
                             setback = true;
                         }
                     }
@@ -204,7 +206,7 @@ public class PacketOrderI extends Check implements PacketReceiveListener, PostPr
                     player.onPacketCancel();
                 }
             } else {
-                flags.add(new FlagData(TYPE_ATTACK, false, rightClicking, picking, releasing, digging));
+                if (flags.size() < MAX_DEFERRED_FLAGS) flags.add(new FlagData(TYPE_ATTACK, false, rightClicking, picking, releasing, digging));
             }
         }
     }
