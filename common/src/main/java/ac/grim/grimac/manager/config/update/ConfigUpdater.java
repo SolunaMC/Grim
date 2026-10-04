@@ -78,16 +78,27 @@ public final class ConfigUpdater {
          */
         public final String resourceDirectory;
         public final int latestVersion;
+        /**
+         * Fork revision on top of {@link #latestVersion}, stamped as
+         * {@code <latestVersion>.<latestMinor>} (e.g. 11.1). The major number
+         * follows upstream; the minor one only adds keys and has no migrations.
+         * Single digit (1–9), because YAML reads 11.10 as 11.1.
+         */
+        public final int latestMinor;
         public final @NotNull ConfigFlavor flavor;
         /** Keyed by the version this migration upgrades TO. */
         public final @NotNull Map<Integer, Migration> migrations;
 
-        Spec(@NotNull String resourceDirectory, int latestVersion,
+        Spec(@NotNull String resourceDirectory, int latestVersion, int latestMinor,
              @NotNull ConfigFlavor flavor, @NotNull Map<Integer, Migration> migrations) {
+            if (latestMinor < 0 || latestMinor > 9) {
+                throw new IllegalArgumentException("minor version must be 0-9, got " + latestMinor);
+            }
             Objects.requireNonNull(resourceDirectory, "resourceDirectory");
             this.resourceDirectory = resourceDirectory.endsWith("/")
                     ? resourceDirectory : resourceDirectory + "/";
             this.latestVersion = latestVersion;
+            this.latestMinor = latestMinor;
             this.flavor = Objects.requireNonNull(flavor, "flavor");
             this.migrations = Map.copyOf(migrations);
         }
@@ -101,6 +112,7 @@ public final class ConfigUpdater {
         public static final class Builder {
             private final String resourceDirectory;
             private final int latestVersion;
+            private int latestMinor;
             private final ConfigFlavor flavor;
             private final Map<Integer, Migration> migrations = new LinkedHashMap<>();
 
@@ -116,8 +128,14 @@ public final class ConfigUpdater {
                 return this;
             }
 
+            /** Fork revision on top of the upstream version, see {@link Spec#latestMinor}. */
+            public @NotNull Builder minor(int minor) {
+                this.latestMinor = minor;
+                return this;
+            }
+
             public @NotNull Spec build() {
-                return new Spec(resourceDirectory, latestVersion, flavor, migrations);
+                return new Spec(resourceDirectory, latestVersion, latestMinor, flavor, migrations);
             }
         }
     }
@@ -240,13 +258,17 @@ public final class ConfigUpdater {
             return new Result(false, -1, spec.latestVersion, warning);
         }
 
-        int oldVersion = parseVersion(oldData.get("config-version"));
-        if (oldVersion >= spec.latestVersion && onDiskFlavor != null) {
+        int[] oldParts = parseVersion(oldData.get("config-version"));
+        int oldVersion = oldParts[0];
+        int oldMinor = oldParts[1];
+        boolean upToDate = oldVersion > spec.latestVersion
+                || oldVersion == spec.latestVersion && oldMinor >= spec.latestMinor;
+        if (upToDate && onDiskFlavor != null) {
             return new Result(false, oldVersion, spec.latestVersion, null);
         }
 
         Path backup = configFile.toPath().resolveSibling(
-                configFile.getName() + ".v" + oldVersion + ".bak");
+                configFile.getName() + ".v" + formatVersion(oldVersion, oldMinor) + ".bak");
         if (!Files.exists(backup)) {
             Files.copy(configFile.toPath(), backup);
         }
@@ -289,7 +311,9 @@ public final class ConfigUpdater {
         }
 
         // Always stamp version + flavor.
-        outputView.put("config-version", spec.latestVersion);
+        outputView.put("config-version", spec.latestMinor == 0
+                ? (Object) spec.latestVersion
+                : Double.valueOf(formatVersion(spec.latestVersion, spec.latestMinor)));
         outputView.put("config-flavor", spec.flavor.name());
 
         applyEntries(configFile, ownLog.finalState().entrySet().stream()
@@ -299,7 +323,7 @@ public final class ConfigUpdater {
                 .toList());
 
         logger.info("[grim-config-updater] " + configFile.getName()
-                + " migrated v" + oldVersion + " → v" + spec.latestVersion
+                + " migrated v" + formatVersion(oldVersion, oldMinor) + " → v" + formatVersion(spec.latestVersion, spec.latestMinor)
                 + " (flavor " + spec.flavor + ", backup at " + backup.getFileName() + ")");
         return new Result(true, oldVersion, spec.latestVersion, null);
     }
@@ -388,11 +412,22 @@ public final class ConfigUpdater {
         return spec.resourceDirectory + "en.yml";
     }
 
-    private static int parseVersion(@Nullable Object raw) {
-        if (raw == null) return 0;
-        if (raw instanceof Number n) return n.intValue();
-        try { return Integer.parseInt(raw.toString().trim()); }
-        catch (NumberFormatException e) { return 0; }
+    /** Parses {@code 11} or {@code 11.1} into {major, minor}; anything else is {0, 0}. */
+    static int[] parseVersion(@Nullable Object raw) {
+        if (raw == null) return new int[]{0, 0};
+        String text = raw.toString().trim();
+        int dot = text.indexOf('.');
+        try {
+            if (dot < 0) return new int[]{Integer.parseInt(text), 0};
+            int minor = dot + 1 < text.length() ? Integer.parseInt(text.substring(dot + 1)) : 0;
+            return new int[]{Integer.parseInt(text.substring(0, dot)), minor};
+        } catch (NumberFormatException e) {
+            return new int[]{0, 0};
+        }
+    }
+
+    private static String formatVersion(int major, int minor) {
+        return minor == 0 ? Integer.toString(major) : major + "." + minor;
     }
 
     /**
