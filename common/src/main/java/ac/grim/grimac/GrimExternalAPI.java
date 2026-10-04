@@ -9,6 +9,7 @@ import ac.grim.grimac.api.event.events.GrimReloadEvent;
 import ac.grim.grimac.api.plugin.GrimPlugin;
 import ac.grim.grimac.api.storage.backend.BackendRegistry;
 import ac.grim.grimac.manager.config.ConfigManagerFileImpl;
+import ac.grim.grimac.manager.datastore.DataStoreLifecycle;
 import ac.grim.grimac.manager.init.start.StartableInitable;
 import ac.grim.grimac.player.GrimPlayer;
 import ac.grim.grimac.utils.anticheat.LogUtil;
@@ -227,8 +228,16 @@ public class GrimExternalAPI implements GrimAbstractAPI, ConfigReloadObserver, S
         // First-load guard: load() calls reload() before start() runs, so this fires once with started=false before the datastore exists. Subsequent /grim reload calls see started=true and proceed (including disabled→enabled flips — DataStoreLifecycle.reload() re-evaluates builder.enabled() each time).
         if (!started) return;
         // Hot-reload picks up backend swaps + routing + connection-pool edits without a server restart. Drains in-flight writes for shutdown-drain-timeout-ms then drops; brief mid-reload unavailability is the tradeoff.
-        if (GrimAPI.INSTANCE.getDataStoreLifecycle() != null) {
-            GrimAPI.INSTANCE.getDataStoreLifecycle().reload();
+        // Off the command thread: teardown drains writes and restart may wait on DB ownership and pool setup.
+        DataStoreLifecycle dataStoreLifecycle = GrimAPI.INSTANCE.getDataStoreLifecycle();
+        if (dataStoreLifecycle != null) {
+            GrimAPI.INSTANCE.getScheduler().getAsyncScheduler().runNow(GrimAPI.INSTANCE.getGrimPlugin(), () -> {
+                try {
+                    dataStoreLifecycle.reload();
+                } catch (RuntimeException e) {
+                    LogUtil.error("Failed to reload datastore", e);
+                }
+            });
         }
         // Reload checks for all players
         for (GrimPlayer player : GrimAPI.INSTANCE.getPlayerDataManager().getEntries()) {
