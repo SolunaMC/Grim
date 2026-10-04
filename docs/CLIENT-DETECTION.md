@@ -15,8 +15,9 @@ Everything in this document is a no-op on existing servers until configured, exc
 additions (detected mods in `/grim profile` and the brand notification, Bedrock device info,
 `/grim brands stats`).
 
-All settings live in the existing `client-brand:` section of `config.yml`. They are not in the bundled
-config, add the ones you want to change yourself. Every key falls back to the default shown here.
+Settings live in the `client-brand:` section of `config.yml`, texts in the `client-brand:` section of
+`messages.yml`. Both are in the bundled files. Configs created before these keys existed fall back to
+the defaults shown here, add the keys you want to change yourself.
 
 ## Limits of channel based detection
 
