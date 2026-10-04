@@ -111,7 +111,6 @@
       ],
       "allowedVersions": "!/SNAPSHOT$/",
       "matchPackageNames": [
-        "*",
         "!com.github.retrooper:**"
       ]
     },
