@@ -1,0 +1,43 @@
+# ===========================================================================
+#  Ustawienia backendu SQLite.
+#
+#  SQLite działa tylko na jednym serwerze. Konfiguracje sieciowe powinny
+#  przełączyć routing w database.yml na backend korzystający ze wspólnej bazy danych.
+# ===========================================================================
+
+# Każdy klucz znajduje się pod `sqlite:`, aby przestrzeń kluczy tego pliku nie
+# kolidowała z sąsiednimi plikami backendów (mysql:, postgres:, mongo:,
+# redis:), gdy Configuralize scala je wszystkie w jedną globalną przestrzeń nazw.
+sqlite:
+  # Ścieżka do pliku bazy danych SQLite. Jeśli nie jest bezwzględna, jest
+  # rozwiązywana względem folderu danych pluginu. Stary plik
+  # `data/violations.sqlite` pozostaje nietknięty jako zabezpieczenie; to
+  # nowy plik, nigdy ALTER na starym.
+  path: "data/history.v1.db"
+
+  # Tryb WAL pozwala współbieżnym czytelnikom działać obok zapisującego — niezbędne
+  # dla pluginu serwerowego, który odczytuje /grim history podczas zapisywania naruszeń.
+  journal-mode: WAL
+
+  # NORMAL to rozsądny kompromis między trwałością zapisu a przepustowością
+  # w trybie WAL. FULL podwaja trwałość kosztem przepustowości. OFF jest niebezpieczny.
+  synchronous-mode: NORMAL
+
+  # Jak długo SQLite czeka na blokadę, zanim zrezygnuje. Handler zapisuje w logach
+  # i odrzuca przy BackendException; zwiększenie tej wartości ogranicza zbędne
+  # odrzucenia na obciążonych dyskach.
+  busy-timeout-ms: 5000
+
+  # Rozmiar pamięci podręcznej stron (w stronach). Domyślny rozmiar strony SQLite
+  # to 4096 bajtów, więc 10000 stron ≈ 40 MB. Zwiększ dla intensywnie używanych historii.
+  cache-pages: 10000
+
+  # Limit opróżniania partii na handler. Każdy handler bufora pierścieniowego
+  # zbiera zdarzenia w partię PreparedStatement i zatwierdza ją przy endOfBatch
+  # LUB gdy partia osiągnie ten limit, w zależności od tego, co nastąpi pierwsze.
+  # Wyższe wartości zwiększają przepustowość kosztem opóźnienia przy długotrwałych skokach.
+  batch-flush-cap: 256
+
+# Znaczniki schematu — zobacz komentarz nagłówkowy w config.yml.
+config-flavor: V2
+config-version: 1

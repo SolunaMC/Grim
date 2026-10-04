@@ -1,0 +1,162 @@
+# » este » (dublu >>), ANSI și UTF-8 îl interpretează diferit... din această cauză poți vedea chiar și ?
+prefix: "&bGrim &8»"
+
+alerts-enabled: "%prefix% &fAlerte activate"
+alerts-disabled: "%prefix% &fAlerte dezactivate"
+verbose-enabled: "%prefix% &fVerbose activat"
+verbose-disabled: "%prefix% &fVerbose dezactivat"
+brands-enabled: "%prefix% &fNotificări de brand activate"
+brands-disabled: "%prefix% &fNotificări de brand dezactivate"
+client-brand-format: "%prefix% &f%player% a intrat folosind %brand%"
+console-specify-target: "%prefix% &cTrebuie să specifici o țintă când folosești consola!"
+reloading: "%prefix% &7Se reîncarcă configurația..."
+reloaded: "%prefix% &fConfigurația a fost reîncărcată."
+reload-failed: "%prefix% &cReîncărcarea configurației a eșuat."
+player-not-found: "%prefix% &cJucătorul este exceptat sau offline!"
+player-not-this-server: "%prefix% &cJucătorul nu este pe acest server!"
+sender-not-found: "%prefix% &cNu poți folosi această comandă dacă ești exceptat!"
+spectate-return: "<click:run_command:/grim stopspectating><hover:show_text:\"/grim stopspectating\">\n%prefix% &fApasă aici pentru a te întoarce la locația anterioară\n</hover></click>"
+cannot-spectate-return: "%prefix% &cPoți face asta doar după ce ai spectat un jucător"
+cannot-run-on-self: "%prefix% &cNu poți folosi această comandă pe tine însuți!"
+upload-log: "%prefix% &fDebug încărcat la: %url%"
+upload-log-start: "%prefix% &fSe încarcă logul... te rugăm să aștepți"
+upload-log-not-found: "%prefix% &cNu s-a putut găsi acel log"
+upload-log-upload-failure: "%prefix% &cA apărut o eroare la încărcarea acestui log, vezi consola pentru mai multe informații"
+disconnect:
+    timeout: "<lang:disconnect.timeout>"
+    closed: "<lang:disconnect.closed>"
+    error: "<red>A apărut o eroare la procesarea pachetelor. Te rugăm să contactezi administratorii."
+    blacklisted-forge: "<red>Versiunea ta de Forge este pe lista neagră din cauza hackurilor Reach integrate.<newline><gold>Versiuni afectate: 1.18.2-1.19.3<newline><newline><red>Vezi https://github.com/MinecraftForge/MinecraftForge/issues/9309."
+run-as-player: "%prefix% &cAceastă comandă poate fi folosită doar de jucători!"
+run-as-player-or-console: "%prefix% &cAceastă comandă poate fi folosită doar de jucători sau de consolă!"
+webhook-not-enabled: "Webhook-urile Discord nu sunt activate!"
+webhook-test-message: "mesaj de test"
+webhook-test-succeeded: "Testul webhook-ului Discord a reușit!"
+webhook-test-failed: "Testul webhook-ului Discord a eșuat!"
+
+# Placeholdere valide:
+# %prefix%
+# %player%
+# %check_name%
+# %description%
+# %experimental%
+# %vl% - încălcări
+# %verbose% - informații suplimentare de la check, cum ar fi abaterile; nu toate check-urile adaugă informații
+alerts-format: "%prefix% &f%player% &ba picat <hover:show_text:\"&b%check_name%%experimental%\n&8Descriere: &f%description%\">&f%check_name%%experimental%</hover> &f(x&c%vl%&f) &7%verbose%"
+alerts-format-proxy: "%prefix% &f[&cproxy&f] &f%player% &ba picat &f%check_name%%experimental% &f(x&c%vl%&f) &7%verbose%"
+experimental-symbol: "*"
+
+profile:
+    - "&7======================"
+    - "%prefix% &bProfil pentru &f%player%"
+    - "&bPing: &f%ping%"
+    - "&bVersiune: &f%version%"
+    - "&bBrand client: &f%brand%"
+    - "&bSensibilitate orizontală: &f%h_sensitivity%%"
+    - "&bSensibilitate verticală: &f%v_sensitivity%%"
+    - "&bFastMath activat: &f%fast_math%"
+    - "&7======================"
+help:
+    - "&7======================"
+    - "/grim alerts &f- &7Comută alertele"
+    - "/grim brands &f- &7Comută notificările de brand"
+    - "/grim brands stats &f- &7Branduri, moduri și versiuni ale jucătorilor online"
+    - "/grim profile <player> &f- &7Vezi informații despre jucător"
+    - "/grim help &f- &7Vezi acest mesaj de ajutor"
+    - "/grim debug <player> &f- &7Output de predicție pentru dezvoltatori"
+    - "/grim perf &f- &7ms/predicție pentru dezvoltatori"
+    - "/grim reload &f- &7Reîncarcă configurația"
+    - "/grim spectate <player> &f- &7Spectează un jucător"
+    - "/grim verbose &f- &7Îți arată fiecare flag, fără buffere"
+    - "/grim log [0-255] &f- &7Încarcă un log de debug pentru flag-urile de predicție"
+    - "/grim history <player> &f- &7Lista sesiunilor (cele mai noi primele)"
+    - "/grim history <player> page <N> &f- &7Sari la pagina N din lista sesiunilor"
+    - "/grim history <player> session <N|latest> [-d] [-v] &f- &7Detaliile sesiunii (cele mai recente încălcări primele)"
+    - "/grim history <player> session <N|latest> page <N> [-d] [-v] &f- &7Detaliile sesiunii, pagina N de încălcări"
+    - "&7======================"
+
+# === /grim history ===
+# Interfață de istoric bazată pe sesiuni. Toate liniile de mai jos sunt șabloane MiniMessage configurabile.
+# Hover-urile implicite ale rândurilor se află în tagurile <hover:show_text:'...'> din linie și în
+# cheile de fragmente hover de mai jos; elimină hover-ul din linie pentru a folosi formatul de rezervă al renderer-ului.
+
+grim-history-load-failure: "%prefix% &cSubsistemul de istoric nu s-a putut încărca! Verifică erorile din consola serverului."
+grim-history-disabled: "%prefix% &cSubsistemul de istoric este dezactivat!"
+grim-history-failed: "%prefix% &cÎncărcarea istoricului a eșuat: &7%error%"
+grim-history-unknown-player: "%prefix% &cJucător necunoscut: &f%player%"
+grim-history-no-sessions: "%prefix% &7Niciun istoric de sesiuni pentru &f%player%&7."
+grim-history-session-not-found: "%prefix% &cSesiunea &f%ordinal%&c nu a fost găsită pentru &f%player%&c."
+
+# Lista sesiunilor — placeholdere valide: %prefix% %player% %page% %max_pages%
+grim-history-header: "%prefix% &bSe afișează istoricul sesiunilor pentru &f%player% &8[&f%page%&7/&f%max_pages%&8]"
+# Linia de rezumat a unei sesiuni — placeholdere valide:
+#   %prefix% %player% %ordinal% %grim_version% %server_name%
+#   %client_version% %client_brand% %duration% %timeago%
+#   %violations% %unique_checks% %crashed_marker% %session_uuid% %detail_command%
+# %crashed_marker% devine grim-history-crashed-marker pentru sesiunile
+# a căror conexiune a dispărut fără o închidere corectă (crash de server,
+# kill -9, RST de canal care nu a declanșat UserDisconnectEvent). Șir gol
+# pentru sesiunile în desfășurare sau închise corect.
+grim-history-session: "<hover:show_text:'&bSesiunea &7%session_uuid%<newline>&7Apasă sau rulează &e%detail_command%<newline>&7pentru a vedea detaliile sesiunii.'>%prefix% &8[&b%grim_version%&8] &8[&b%server_name%&8] &8[&b%client_version%&8] &bSesiunea &f%ordinal%&b, durată &f%duration%&b, cu &c%violations%&b încălcări &8[&c%unique_checks%&8]%crashed_marker% &8(&7acum %timeago%&8)</hover>"
+
+# Marcaj inserat în %crashed_marker% pe liniile de sesiune al căror
+# closed_at == last_activity (adică marcate de curățarea după crash la
+# următoarea pornire, nu de calea de deconectare). Include un spațiu la
+# început, astfel încât marcajul să se citească natural când e prezent și să dispară când e gol.
+grim-history-crashed-marker: " &8(&cprăbușită&8)"
+
+# Detaliile sesiunii — placeholdere valide:
+#   %prefix% %player% %ordinal% %grim_version% %server_name%
+#   %client_version% %client_brand% %duration% %timeago%
+#   %violations% %unique_checks% %bucket_size%
+grim-history-detail-header: "%prefix% &bDetaliile sesiunii &f%ordinal%&b a jucătorului &f%player%&b:"
+grim-history-detail-meta1: "%prefix% &bGrim: &f%grim_version%&b, Server: &f%server_name%&b, Durată: &f%duration%&b, Dată: &7acum %timeago%"
+grim-history-detail-meta2: "%prefix% &bClient: &f%client_version%&b, Brand: &f%client_brand%"
+grim-history-detail-violations-header: "%prefix% &bÎncălcări: &8(%violations% în total, %unique_checks% unice)"
+grim-history-detail-empty: "%prefix% &7- (niciuna)"
+# Rând grupat (implicit) — placeholdere valide: %prefix% %offset% %checks_list%
+#   %bucket_start% %bucket_end% %bucket_hover_entries%
+#   %checks_list% se construiește unind intrările grim-history-check-count cu ", "
+grim-history-detail-group: "<hover:show_text:'&bÎncălcări în &f%bucket_start%–%bucket_end%&b:%bucket_hover_entries%'>%prefix% &7- %checks_list% &8(&b%offset%&8)</hover>"
+grim-history-detail-group-hover: "&bÎncălcări în &f%bucket_start%–%bucket_end%&b:%bucket_hover_entries%"
+grim-history-detail-group-hover-entry: "<newline>&8  %offset% &b%check%%description%%verbose%"
+grim-history-hover-description: " — &f%description%"
+grim-history-detail-group-hover-verbose: " — &7%verbose%"
+# Rândul unei singure încălcări brute (--detailed) — placeholdere valide:
+#   %prefix% %offset% %check% %description% %vl% %verbose%
+grim-history-detail-entry: "%prefix% &7- &f%check% &8(&b%offset%&8)&7 %verbose%"
+grim-history-detail-entry-hover: "&b%check%%description%<newline>&8@ %offset% — vl %vl%%verbose%"
+grim-history-detail-entry-hover-verbose: "<newline>&7%verbose%"
+# Formatul fiecărui check din %checks_list% al unui grup — placeholdere valide: %check_name% %count%
+grim-history-check-count: "&f%check_name%&7 x&c%count%"
+
+# === Detectarea clienților și a modurilor ===
+client-brand:
+    # Adăugat la client-brand-format când au fost detectate moduri și formatul nu conține %mods%
+    mods-suffix: " &7(moduri: &f%mods%&7)"
+    # Adăugat în profil înaintea ultimei linii când au fost detectate moduri
+    profile-mods-line: "&bModuri: &f%mods%"
+    # /grim profile pentru jucătorii Bedrock. %bedrock_device%, %bedrock_input%
+    bedrock-profile:
+        - "&7======================"
+        - "%prefix% &bProfil pentru &f%player%"
+        - "&bJucător Bedrock &7(exceptat de la check-uri)"
+        - "&bDispozitiv: &f%bedrock_device%"
+        - "&bControl: &f%bedrock_input%"
+        - "&7======================"
+    # Reguli de client din config.yml. %match% este brandul, modul sau canalul potrivit, %rule% este regex-ul
+    rule-alert-format: "%prefix% &f%player% &ba declanșat regula de client &f%rule% &7(%match%)"
+    rule-kick-message: "<red>Clientul tău sau unul dintre modurile tale nu este permis pe acest server."
+    # /grim brands stats
+    stats:
+        header: "%prefix% &bClienții celor &f%players% &bjucători online &7(doar jucătorii online)"
+        brands: "&bBranduri:"
+        mods: "&bModuri detectate:"
+        versions: "&bVersiuni de client:"
+        entry: " &7- &f%name%&7: &f%count% &7(%percent%%)"
+        more: " &7... și &f%count% &7în plus"
+        none: " &7- niciunul"
+
+# Markeri de schemă — vezi comentariul din antetul config.yml.
+config-flavor: V2
+config-version: 2

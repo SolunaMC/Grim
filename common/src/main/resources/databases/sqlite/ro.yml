@@ -1,0 +1,43 @@
+# ===========================================================================
+#  Setările backend-ului SQLite.
+#
+#  SQLite funcționează doar pe un singur server. Configurațiile în rețea ar trebui
+#  să schimbe routing-ul din database.yml către un backend care folosește o bază de date partajată.
+# ===========================================================================
+
+# Fiecare cheie se află sub `sqlite:`, astfel încât spațiul de chei al acestui
+# fișier să nu se ciocnească cu fișierele celorlalte backend-uri (mysql:,
+# postgres:, mongo:, redis:) atunci când Configuralize le unește pe toate într-un singur namespace global.
+sqlite:
+  # Calea către fișierul bazei de date SQLite. Dacă nu este absolută, este
+  # rezolvată relativ la folderul de date al pluginului. Fișierul vechi
+  # `data/violations.sqlite` rămâne neatins ca plasă de siguranță; acesta
+  # este un fișier nou, niciodată un ALTER pe cel vechi.
+  path: "data/history.v1.db"
+
+  # Modul WAL permite cititorilor concurenți să ruleze în paralel cu scriitorul — esențial
+  # pentru un plugin de server care citește /grim history în timp ce scrie încălcări.
+  journal-mode: WAL
+
+  # NORMAL este un echilibru rezonabil între durabilitatea scrierii și debit
+  # în modul WAL. FULL dublează durabilitatea cu prețul debitului. OFF este periculos.
+  synchronous-mode: NORMAL
+
+  # Cât timp așteaptă SQLite un lock înainte de a renunța. Handler-ul scrie în log
+  # și renunță la date la BackendException; mărirea acestei valori reduce pierderile
+  # inutile pe discuri foarte solicitate.
+  busy-timeout-ms: 5000
+
+  # Dimensiunea cache-ului de pagini (în pagini). Dimensiunea implicită a unei pagini
+  # SQLite este 4096 octeți, deci 10000 de pagini ≈ 40 MB. Mărește pentru istorice foarte active.
+  cache-pages: 10000
+
+  # Limita de flush a batch-ului per handler. Fiecare handler al ring buffer-ului
+  # adună evenimente într-un batch PreparedStatement și face commit la endOfBatch
+  # SAU când batch-ul atinge această limită, oricare survine primul. Valorile mai
+  # mari sacrifică latența pentru debit la vârfuri susținute de încărcare.
+  batch-flush-cap: 256
+
+# Markeri de schemă — vezi comentariul din antetul config.yml.
+config-flavor: V2
+config-version: 1

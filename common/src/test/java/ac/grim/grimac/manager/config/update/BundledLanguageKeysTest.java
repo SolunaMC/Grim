@@ -16,32 +16,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 // Every bundled translation has exactly the keys of the en.yml in the same folder
 class BundledLanguageKeysTest {
 
-    private static final String[] CONFIG_LANGUAGES = {"de", "es", "fr", "it", "ja", "nl", "pl", "pt", "ro", "ru", "tr", "zh"};
-    private static final String[] LANGUAGES = {"de", "es", "fr", "it", "ja", "nl", "pt", "ru", "tr", "zh"};
+    // Configuralize only uses a language when every source has it, so each folder needs all of them
+    private static final String[] LANGUAGES = {"de", "es", "fr", "it", "ja", "nl", "pl", "pt", "ro", "ru", "tr", "zh"};
+    private static final String[] FOLDERS = {"config", "messages", "database", "discord", "punishments",
+            "databases/mongo", "databases/mysql", "databases/postgres", "databases/redis", "databases/sqlite"};
 
     @Test
-    void configLanguagesHaveTheEnglishKeys() throws Exception {
-        assertSameKeys("config", CONFIG_LANGUAGES);
-    }
-
-    @Test
-    void messagesLanguagesHaveTheEnglishKeys() throws Exception {
-        assertSameKeys("messages", LANGUAGES);
-    }
-
-    @Test
-    void databaseLanguagesHaveTheEnglishKeys() throws Exception {
-        assertSameKeys("database", LANGUAGES);
-    }
-
-    @Test
-    void discordLanguagesHaveTheEnglishKeys() throws Exception {
-        assertSameKeys("discord", LANGUAGES);
-    }
-
-    @Test
-    void punishmentsLanguagesHaveTheEnglishKeys() throws Exception {
-        assertSameKeys("punishments", LANGUAGES);
+    void everyFolderHasEveryLanguageWithTheEnglishKeys() throws Exception {
+        for (String folder : FOLDERS) {
+            assertSameKeys(folder, LANGUAGES);
+        }
     }
 
     private static void assertSameKeys(String folder, String[] languages) throws Exception {

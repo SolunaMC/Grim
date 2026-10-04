@@ -1,0 +1,51 @@
+# ===========================================================================
+#  Setările backend-ului Redis.
+#
+#  Redis este în primul rând o stocare în memorie — asigură-te că persistența
+#  AOF este activată pe server dacă direcționezi istoricul către el, altfel
+#  istoricul va dispărea la repornire. Necesită Jedis la runtime; dacă Jedis
+#  lipsește, backend-ul se dezactivează singur, iar routing-ul trece pe varianta de rezervă.
+#
+#  Nu este recomandat ca țintă principală pentru istoric. Oferit pentru
+#  administratorii care au doar Redis la dispoziție și au nevoie urgent de ceva funcțional.
+# ===========================================================================
+
+# Fiecare cheie se află sub `redis:`, astfel încât spațiul de chei al acestui
+# fișier să nu se ciocnească cu fișierele celorlalte backend-uri atunci când
+# Configuralize le unește pe toate într-un singur namespace global.
+redis:
+  host: "localhost"
+  port: 6379
+
+  # Indexul bazei de date logice (implicit 0-15).
+  database: 0
+
+  # Credențiale ACL opționale. Lasă gol pentru Redis fără autentificare.
+  user: ""
+  password: ""
+
+  # Adăugat la începutul fiecărei chei scrise de acest backend. Util când partajezi
+  # o instanță Redis cu alte aplicații. Lasă gol pentru niciun prefix.
+  key-prefix: ""
+
+  timeout-ms: 2000
+  batch-flush-cap: 256
+
+  # Când este true, scrie un avertisment în log la pornire dacă acest backend
+  # primește istoricul de încălcări/sesiuni. Setează false pentru a-l opri după
+  # ce ai confirmat că persistența este configurată.
+  warn-on-history: true
+
+  # Suprascrieri pentru namespace-urile cheilor. Interpretate ca segmente de prefix
+  # ale cheilor (Redis nu are tabele native). Numele implicite sunt mai jos.
+  tables:
+    meta: grim_meta
+    checks: grim_checks
+    players: grim_players
+    sessions: grim_sessions
+    violations: grim_violations
+    settings: grim_settings
+
+# Markeri de schemă — vezi comentariul din antetul config.yml.
+config-flavor: V2
+config-version: 1

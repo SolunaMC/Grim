@@ -1,0 +1,120 @@
+# ===========================================================================
+#  Magazyn danych Grim
+#
+#  Kieruje kategorie DataStore (violation / session / player-identity /
+#  setting / blob) do konkretnych instancji backendów. Każdy backend wymieniony
+#  w `routing:` ma własny plik ustawień w `databases/<backend-id>.yml`.
+#
+#  Przy pierwszym uruchomieniu, jeśli istnieje stary magazyn (violations.sqlite),
+#  zostanie on automatycznie zmigrowany do nowego magazynu. Ustaw migration.skip
+#  na true, jeśli wolisz później przenieść dane ręcznie.
+# ===========================================================================
+
+# Każdy klucz magazynu danych znajduje się pod tym głównym kluczem, dzięki czemu
+# przestrzeń kluczy ma naturalną przestrzeń nazw — Configuralize w czasie działania
+# scala wszystkie pliki yml w jedną globalną przestrzeń kluczy, a płaski układ
+# kolidowałby tutaj z identycznymi kluczami najwyższego poziomu w config.yml /
+# discord.yml (`enabled`, `history` itd.).
+database:
+
+  # Główny przełącznik. Ustaw false, aby całkowicie wyłączyć historię naruszeń
+  # i /grim history. Kontrole antycheata nadal działają; flagi po prostu nie są zapisywane.
+  enabled: true
+
+  # Kategorie → identyfikatory backendów. Każdy użyty tu identyfikator musi mieć
+  # odpowiadający mu plik `databases/<id>.yml` (tworzony automatycznie z domyślnych
+  # ustawień przy pierwszym uruchomieniu) oraz zarejestrowanego BackendProvider
+  # w czasie działania. `none` całkowicie wyłącza zapisywanie dla danej kategorii.
+  # Mieszanie backendów jest dozwolone — np. naruszenia w sieciowej bazie SQL,
+  # a bloby w magazynie obiektów.
+  routing:
+    violation: sqlite
+    session: sqlite
+    player-identity: sqlite
+    setting: sqlite
+    blob: none
+
+  session:
+    # Używane tylko podczas migracji — stary czytnik V0 nie ma sygnałów
+    # dołączenia/wyjścia, więc SessionReconstructor grupuje naruszenia w sesje,
+    # gdy kolejne flagi mieszczą się w tej przerwie. Sesje na żywo są ograniczone
+    # połączeniem, a nie tą wartością.
+    gap-ms: 600000
+    scope-per-server: true
+    # Jak często heartbeat połączonego gracza aktualizuje (upsert) wiersz sesji,
+    # aby last_activity_epoch_ms był aktualny. Ogranicza widoczny czas trwania
+    # sesji w razie crashu serwera (poprawne rozłączenia zawsze ustawiają
+    # closed_at). Koszt: ~jeden UPSERT wiersza na gracza online na interwał.
+    # 0 wyłącza.
+    heartbeat-interval-ms: 30000
+
+  ownership:
+    # Zapobiega zapisywaniu do tej samej bazy danych przez dwa działające serwery
+    # z tym samym trwałym UUID magazynu. Wyłącz to tylko wtedy, gdy świadomie
+    # akceptujesz zduplikowanych zapisujących.
+    enforce-persistent-uuid-ownership: true
+    # Opcje:
+    # - disable-storage: kontrole działają dalej, ale zapisy do bazy są wyłączone na czas tego uruchomienia.
+    # - fail-startup: przerywa uruchamianie magazynu Grim przy aktywnym zduplikowanym UUID.
+    # - allow-unsafe: tylko dla ekspertów; pomija egzekwowanie własności.
+    duplicate-persistent-uuid-action: disable-storage
+    renew-interval-ms: 10000
+    lease-ttl-ms: 20000
+    startup-wait-ms: 20000
+    safety-margin-ms: 5000
+    stale-startup-ttl-ms: 30000
+    recovery-sweep-interval-ms: 60000
+    cleanup-other-servers: true
+
+  write-path:
+    # queue-capacity musi być dodatnią potęgą dwójki (wymóg bufora pierścieniowego).
+    # Typowe wartości: 4096, 8192, 16384, 32768, 65536.
+    queue-capacity: 16384
+    batch-size: 256
+    flush-interval-ms: 1000
+    warn-rate-ms: 10000
+    shutdown-drain-timeout-ms: 5000
+    # Strategia oczekiwania bufora pierścieniowego. BLOCKING to bezpieczna wartość
+    # domyślna: oczekiwanie na zmiennej warunkowej, które minimalizuje użycie CPU
+    # kosztem niewielkiego opóźnienia przy ekstremalnych skokach obciążenia.
+    # Wybierz YIELDING lub BUSY_SPIN tylko wtedy, gdy masz wolny rdzeń i zmierzyłeś
+    # zysk względem BLOCKING.
+    # Opcje: BLOCKING, TIMEOUT_BLOCKING, SLEEPING, YIELDING, BUSY_SPIN.
+    wait-strategy: BLOCKING
+
+  retention:
+    session:
+      enabled: true
+      max-age-days: 90
+    violation:
+      enabled: true
+      max-age-days: 365
+    player-identity:
+      enabled: false
+    setting:
+      enabled: false
+    blob:
+      enabled: true
+      max-age-days: 30
+
+  migration:
+    skip: false
+    max-duration-ms: 0        # 0 = bez limitu czasu
+
+  name-resolution:
+    # Kolejność ma znaczenie — wygrywa pierwszy niepusty wynik.
+    # local-cache odczytuje kategorię PlayerIdentity.
+    # offline-mode-uuid wylicza UUID.nameUUIDFromBytes (tylko serwery offline).
+    chain: [local-cache, offline-mode-uuid]
+
+  history:
+    entries-per-page: 15
+    group-interval-ms: 30000
+
+  # Etykieta tylko do wyświetlania, dodawana do nowych rekordów sesji. Pokazywana
+  # w linii nagłówka sesji w `/grim history`. Można ją bezpiecznie zmienić w trakcie działania.
+  server-name: "ChangeMe"
+
+# Znaczniki schematu — zobacz komentarz nagłówkowy w config.yml.
+config-flavor: V2
+config-version: 1
