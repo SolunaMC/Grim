@@ -10,6 +10,7 @@ import ac.grim.grimac.platform.bukkit.entity.BukkitGrimEntity;
 import ac.grim.grimac.platform.bukkit.utils.anticheat.MultiLibUtil;
 import ac.grim.grimac.platform.bukkit.utils.convert.BukkitConversionUtils;
 import ac.grim.grimac.platform.bukkit.utils.reflection.PaperUtils;
+import ac.grim.grimac.utils.anticheat.LogUtil;
 import ac.grim.grimac.utils.common.arguments.CommonGrimArguments;
 import ac.grim.grimac.utils.math.Location;
 import ac.grim.grimac.utils.reflection.ReflectionUtils;
@@ -190,6 +191,7 @@ public class BukkitPlatformPlayer extends BukkitGrimEntity implements PlatformPl
     static {
         final ServerVersion version = PacketEvents.getAPI().getServerManager().getVersion();
 
+        Consumer<@NotNull Player> resync;
         try {
             final String nmsPackage;
 
@@ -254,7 +256,7 @@ public class BukkitPlatformPlayer extends BukkitGrimEntity implements PlatformPl
                 sharedFlagsId = field.get(null);
             }
 
-            resyncSharedFlags = player -> {
+            resync = player -> {
                 try {
                     Object handle = getHandle.invoke(player);
                     Object dataWatcher = getDataWatcher.invoke(handle);
@@ -264,7 +266,10 @@ public class BukkitPlatformPlayer extends BukkitGrimEntity implements PlatformPl
                 }
             };
         } catch (Throwable t) {
-            throw t instanceof RuntimeException e ? e : new RuntimeException(t);
+            // e.g. a new NMS revision we don't know the obfuscated names for yet, don't break player creation over this
+            LogUtil.warn("Failed to set up shared flags resync for " + version.getReleaseName() + ", it will be disabled", t);
+            resync = player -> {};
         }
+        resyncSharedFlags = resync;
     }
 }
