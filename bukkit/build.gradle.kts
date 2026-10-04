@@ -7,7 +7,7 @@ plugins {
     grim.`base-conventions`
     grim.`shadow-conventions`
     id("de.eldoria.plugin-yml.bukkit") version "0.8.0"
-    id("xyz.jpenilla.run-paper") version "3.0.0-beta.1"
+    id("xyz.jpenilla.run-paper") version "3.1.0"
 }
 
 repositories {
