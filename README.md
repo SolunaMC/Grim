@@ -18,6 +18,12 @@
  <br>
 </div>
 
+> [!NOTE]
+> This repository is a fork of [GrimAnticheat/Grim](https://github.com/GrimAnticheat/Grim), maintained by SolunaMC.
+> It tracks the upstream `2.0` branch and mainly differs in build and dependency maintenance.
+> The links, downloads and support channels below belong to the original project.
+> Please report issues with this fork here rather than to the upstream developers.
+
 GrimAC is an open source Minecraft anticheat designed to support the latest versions of Minecraft.
 It currently supports Minecraft versions 1.8–26.3. Geyser players are fully exempt from the anticheat to prevent false positives.
 This project is considered feature-complete for the 2.0 (open-source) branch. If you would like a bug fix or enhancement and cannot sponsor the work, pull requests are welcome.
