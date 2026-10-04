@@ -21,7 +21,7 @@ dependencies {
     mappings(loom.officialMojangMappings())
     modImplementation(fabricApi.module("fabric-lifecycle-events-v1", fabric_version))
 
-    modCompileOnly("me.lucko:fabric-permissions-api:0.7.0")
+    modCompileOnly(libs.fabric.permissions.api)
 
     modImplementation(libs.cloud.fabric)
     modImplementation(libs.fabric.loader)
@@ -32,8 +32,8 @@ dependencies {
     // Use the API artifact so intermediary Loom does not inspect PE's official-mapped nested mods.
     compileOnly(libs.packetevents.api)
     compileOnly(libs.packetevents.fabric.common)
-    compileOnly("org.slf4j:slf4j-api:2.0.20")
-    compileOnly("org.apache.logging.log4j:log4j-api:2.26.1")
+    compileOnly(libs.slf4j.api)
+    compileOnly(libs.log4j.api)
 }
 
 // The configurations below will only apply to :fabric and its submodules, not its siblings or the root project
@@ -53,10 +53,7 @@ allprojects {
             includeGroup("net.fabricmc.fabric-api")
         }
 
-        exclusive("https://repo.grim.ac/snapshots") {
-            includeGroup("ac.grim.grimac")
-            includeGroup("com.github.retrooper")
-        }
+        grimMaven()
 
         exclusive("https://jitpack.io", { mavenContent { releasesOnly() } }) {
             includeGroup("com.github.Fallen-Breath.conditional-mixin")
@@ -81,13 +78,8 @@ allprojects {
             includeModule("org.geysermc", "geyser-parent")
         }
 
-        // Special logic for LuckPerms
-        if (project.name == "mc1161") {
-            exclusive("https://repo.grim.ac/snapshots") { includeGroup("me.lucko") }
-        } else {
-            // Enforce Central for LuckPerms so we don't accidentally check other snapshot repos
-            exclusive(mavenCentral()) { includeGroup("me.lucko") }
-        }
+        // fabric-permissions-api: enforce Central so we don't accidentally check other snapshot repos
+        exclusive(mavenCentral()) { includeGroup("me.lucko") }
 
         mavenCentral()
     }

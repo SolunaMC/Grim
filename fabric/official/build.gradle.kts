@@ -33,15 +33,15 @@ dependencies {
     }
     implementation(libs.cloud.core)
 
-    compileOnly("me.lucko:fabric-permissions-api:0.7.0")
+    compileOnly(libs.fabric.permissions.api)
     implementation(fabricApi.module("fabric-lifecycle-events-v1", fabric_version))
     compileOnly("net.fabricmc.fabric-api:fabric-api:$fabric_version")
 
     implementation(project(":common"))
     implementation(project(":fabric:shared"))
     compileOnly(libs.packetevents.api)
-    compileOnly("org.slf4j:slf4j-api:2.0.20")
-    compileOnly("org.apache.logging.log4j:log4j-api:2.26.1")
+    compileOnly(libs.slf4j.api)
+    compileOnly(libs.log4j.api)
 }
 
 allprojects {
@@ -57,10 +57,7 @@ allprojects {
             includeGroup("net.fabricmc.fabric-api")
         }
 
-        exclusive("https://repo.grim.ac/snapshots") {
-            includeGroup("ac.grim.grimac")
-            includeGroup("com.github.retrooper")
-        }
+        grimMaven()
 
         exclusive("https://jitpack.io", { mavenContent { releasesOnly() } }) {
             includeGroup("com.github.Fallen-Breath.conditional-mixin")
