@@ -140,7 +140,7 @@ dependencies {
 
 bukkit {
     name = "GrimAC"
-    author = "GrimAC"
+    authors = listOf("GrimAC", "M4xi2312")
     main = "ac.grim.grimac.platform.bukkit.GrimACBukkitLoaderPlugin"
     website = "https://grim.ac/"
     apiVersion = "1.13"
