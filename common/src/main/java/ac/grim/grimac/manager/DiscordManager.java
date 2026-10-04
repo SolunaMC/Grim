@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.awt.*;
 import java.net.URI;
 import java.net.http.HttpClient;
+import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
@@ -30,6 +31,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -38,14 +40,15 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 public class DiscordManager implements StartableInitable, ReloadableInitable {
-    private static final Predicate<String> WEBHOOK_REGEX = Pattern.compile("^https://(?:canary\\.)?discord\\.com/api(?:/v\\d+)?/webhooks/\\d+/[\\w-]+(\\?thread_id=\\d+)?$").asMatchPredicate();
+    private static final Predicate<String> WEBHOOK_REGEX = Pattern.compile("^https://(?:canary\\.|ptb\\.)?discord(?:app)?\\.com/api(?:/v\\d+)?/webhooks/\\d+/[\\w-]+(\\?thread_id=\\d+)?$").asMatchPredicate();
     private static final Predicate<String> HTTPS_URL_REGEX = Pattern.compile("^https://[^/\\s]+/\\S+$").asMatchPredicate();
     private static final Duration timeout = Duration.ofMillis(CommonGrimArguments.URL_TIMEOUT.value());
     private static final HttpClient client = HttpClient.newBuilder().connectTimeout(timeout).build();
     private static final ConcurrentLinkedDeque<Pair<HttpRequest, CompletableFuture<Boolean>>> requests = new ConcurrentLinkedDeque<>();
     private static final AtomicBoolean taskStarted = new AtomicBoolean();
     private static final AtomicBoolean sending = new AtomicBoolean();
-    private static long rateLimitedUntil;
+    private static final long TRANSPORT_ERROR_BACKOFF_MS = 5000;
+    private static volatile long rateLimitedUntil;
     private URI url;
     private int embedColor;
     private CompiledDiscordTemplate compiledContent;
@@ -61,12 +64,12 @@ public class DiscordManager implements StartableInitable, ReloadableInitable {
     private static final Pattern URL_PATTERN = Pattern.compile("^https?://(?:www\\.)?[-a-z0-9@:%._+~#=]{1,256}\\.[a-z0-9()]{1,6}\\b[-a-z0-9()@:%_+.~#?&/=]*$", Pattern.CASE_INSENSITIVE);
 
     private static String validatedConfigURL(String configPath, String defaultURL) {
-        String url = GrimAPI.INSTANCE.getConfigManager().getConfig().getStringElse("embed-image-url", defaultURL);
+        String url = GrimAPI.INSTANCE.getConfigManager().getConfig().getStringElse(configPath, defaultURL);
         if (url == null || url.isBlank()) return null;
         if (URL_PATTERN.matcher(url).matches()) {
             return url;
         } else {
-            LogUtil.warn("Invalid embed url for config path " + configPath + ": " + configPath);
+            LogUtil.warn("Invalid embed url for config path " + configPath + ": " + url);
             return defaultURL;
         }
     }
@@ -96,7 +99,7 @@ public class DiscordManager implements StartableInitable, ReloadableInitable {
             } else if (strictValidation) {
                 if (!WEBHOOK_REGEX.test(webhook)) {
                     LogUtil.error("Discord webhook URL does not match expected format"
-                            + " (https://discord.com/api/webhooks/<id>/<token>): " + webhook);
+                            + " (https://discord.com/api/webhooks/<id>/<token>): " + redactWebhook(webhook));
                     LogUtil.error("If you are using a proxy or custom endpoint,"
                             + " set 'disable-webhook-validation: true' in the Discord config.");
                     url = null;
@@ -105,7 +108,7 @@ public class DiscordManager implements StartableInitable, ReloadableInitable {
                 }
             } else {
                 if (!HTTPS_URL_REGEX.test(webhook)) {
-                    LogUtil.error("Discord webhook URL is not a valid HTTPS URL: " + webhook);
+                    LogUtil.error("Discord webhook URL is not a valid HTTPS URL: " + redactWebhook(webhook));
                     url = null;
                 } else {
                     LogUtil.info("Webhook validation disabled — using custom endpoint: "
@@ -209,6 +212,25 @@ public class DiscordManager implements StartableInitable, ReloadableInitable {
         return future;
     }
 
+    // Discord sends these as (fractional) seconds, e.g. "1470173023.123" or "0.5"
+    private static long rateLimitEnd(HttpHeaders headers) {
+        long now = System.currentTimeMillis();
+        try {
+            Optional<String> resetAfter = headers.firstValue("X-RateLimit-Reset-After").or(() -> headers.firstValue("Retry-After"));
+            if (resetAfter.isPresent()) return now + (long) (Double.parseDouble(resetAfter.get()) * 1000);
+            Optional<String> reset = headers.firstValue("X-RateLimit-Reset");
+            if (reset.isPresent()) return (long) (Double.parseDouble(reset.get()) * 1000);
+        } catch (NumberFormatException ignored) {
+        }
+        return now + TRANSPORT_ERROR_BACKOFF_MS;
+    }
+
+    // Keep the webhook token out of the logs
+    private static String redactWebhook(String webhook) {
+        int lastSlash = webhook.lastIndexOf('/');
+        return lastSlash < 0 ? "<redacted>" : webhook.substring(0, lastSlash + 1) + "<redacted>";
+    }
+
     public boolean isDisabled() {
         return url == null;
     }
@@ -219,14 +241,19 @@ public class DiscordManager implements StartableInitable, ReloadableInitable {
             HttpRequest request = pair.first();
             client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).whenComplete((response, throwable) -> {
                 if (throwable != null) {
+                    // Drop the request instead of retrying it forever: a dead endpoint would otherwise block
+                    // the queue head and log this error every tick. Back off briefly before the next request.
+                    requests.remove(pair);
+                    rateLimitedUntil = Math.max(System.currentTimeMillis() + TRANSPORT_ERROR_BACKOFF_MS, rateLimitedUntil);
                     sending.set(false);
-                    LogUtil.error("Exception caught while sending a Discord webhook alert", throwable);
+                    LogUtil.error("Exception caught while sending a Discord webhook alert: " + throwable);
+                    pair.second().complete(false);
                     return;
                 }
 
                 if (response != null && response.statusCode() == 429) {
+                    rateLimitedUntil = Math.max(rateLimitEnd(response.headers()), rateLimitedUntil);
                     sending.set(false);
-                    rateLimitedUntil = Math.max(response.headers().firstValueAsLong("X-RateLimit-Reset").getAsLong() * 1000, rateLimitedUntil);
                     return;
                 }
 
