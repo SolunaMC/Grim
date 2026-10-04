@@ -417,7 +417,7 @@ public class CompensatedWorld implements PacketWorld {
                 modZ = Math.max(modZ, Math.abs(direction.getModZ() * 0.51D));
 
                 playerBox.expandMax(modX, modY, modZ);
-                playerBox.expandMin(modX, modY, modZ);
+                playerBox.expandMin(-modX, -modY, -modZ);
 
                 player.uncertaintyHandler.isSteppingNearShulker = true;
             }
