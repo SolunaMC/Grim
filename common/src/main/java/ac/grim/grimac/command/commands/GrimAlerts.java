@@ -32,8 +32,11 @@ public class GrimAlerts implements BuildableCommand {
             AlertManagerImpl am = GrimAPI.INSTANCE.getAlertManager();
             boolean newState = !am.hasAlertsEnabled(player);
             am.setAlertsEnabled(player, newState, false);
-            GrimAPI.INSTANCE.getDataStoreLifecycle().playerToggleStore()
-                    .applyUserToggle(player.getUniqueId(), PlayerToggleStore.KEY_ALERTS, newState);
+            PlayerToggleStore toggles = GrimAPI.INSTANCE.getDataStoreLifecycle().playerToggleStore();
+            toggles.applyUserToggle(player.getUniqueId(), PlayerToggleStore.KEY_ALERTS, newState);
+            // Disabling alerts also disables verbose — persist that too, otherwise a stored
+            // verbose=true turns alerts back on with the next join.
+            if (!newState) toggles.applyUserToggle(player.getUniqueId(), PlayerToggleStore.KEY_VERBOSE, false);
         } else if (sender.isConsole()) {
             GrimAPI.INSTANCE.getAlertManager().toggleConsoleAlerts();
         }
