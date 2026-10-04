@@ -254,6 +254,7 @@ public class CheckManager implements BasicReloadable {
                 // BadPacketsB/N/W, VehicleC, and TransactionOrder are packet checks with no listener
                 .put(BadPacketsB.class, new BadPacketsB(player))
                 .put(BadPacketsN.class, new BadPacketsN(player))
+                .put(BadPacketsT.class, new BadPacketsT(player)) // fed by ClientBrand
                 .put(InvalidInteractTarget.class, new InvalidInteractTarget(player))
                 .put(TransactionOrder.class, new TransactionOrder(player))
                 .put(VehicleC.class, new VehicleC(player))

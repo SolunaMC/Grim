@@ -202,6 +202,11 @@ bukkit {
             default = Permission.Default.OP
         }
 
+        register("grim.brand.stats") {
+            description = "Show brand, mod and version statistics of online players"
+            default = Permission.Default.OP
+        }
+
         register("grim.sendalert") {
             description = "Send cheater alert"
             default = Permission.Default.OP
