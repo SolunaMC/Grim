@@ -78,7 +78,7 @@ jobs:
                   cache-read-only: ${{ github.ref_name != github.event.repository.default_branch && github.ref_name != 'dev' }}
 
             - name: Cache Gradle Loom Cache
-              uses: actions/cache@v4
+              uses: actions/cache@v6
               with:
                   path: .gradle/loom-cache
                   key: loom-cache-${{ runner.os }}-${{ hashFiles('**/libs.versions.toml', 'fabric/**/build.gradle.kts') }}
