@@ -71,6 +71,8 @@ Not included because they could not be verified, or register nothing:
 
 ## Configuration
 
+`config.yml`:
+
 ```yaml
 client-brand:
   # Operator signatures, "regex -> name". Matched in addition to the built-in ones.
@@ -82,7 +84,46 @@ client-brand:
   # registered after the brand can be listed. 0 sends it as soon as the brand arrives (mods registered
   # later are then not listed). Players who leave within this time produce no notification.
   notification-delay-ms: 1000
-  # Appended to client-brand-format (messages.yml) when mods were detected and the format has no %mods%.
+
+  # Rules, evaluated once the brand or registrations are known (in any order).
+  # Each rule acts at most once per player session.
+  #   regex:   Java regular expression, matched with find()
+  #   type:    brand -> matched against the client brand
+  #            mod   -> matched against detected mod names and the raw registered channel names
+  #   action:  alert -> message to staff with alerts enabled
+  #            kick  -> disconnect the player (logged to the console)
+  #   message: optional, overrides rule-alert-format / rule-kick-message (messages.yml) for this rule,
+  #            same placeholders
+  rules: []
+  #  - regex: "(?i)^wurst"
+  #    type: brand
+  #    action: kick
+  #  - regex: "^Xaero's Minimap$"
+  #    type: mod
+  #    action: alert
+  #    message: "%prefix% &f%player% &buses Xaero's Minimap"
+
+  # BadPacketsT, brand spoof check. Nothing is flagged unless enabled.
+  spoof-check:
+    enabled: false
+    # Brand exactly "vanilla" (case-insensitive) while the client registers channels only a mod loader
+    # registers (Fabric API "fabric*:", Forge "forge:"/"fml:"/legacy FML, NeoForge "neoforge:").
+    vanilla-with-mod-loader: true
+    # A different brand later in the same session. Opt-in: the vanilla client sends its brand once per
+    # connection, but proxies or mods may resend it.
+    brand-change: false
+
+  # /grim brands stats
+  stats:
+    # Most entries per section
+    max-entries: 10
+```
+
+`messages.yml`:
+
+```yaml
+client-brand:
+  # Appended to client-brand-format when mods were detected and the format has no %mods%.
   mods-suffix: " &7(mods: &f%mods%&7)"
   # Inserted before the last line of the "profile" message when mods were detected and the profile
   # has no %mods% placeholder.
@@ -98,40 +139,14 @@ client-brand:
     - "&bInput: &f%bedrock_input%"
     - "&7======================"
 
-  # Rules, evaluated once the brand or registrations are known (in any order).
-  # Each rule acts at most once per player session.
-  #   regex:   Java regular expression, matched with find()
-  #   type:    brand -> matched against the client brand
-  #            mod   -> matched against detected mod names and the raw registered channel names
-  #   action:  alert -> message to staff with alerts enabled
-  #            kick  -> disconnect the player (logged to the console)
-  #   message: optional, overrides rule-alert-format / rule-kick-message for this rule
-  rules: []
-  #  - regex: "(?i)^wurst"
-  #    type: brand
-  #    action: kick
-  #  - regex: "^Xaero's Minimap$"
-  #    type: mod
-  #    action: alert
-  #    message: "%prefix% &f%player% &buses Xaero's Minimap"
+  # Default texts of the rules in config.yml.
   # Placeholders in rule messages: %player% and the other player placeholders, %match% (the matched
   # brand, mod or channel), %rule% (the regex)
   rule-alert-format: "%prefix% &f%player% &bmatched client rule &f%rule% &7(%match%)"
   rule-kick-message: "<red>Your client or one of your mods is not allowed on this server."
 
-  # BadPacketsT, brand spoof check. Nothing is flagged unless enabled.
-  spoof-check:
-    enabled: false
-    # Brand exactly "vanilla" (case-insensitive) while the client registers channels only a mod loader
-    # registers (Fabric API "fabric*:", Forge "forge:"/"fml:"/legacy FML, NeoForge "neoforge:").
-    vanilla-with-mod-loader: true
-    # A different brand later in the same session. Opt-in: the vanilla client sends its brand once per
-    # connection, but proxies or mods may resend it.
-    brand-change: false
-
   # /grim brands stats
   stats:
-    max-entries: 10
     header: "%prefix% &bClients of &f%players% &bonline players &7(online players only)"
     brands: "&bBrands:"
     mods: "&bDetected mods:"
