@@ -19,7 +19,7 @@ class BundledLanguageKeysTest {
     // Configuralize only uses a language when every source has it, so each folder needs all of them
     private static final String[] LANGUAGES = {"de", "es", "fr", "it", "ja", "nl", "pl", "pt", "ro", "ru", "tr", "zh"};
     private static final String[] FOLDERS = {"config", "messages", "database", "discord", "punishments",
-            "databases/mongo", "databases/mysql", "databases/postgres", "databases/redis", "databases/sqlite"};
+            "databases/mongo", "databases/mysql", "databases/postgres", "databases/redis", "databases/sqlite", "bedrock"};
 
     @Test
     void everyFolderHasEveryLanguageWithTheEnglishKeys() throws Exception {
