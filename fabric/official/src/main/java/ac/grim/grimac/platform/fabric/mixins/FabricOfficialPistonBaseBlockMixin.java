@@ -85,11 +85,19 @@ public class FabricOfficialPistonBaseBlockMixin {
         final int px = pistonPos.getX(), py = pistonPos.getY(), pz = pistonPos.getZ();
 
         for (GrimPlayer player : GrimAPI.INSTANCE.getPlayerDataManager().getEntries()) {
+            // A piston at the same coordinates in another dimension must not affect the player
+            if (player.platformPlayer != null && player.platformPlayer.getWorld() != (Object) level) continue;
+
             Vector3d pos = player.compensatedEntities.self.trackedServerPosition.getPos();
-            if (grimac$isCloseEnough(px, py, pz, pos.getX(), pos.getY(), pos.getZ()) && player.compensatedWorld.isChunkLoaded(chunkX, chunkZ)) {
+            if (grimac$isCloseEnough(px, py, pz, pos.getX(), pos.getY(), pos.getZ())) {
                 int lastTrans = player.lastTransactionSent.get();
                 PistonData data = new PistonData(blockFace, boxes, lastTrans, extending, hasSlimeBlock, hasHoneyBlock);
-                player.latencyUtils.addRealTimeTaskAsync(lastTrans, () -> player.compensatedWorld.activePistons.add(data));
+                // The compensated chunk map is only safe to read on the netty thread, so check it inside the task
+                player.latencyUtils.addRealTimeTaskAsync(lastTrans, () -> {
+                    if (player.compensatedWorld.isChunkLoaded(chunkX, chunkZ)) {
+                        player.compensatedWorld.activePistons.add(data);
+                    }
+                });
             }
         }
     }
