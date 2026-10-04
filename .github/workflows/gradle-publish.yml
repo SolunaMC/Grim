@@ -37,6 +37,25 @@ on:
             - '**.kt'
             - '**.kts'
             - '**.toml'
+    # Build PRs (e.g. Renovate) so they get a status check; they never publish.
+    pull_request:
+        paths:
+            - 'bukkit/**'
+            - 'common/**'
+            - 'fabric/**'
+            - 'buildSrc/**'
+            - 'gradle/**'
+            - '**.java'
+            - '**.kt'
+            - '**.kts'
+            - '**.toml'
+            - '**.properties'
+            - '.github/workflows/**'
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+    cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
     call-build-workflow:
         uses: ./.github/workflows/build-and-publish.yml
@@ -45,7 +64,7 @@ jobs:
             is-release-build: false
             release-version-type: alpha # Dev builds are always 'alpha'
             run-build-scan: ${{ github.event.inputs.run-build-scan == 'true' }}
-            publish-artifacts: ${{ github.event.inputs.publish-artifacts != 'false' }}
+            publish-artifacts: ${{ github.event_name != 'pull_request' && github.event.inputs.publish-artifacts != 'false' }}
             use-modrinth-fallback: ${{ github.event.inputs.use-modrinth-fallback != 'false' }}
         secrets:
             MODRINTH_ID: ${{ secrets.MODRINTH_ID }}

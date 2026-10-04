@@ -39,17 +39,17 @@ on:
                 required: false
             MODRINTH_TOKEN:
                 required: false
+            # Optional so forks without these secrets can still build; the publish steps skip themselves.
             BUILD_UPDATE_TOKEN:
-                required: true
+                required: false
             BUILD_UPDATE_URL:
-                required: true
+                required: false
 
 jobs:
     build:
         runs-on: ${{ inputs.runner }}
         permissions:
             contents: read
-            packages: write
 
         env:
             MODRINTH_ID: ${{ secrets.MODRINTH_ID }}
