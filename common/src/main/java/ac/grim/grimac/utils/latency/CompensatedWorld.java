@@ -91,6 +91,8 @@ public class CompensatedWorld implements PacketWorld {
     private boolean isCurrentlyPredicting = false;
     public boolean isRaining = false;
 
+    // ViaBackwards strips every block below y=0 for clients <= 1.16.4
+    @Getter
     private final boolean noNegativeBlocks;
 
     public CompensatedWorld(GrimPlayer player) {
