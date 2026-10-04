@@ -57,6 +57,7 @@ help:
     - "&7======================"
     - "/grim alerts &f- &7アラートを切り替えます"
     - "/grim brands &f- &7Toggle brands"
+    - "/grim brands stats &f- &7オンラインプレイヤーのブランド、Mod、バージョンを表示します"
     - "/grim profile <player> &f- &7プレイヤー情報を表示します"
     - "/grim help &f- &7このヘルプメッセージを表示します"
     - "/grim debug <player> &f- &7開発者用の予測出力を表示します"
@@ -126,6 +127,33 @@ grim-history-detail-entry-hover: "&b%check%%description%<newline>&8@ %offset% �
 grim-history-detail-entry-hover-verbose: "<newline>&7%verbose%"
 # %checks_list% の各チェック項目の内部書式 — 有効なプレースホルダ: %check_name% %count%
 grim-history-check-count: "&f%check_name%&7 x&c%count%"
+
+# === クライアントと Mod の検出 ===
+client-brand:
+    # Mod が検出され、client-brand-format に %mods% が含まれない場合に末尾へ追加されます
+    mods-suffix: " &7(Mod: &f%mods%&7)"
+    # Mod が検出された場合、プロファイルの最終行の前に追加されます
+    profile-mods-line: "&bMod: &f%mods%"
+    # Bedrock プレイヤー用の /grim profile。%bedrock_device%, %bedrock_input%
+    bedrock-profile:
+        - "&7======================"
+        - "%prefix% &b%player% のプロファイル"
+        - "&bBedrock プレイヤー &7(チェック対象外)"
+        - "&bデバイス: &f%bedrock_device%"
+        - "&b入力方法: &f%bedrock_input%"
+        - "&7======================"
+    # config.yml のクライアントルール。%match% は一致したブランド・Mod・チャンネル、%rule% は正規表現
+    rule-alert-format: "%prefix% &f%player% &bがクライアントルール &f%rule% &bに一致しました &7(%match%)"
+    rule-kick-message: "<red>お使いのクライアントまたは Mod の一部はこのサーバーで許可されていません。"
+    # /grim brands stats
+    stats:
+        header: "%prefix% &bオンラインプレイヤー &f%players% &b人のクライアント &7(オンラインのプレイヤーのみ)"
+        brands: "&bブランド:"
+        mods: "&b検出された Mod:"
+        versions: "&bクライアントバージョン:"
+        entry: " &7- &f%name%&7: &f%count% &7(%percent%%)"
+        more: " &7... ほか &f%count% &7件"
+        none: " &7- なし"
 
 # スキーマ用マーカー — config.yml のヘッダーコメントを参照。
 config-flavor: V2

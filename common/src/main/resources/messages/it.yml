@@ -52,6 +52,7 @@ help:
     - "&7======================"
     - "/grim alerts &f- &7Attiva/disattiva gli alerts"
     - "/grim brands &f- &7Toggle brands"
+    - "/grim brands stats &f- &7Brand, mod e versioni dei giocatori online"
     - "/grim profile <giocatore> &f- &7Visualizza le informazioni del giocatore"
     - "/grim help &f- &7Visualizza questo messaggio di aiuto"
     - "/grim debug <giocatore> &f- &7Output di previsione dello sviluppatore"
@@ -122,6 +123,33 @@ grim-history-detail-entry-hover: "&b%check%%description%<newline>&8@ %offset% �
 grim-history-detail-entry-hover-verbose: "<newline>&7%verbose%"
 # Formato interno per ogni check in %checks_list% — placeholder validi: %check_name% %count%
 grim-history-check-count: "&f%check_name%&7 x&c%count%"
+
+# === Rilevamento di client e mod ===
+client-brand:
+    # Aggiunto a client-brand-format quando sono stati rilevati mod e il formato non contiene %mods%
+    mods-suffix: " &7(mod: &f%mods%&7)"
+    # Aggiunto al profilo prima dell'ultima riga quando sono stati rilevati mod
+    profile-mods-line: "&bMod: &f%mods%"
+    # /grim profile per i giocatori Bedrock. %bedrock_device%, %bedrock_input%
+    bedrock-profile:
+        - "&7======================"
+        - "%prefix% &bProfilo per &f%player%"
+        - "&bGiocatore Bedrock &7(escluso dai check)"
+        - "&bDispositivo: &f%bedrock_device%"
+        - "&bInput: &f%bedrock_input%"
+        - "&7======================"
+    # Regole client da config.yml. %match% è il brand, mod o canale corrispondente, %rule% la regex
+    rule-alert-format: "%prefix% &f%player% &bcorrisponde alla regola client &f%rule% &7(%match%)"
+    rule-kick-message: "<red>Il tuo client o uno dei tuoi mod non è consentito su questo server."
+    # /grim brands stats
+    stats:
+        header: "%prefix% &bClient di &f%players% &bgiocatori online &7(solo giocatori online)"
+        brands: "&bBrand:"
+        mods: "&bMod rilevati:"
+        versions: "&bVersioni del client:"
+        entry: " &7- &f%name%&7: &f%count% &7(%percent%%)"
+        more: " &7... e altri &f%count%"
+        none: " &7- nessuno"
 
 # Marcatori di schema — vedi il commento di intestazione in config.yml.
 config-flavor: V2

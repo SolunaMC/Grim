@@ -32,6 +32,38 @@ client-brand:
     # Grim will blacklist specific Forge versions which include built-in Reach hacks (Forge 1.18.2 to 1.19.3).
     # Setting this option to false will allow said clients to connect to the server. Disable this at your own risk.
     disconnect-blacklisted-forge-versions: true
+    # Mods worden herkend aan de pluginkanalen die een client registreert. Mods die puur aan de clientkant draaien (Freecam,
+    # Sodium, de meeste cheats) registreren niets en kunnen niet worden herkend. Zie detecties als aanwijzingen, niet als bewijs.
+    # Details en de ingebouwde signaturen: docs/CLIENT-DETECTION.md op GitHub
+    # Je eigen signaturen, "regex -> naam", worden naast de ingebouwde gecontroleerd
+    mod-signatures: []
+    #  - "^mymod: -> My Mod"
+    # Milliseconden die de merkmelding na het joinen wacht, zodat later geregistreerde mods vermeld kunnen worden.
+    # 0 verstuurt hem meteen
+    notification-delay-ms: 1000
+    # Regels voor merken of mods. Elke regel wordt één keer per spelersessie toegepast.
+    #   regex:   reguliere expressie (Java)
+    #   type:    brand (client merk) of mod (herkende modnamen en ruwe kanaalnamen)
+    #   action:  alert (bericht aan het team) of kick
+    #   message: optioneel, vervangt rule-alert-format / rule-kick-message uit messages.yml
+    rules: []
+    #  - regex: "(?i)^wurst"
+    #    type: brand
+    #    action: kick
+    #  - regex: "^Xaero's Minimap$"
+    #    type: mod
+    #    action: alert
+    # Controle op vervalste merken (BadPacketsT). Flagt maar één keer per sessie, gebruik er dus een punishments.yml-groep
+    # met een lage drempel voor, zie docs/CLIENT-DETECTION.md
+    spoof-check:
+        enabled: false
+        # De client noemt zichzelf "vanilla" maar registreert Fabric-, Forge- of NeoForge-kanalen
+        vanilla-with-mod-loader: true
+        # De client stuurt later in de sessie een ander merk. Proxy's en sommige mods sturen het opnieuw
+        brand-change: false
+    stats:
+        # Maximaal aantal regels per sectie in /grim brands stats
+        max-entries: 10
 
 spectators:
     # Verberg alle toeschouwers met de grim.spectator-toestemming, ongeacht of ze daadwerkelijk actief toeschouwer zijn

@@ -32,6 +32,38 @@ client-brand:
     # Grim will blacklist specific Forge versions which include built-in Reach hacks (Forge 1.18.2 to 1.19.3).
     # Setting this option to false will allow said clients to connect to the server. Disable this at your own risk.
     disconnect-blacklisted-forge-versions: true
+    # Modlar, clientin kaydettiği plugin kanallarından tespit edilir. Tamamen client tarafında çalışan modlar (Freecam,
+    # Sodium, çoğu hile) hiçbir şey kaydetmez ve tespit edilemez. Tespitleri kanıt değil, ipucu olarak değerlendirin.
+    # Ayrıntılar ve yerleşik imzalar: GitHub'daki docs/CLIENT-DETECTION.md
+    # Yerleşik imzalara ek olarak kontrol edilen kendi imzalarınız, "regex -> isim"
+    mod-signatures: []
+    #  - "^mymod: -> My Mod"
+    # Marka bildiriminin giriş yaptıktan sonra beklediği milisaniye, böylece sonradan kaydedilen modlar da listelenebilir.
+    # 0 bildirimi hemen gönderir
+    notification-delay-ms: 1000
+    # Markalar veya modlar için kurallar. Her kural oyuncu oturumu başına bir kez uygulanır.
+    #   regex:   Java düzenli ifadesi (regex)
+    #   type:    brand (client markası) veya mod (tespit edilen mod isimleri ve ham kanal isimleri)
+    #   action:  alert (yetkililere mesaj) veya kick
+    #   message: isteğe bağlı, messages.yml'deki rule-alert-format / rule-kick-message yerine kullanılır
+    rules: []
+    #  - regex: "(?i)^wurst"
+    #    type: brand
+    #    action: kick
+    #  - regex: "^Xaero's Minimap$"
+    #    type: mod
+    #    action: alert
+    # Sahte marka kontrolü (BadPacketsT). Oturum başına yalnızca bir kez işaretler, bu yüzden bunun için düşük eşikli bir
+    # punishments.yml grubu kullanın, bkz. docs/CLIENT-DETECTION.md
+    spoof-check:
+        enabled: false
+        # Client kendini "vanilla" olarak tanıtıyor ama Fabric, Forge veya NeoForge kanalları kaydediyor
+        vanilla-with-mod-loader: true
+        # Client oturumun ilerleyen kısmında farklı bir marka gönderiyor. Proxy'ler ve bazı modlar markayı yeniden gönderir
+        brand-change: false
+    stats:
+        # /grim brands stats içinde bölüm başına en fazla girdi sayısı
+        max-entries: 10
 
 spectators:
     # Seyirciler aktif olarak izliyor olsalar bile, grim.spectator iznine sahip tüm seyircileri gizle

@@ -60,6 +60,7 @@ help:
     - "&7======================"
     - "/grim alerts &f- &7Uyarıları aktif/deaktif eder"
     - "/grim brands &f- &7Toggle brands"
+    - "/grim brands stats &f- &7Çevrimiçi oyuncuların markalarını, modlarını ve versiyonlarını gösterir"
     - "/grim profile (oyuncu) &f- &7Oyuncu profilini gösterir"
     - "/grim help &f- &7Bu yardım mesajını gösterir"
     - "/grim debug <player> &f- &7Geliştirici Debug'ını verir"
@@ -129,6 +130,33 @@ grim-history-detail-entry-hover: "&b%check%%description%<newline>&8@ %offset% �
 grim-history-detail-entry-hover-verbose: "<newline>&7%verbose%"
 # %checks_list% içinde her kontrol için iç biçim — geçerli placeholder'lar: %check_name% %count%
 grim-history-check-count: "&f%check_name%&7 x&c%count%"
+
+# === Client ve mod tespiti ===
+client-brand:
+    # Mod tespit edildiğinde ve biçimde %mods% yoksa client-brand-format'ın sonuna eklenir
+    mods-suffix: " &7(modlar: &f%mods%&7)"
+    # Mod tespit edildiğinde profilin son satırından önce eklenir
+    profile-mods-line: "&bModlar: &f%mods%"
+    # Bedrock oyuncuları için /grim profile. %bedrock_device%, %bedrock_input%
+    bedrock-profile:
+        - "&7======================"
+        - "%prefix% &f%player% &badlı oyuncunun profili:"
+        - "&bBedrock oyuncusu &7(kontrollerden muaf)"
+        - "&bCihaz: &f%bedrock_device%"
+        - "&bKontrol Yöntemi: &f%bedrock_input%"
+        - "&7======================"
+    # config.yml'deki client kuralları. %match% eşleşen marka, mod veya kanal, %rule% ise regex
+    rule-alert-format: "%prefix% &f%player% &badlı oyuncu &f%rule% &bclient kuralıyla eşleşti &7(%match%)"
+    rule-kick-message: "<red>Clientiniz veya modlarınızdan biri bu sunucuda yasaktır."
+    # /grim brands stats
+    stats:
+        header: "%prefix% &f%players% &bçevrimiçi oyuncunun clientleri &7(yalnızca çevrimiçi oyuncular)"
+        brands: "&bMarkalar:"
+        mods: "&bTespit edilen modlar:"
+        versions: "&bClient versiyonları:"
+        entry: " &7- &f%name%&7: &f%count% &7(%percent%%)"
+        more: " &7... ve &f%count% &7tane daha"
+        none: " &7- yok"
 
 # Şema işaretçileri — bkz. config.yml'deki başlık yorumu.
 config-flavor: V2

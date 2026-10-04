@@ -32,6 +32,38 @@ client-brand:
     # Grim will blacklist specific Forge versions which include built-in Reach hacks (Forge 1.18.2 to 1.19.3).
     # Setting this option to false will allow said clients to connect to the server. Disable this at your own risk.
     disconnect-blacklisted-forge-versions: true
+    # Les mods sont détectés à partir des canaux de plugin qu'un client enregistre. Les mods purement côté client (Freecam,
+    # Sodium, la plupart des cheats) n'enregistrent rien et ne peuvent pas être détectés. Considérez les détections comme des indices, pas des preuves.
+    # Détails et signatures intégrées : docs/CLIENT-DETECTION.md sur GitHub
+    # Vos propres signatures, "regex -> nom", vérifiées en plus de celles intégrées
+    mod-signatures: []
+    #  - "^mymod: -> My Mod"
+    # Millisecondes d'attente de la notification de nature du client après la connexion, afin de lister les mods enregistrés plus tard.
+    # 0 l'envoie immédiatement
+    notification-delay-ms: 1000
+    # Règles pour les natures de client ou les mods. Chaque règle agit une fois par session de joueur.
+    #   regex:   expression régulière Java
+    #   type:    brand (nature du client) ou mod (noms des mods détectés et noms bruts des canaux)
+    #   action:  alert (message au staff) ou kick
+    #   message: optionnel, remplace rule-alert-format / rule-kick-message de messages.yml
+    rules: []
+    #  - regex: "(?i)^wurst"
+    #    type: brand
+    #    action: kick
+    #  - regex: "^Xaero's Minimap$"
+    #    type: mod
+    #    action: alert
+    # Vérification de nature du client falsifiée (BadPacketsT). Ne signale qu'une fois par session, utilisez donc un groupe
+    # punishments.yml avec un seuil bas pour celle-ci, voir docs/CLIENT-DETECTION.md
+    spoof-check:
+        enabled: false
+        # Le client se présente comme "vanilla" mais enregistre des canaux Fabric, Forge ou NeoForge
+        vanilla-with-mod-loader: true
+        # Le client envoie une nature différente plus tard dans la session. Les proxys et certains mods la renvoient
+        brand-change: false
+    stats:
+        # Nombre maximal d'entrées par section dans /grim brands stats
+        max-entries: 10
 
 spectators:
     # Masquer tout les spectateurs ayant la permission grim.spectator, peu importe s'ils sont actuellement en train d'observer.
