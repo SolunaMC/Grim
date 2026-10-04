@@ -174,6 +174,7 @@ public class GrimVersion implements BuildableCommand {
 
             public static Status getVersionStatus(String current, String latest) {
                 try {
+                    if (parseVersion(current) == null || parseVersion(latest) == null) return Status.UNKNOWN;
                     var cmp = compareSemver(current, latest);
                     if (cmp == 0) {
                         return Status.UPDATED;
