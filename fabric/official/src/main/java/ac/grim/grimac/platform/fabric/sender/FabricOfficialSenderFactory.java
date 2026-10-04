@@ -10,8 +10,6 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.permissions.Permission;
-import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.server.rcon.RconConsoleSource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -71,8 +69,7 @@ public class FabricOfficialSenderFactory extends AbstractFabricSenderFactory<Com
 
     @Override
     protected boolean isOperator(CommandSourceStack source) {
-        return source.permissions().hasPermission(
-                new Permission.HasCommandLevel(PermissionLevel.byId(2)));
+        return platformServer.hasPermission((Sender) (Object) source, platformServer.getOperatorPermissionLevel());
     }
 
     @Override
