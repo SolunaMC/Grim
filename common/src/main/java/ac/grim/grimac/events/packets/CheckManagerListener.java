@@ -422,6 +422,18 @@ public class CheckManagerListener extends PacketListenerAbstract {
             teleportData = !TELEPORT_CONTAINS_POSITION && flying.hasPositionChanged() && flying.hasRotationChanged() ? player.getSetbackTeleportUtil().checkTeleportQueue(position.getX(), position.getY(), position.getZ(), location.getYaw(), location.getPitch()) : new TeleportAcceptData();
             player.packetStateData.lastPacketWasTeleport = teleportData.isTeleport();
 
+            // The client answers a rotation packet right after the transaction sent with it, so once a later
+            // transaction has been received the answer can no longer come. Evict it so the queue can't grow forever
+            // and a missing answer can't block BadPacketsB for every later rotation.
+            RotationData stale;
+            while ((stale = player.pendingRotations.peek()) != null && stale.transaction() < player.getLastTransactionReceived()) {
+                player.pendingRotations.remove();
+                // Only flag when the client gets the packet as the server sent it, ViaVersion translates it for older clients
+                if (player.getClientVersion().isNewerThanOrEquals(PacketEvents.getAPI().getServerManager().getVersion().toClientVersion())) {
+                    player.checkManager.get(BadPacketsB.class).flag();
+                }
+            }
+
             if (flying.hasRotationChanged() && !flying.hasPositionChanged() && !flying.isOnGround() && !flying.isHorizontalCollision()) {
                 RotationData data = player.pendingRotations.peek();
 
