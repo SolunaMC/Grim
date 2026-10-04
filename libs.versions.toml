@@ -3,7 +3,7 @@
 adventure = "5.2.0"
 adventure-platform-bukkit = "4.4.1"
 examination = "1.3.0"
-paper-api = "1.20.6-R0.1-SNAPSHOT"
+paper-api = "26.2.build.129-stable"
 cloud = "2.0.0"
 cloud-paper = "2.0.1"
 cloud-fabric = "2.0.0-beta.15"
