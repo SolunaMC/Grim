@@ -1,0 +1,162 @@
+# » to » (podwójne >>), ANSI i UTF-8 interpretują to inaczej... z tego powodu możesz nawet zobaczyć ?
+prefix: "&bGrim &8»"
+
+alerts-enabled: "%prefix% &fAlerty włączone"
+alerts-disabled: "%prefix% &fAlerty wyłączone"
+verbose-enabled: "%prefix% &fVerbose włączony"
+verbose-disabled: "%prefix% &fVerbose wyłączony"
+brands-enabled: "%prefix% &fPowiadomienia o markach włączone"
+brands-disabled: "%prefix% &fPowiadomienia o markach wyłączone"
+client-brand-format: "%prefix% &f%player% dołączył, używając %brand%"
+console-specify-target: "%prefix% &cJako konsola musisz podać cel!"
+reloading: "%prefix% &7Przeładowywanie konfiguracji..."
+reloaded: "%prefix% &fKonfiguracja została przeładowana."
+reload-failed: "%prefix% &cNie udało się przeładować konfiguracji."
+player-not-found: "%prefix% &cGracz jest zwolniony z kontroli lub jest offline!"
+player-not-this-server: "%prefix% &cGracza nie ma na tym serwerze!"
+sender-not-found: "%prefix% &cNie możesz być zwolniony z kontroli, aby użyć tej komendy!"
+spectate-return: "<click:run_command:/grim stopspectating><hover:show_text:\"/grim stopspectating\">\n%prefix% &fKliknij tutaj, aby wrócić do poprzedniej lokalizacji\n</hover></click>"
+cannot-spectate-return: "%prefix% &cMożesz to zrobić dopiero po obserwowaniu gracza"
+cannot-run-on-self: "%prefix% &cNie możesz użyć tej komendy na sobie!"
+upload-log: "%prefix% &fPrzesłano debug do: %url%"
+upload-log-start: "%prefix% &fPrzesyłanie logu... proszę czekać"
+upload-log-not-found: "%prefix% &cNie znaleziono tego logu"
+upload-log-upload-failure: "%prefix% &cCoś poszło nie tak podczas przesyłania tego logu, więcej informacji w konsoli"
+disconnect:
+    timeout: "<lang:disconnect.timeout>"
+    closed: "<lang:disconnect.closed>"
+    error: "<red>Wystąpił błąd podczas przetwarzania pakietów. Skontaktuj się z administracją."
+    blacklisted-forge: "<red>Twoja wersja Forge jest na czarnej liście z powodu wbudowanych hacków Reach.<newline><gold>Dotyczy wersji: 1.18.2-1.19.3<newline><newline><red>Zobacz https://github.com/MinecraftForge/MinecraftForge/issues/9309."
+run-as-player: "%prefix% &cTej komendy mogą używać tylko gracze!"
+run-as-player-or-console: "%prefix% &cTej komendy mogą używać tylko gracze lub konsola!"
+webhook-not-enabled: "Webhooki Discorda nie są włączone!"
+webhook-test-message: "wiadomość testowa"
+webhook-test-succeeded: "Test webhooka Discorda zakończył się powodzeniem!"
+webhook-test-failed: "Test webhooka Discorda nie powiódł się!"
+
+# Dostępne placeholdery:
+# %prefix%
+# %player%
+# %check_name%
+# %description%
+# %experimental%
+# %vl% - naruszenia
+# %verbose% - dodatkowe informacje z kontroli, np. odchylenia; nie wszystkie kontrole je dodają
+alerts-format: "%prefix% &f%player% &bnie przeszedł <hover:show_text:\"&b%check_name%%experimental%\n&8Opis: &f%description%\">&f%check_name%%experimental%</hover> &f(x&c%vl%&f) &7%verbose%"
+alerts-format-proxy: "%prefix% &f[&cproxy&f] &f%player% &bnie przeszedł &f%check_name%%experimental% &f(x&c%vl%&f) &7%verbose%"
+experimental-symbol: "*"
+
+profile:
+    - "&7======================"
+    - "%prefix% &bProfil gracza &f%player%"
+    - "&bPing: &f%ping%"
+    - "&bWersja: &f%version%"
+    - "&bMarka klienta: &f%brand%"
+    - "&bCzułość pozioma: &f%h_sensitivity%%"
+    - "&bCzułość pionowa: &f%v_sensitivity%%"
+    - "&bFastMath włączony: &f%fast_math%"
+    - "&7======================"
+help:
+    - "&7======================"
+    - "/grim alerts &f- &7Przełącza alerty"
+    - "/grim brands &f- &7Przełącza powiadomienia o markach"
+    - "/grim brands stats &f- &7Marki, mody i wersje graczy online"
+    - "/grim profile <player> &f- &7Wyświetla informacje o graczu"
+    - "/grim help &f- &7Wyświetla tę wiadomość pomocy"
+    - "/grim debug <player> &f- &7Wyjście predykcji dla deweloperów"
+    - "/grim perf &f- &7ms/predykcję dla deweloperów"
+    - "/grim reload &f- &7Przeładowuje konfigurację"
+    - "/grim spectate <player> &f- &7Obserwuj gracza"
+    - "/grim verbose &f- &7Pokazuje ci każdą flagę, bez buforów"
+    - "/grim log [0-255] &f- &7Przesyła log debugowania dla flag predykcji"
+    - "/grim history <player> &f- &7Lista sesji (najnowsze najpierw)"
+    - "/grim history <player> page <N> &f- &7Przechodzi do strony N listy sesji"
+    - "/grim history <player> session <N|latest> [-d] [-v] &f- &7Szczegóły sesji (najnowsze naruszenia najpierw)"
+    - "/grim history <player> session <N|latest> page <N> [-d] [-v] &f- &7Szczegóły sesji, strona naruszeń N"
+    - "&7======================"
+
+# === /grim history ===
+# Interfejs historii oparty na sesjach. Wszystkie poniższe linie to konfigurowalne szablony MiniMessage.
+# Domyślne podpowiedzi (hover) wierszy znajdują się w tagach <hover:show_text:'...'> w linii oraz
+# w poniższych kluczach fragmentów hover; usuń hover z linii, aby użyć zapasowego formatu renderera.
+
+grim-history-load-failure: "%prefix% &cNie udało się załadować podsystemu historii! Sprawdź błędy w konsoli serwera."
+grim-history-disabled: "%prefix% &cPodsystem historii jest wyłączony!"
+grim-history-failed: "%prefix% &cNie udało się załadować historii: &7%error%"
+grim-history-unknown-player: "%prefix% &cNieznany gracz: &f%player%"
+grim-history-no-sessions: "%prefix% &7Brak historii sesji dla &f%player%&7."
+grim-history-session-not-found: "%prefix% &cNie znaleziono sesji &f%ordinal%&c dla &f%player%&c."
+
+# Lista sesji — dostępne placeholdery: %prefix% %player% %page% %max_pages%
+grim-history-header: "%prefix% &bHistoria sesji gracza &f%player% &8[&f%page%&7/&f%max_pages%&8]"
+# Linia podsumowania pojedynczej sesji — dostępne placeholdery:
+#   %prefix% %player% %ordinal% %grim_version% %server_name%
+#   %client_version% %client_brand% %duration% %timeago%
+#   %violations% %unique_checks% %crashed_marker% %session_uuid% %detail_command%
+# %crashed_marker% rozwija się do grim-history-crashed-marker dla sesji,
+# których połączenie zniknęło bez poprawnego zamknięcia (crash serwera,
+# kill -9, RST kanału, który nie wywołał UserDisconnectEvent). Pusty
+# ciąg dla trwających lub poprawnie zamkniętych sesji.
+grim-history-session: "<hover:show_text:'&bSesja &7%session_uuid%<newline>&7Kliknij lub wpisz &e%detail_command%<newline>&7aby zobaczyć szczegóły sesji.'>%prefix% &8[&b%grim_version%&8] &8[&b%server_name%&8] &8[&b%client_version%&8] &bSesja &f%ordinal%&b, czas trwania &f%duration%&b, naruszenia: &c%violations%&b &8[&c%unique_checks%&8]%crashed_marker% &8(&7%timeago% temu&8)</hover>"
+
+# Znacznik wstawiany w %crashed_marker% w liniach sesji, których
+# closed_at == last_activity (czyli oznaczonych przez sprzątanie po crashu
+# przy następnym starcie, a nie przez ścieżkę rozłączenia). Zawiera spację
+# na początku, aby znacznik czytał się naturalnie, gdy jest obecny, i znikał, gdy jest pusty.
+grim-history-crashed-marker: " &8(&cawaria&8)"
+
+# Szczegóły sesji — dostępne placeholdery:
+#   %prefix% %player% %ordinal% %grim_version% %server_name%
+#   %client_version% %client_brand% %duration% %timeago%
+#   %violations% %unique_checks% %bucket_size%
+grim-history-detail-header: "%prefix% &bSzczegóły sesji &f%ordinal%&b gracza &f%player%&b:"
+grim-history-detail-meta1: "%prefix% &bGrim: &f%grim_version%&b, Serwer: &f%server_name%&b, Czas trwania: &f%duration%&b, Data: &7%timeago% temu"
+grim-history-detail-meta2: "%prefix% &bKlient: &f%client_version%&b, Marka: &f%client_brand%"
+grim-history-detail-violations-header: "%prefix% &bNaruszenia: &8(%violations% łącznie, %unique_checks% unikalnych)"
+grim-history-detail-empty: "%prefix% &7- (brak)"
+# Wiersz grupy (domyślny) — dostępne placeholdery: %prefix% %offset% %checks_list%
+#   %bucket_start% %bucket_end% %bucket_hover_entries%
+#   %checks_list% powstaje przez połączenie wpisów grim-history-check-count za pomocą ", "
+grim-history-detail-group: "<hover:show_text:'&bNaruszenia w &f%bucket_start%–%bucket_end%&b:%bucket_hover_entries%'>%prefix% &7- %checks_list% &8(&b%offset%&8)</hover>"
+grim-history-detail-group-hover: "&bNaruszenia w &f%bucket_start%–%bucket_end%&b:%bucket_hover_entries%"
+grim-history-detail-group-hover-entry: "<newline>&8  %offset% &b%check%%description%%verbose%"
+grim-history-hover-description: " — &f%description%"
+grim-history-detail-group-hover-verbose: " — &7%verbose%"
+# Wiersz pojedynczego naruszenia (--detailed) — dostępne placeholdery:
+#   %prefix% %offset% %check% %description% %vl% %verbose%
+grim-history-detail-entry: "%prefix% &7- &f%check% &8(&b%offset%&8)&7 %verbose%"
+grim-history-detail-entry-hover: "&b%check%%description%<newline>&8@ %offset% — vl %vl%%verbose%"
+grim-history-detail-entry-hover-verbose: "<newline>&7%verbose%"
+# Format każdej kontroli w %checks_list% grupy — dostępne placeholdery: %check_name% %count%
+grim-history-check-count: "&f%check_name%&7 x&c%count%"
+
+# === Wykrywanie klientów i modów ===
+client-brand:
+    # Dodawane do client-brand-format, gdy wykryto mody, a format nie zawiera %mods%
+    mods-suffix: " &7(mody: &f%mods%&7)"
+    # Dodawane do profilu przed jego ostatnią linią, gdy wykryto mody
+    profile-mods-line: "&bMody: &f%mods%"
+    # /grim profile dla graczy Bedrock. %bedrock_device%, %bedrock_input%
+    bedrock-profile:
+        - "&7======================"
+        - "%prefix% &bProfil gracza &f%player%"
+        - "&bGracz Bedrock &7(zwolniony z kontroli)"
+        - "&bUrządzenie: &f%bedrock_device%"
+        - "&bSterowanie: &f%bedrock_input%"
+        - "&7======================"
+    # Reguły klienta z config.yml. %match% to dopasowana marka, mod lub kanał, %rule% to regex
+    rule-alert-format: "%prefix% &f%player% &bpasuje do reguły klienta &f%rule% &7(%match%)"
+    rule-kick-message: "<red>Twój klient lub jeden z twoich modów nie jest dozwolony na tym serwerze."
+    # /grim brands stats
+    stats:
+        header: "%prefix% &bKlienci &f%players% &bgraczy online &7(tylko gracze online)"
+        brands: "&bMarki:"
+        mods: "&bWykryte mody:"
+        versions: "&bWersje klienta:"
+        entry: " &7- &f%name%&7: &f%count% &7(%percent%%)"
+        more: " &7... i &f%count% &7więcej"
+        none: " &7- brak"
+
+# Znaczniki schematu — zobacz komentarz nagłówkowy w config.yml.
+config-flavor: V2
+config-version: 2

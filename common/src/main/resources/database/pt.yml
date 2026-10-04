@@ -50,6 +50,24 @@ database:
     # jogador online por intervalo. 0 desativa.
     heartbeat-interval-ms: 30000
 
+  ownership:
+    # Impede que dois servidores ativos com o mesmo UUID de armazenamento
+    # persistente escrevam no mesmo DB. Desative apenas se você aceita
+    # intencionalmente escritores duplicados.
+    enforce-persistent-uuid-ownership: true
+    # Opções:
+    # - disable-storage: as checks continuam, mas sem escritas no DB nesta inicialização.
+    # - fail-startup: a inicialização do armazenamento do Grim falha com um UUID duplicado ativo.
+    # - allow-unsafe: só para especialistas; ignora a proteção de propriedade.
+    duplicate-persistent-uuid-action: disable-storage
+    renew-interval-ms: 10000
+    lease-ttl-ms: 20000
+    startup-wait-ms: 20000
+    safety-margin-ms: 5000
+    stale-startup-ttl-ms: 30000
+    recovery-sweep-interval-ms: 60000
+    cleanup-other-servers: true
+
   write-path:
     # queue-capacity precisa ser uma potência de dois positiva (exigência
     # do ring buffer). Valores típicos: 4096, 8192, 16384, 32768, 65536.

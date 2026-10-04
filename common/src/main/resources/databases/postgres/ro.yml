@@ -1,0 +1,53 @@
+# ===========================================================================
+#  Setările backend-ului Postgres.
+#
+#  Postgres suportă configurații cu mai multe servere (mai multe instanțe Grim
+#  care scriu într-o singură bază de date centrală). Necesită driver-ul Postgres
+#  JDBC la runtime; dacă driver-ul lipsește, backend-ul se dezactivează la
+#  pornire, iar routing-ul care viza acest backend trece pe varianta de rezervă.
+# ===========================================================================
+
+# Fiecare cheie se află sub `postgres:`, astfel încât spațiul de chei al acestui
+# fișier să nu se ciocnească cu fișierele celorlalte backend-uri atunci când
+# Configuralize le unește pe toate într-un singur namespace global.
+postgres:
+  host: "localhost"
+  port: 5432
+  database: "grim"
+  user: "postgres"
+  password: ""
+
+  # Setările pool-ului de conexiuni HikariCP. Se aplică doar backend-urilor SQL
+  # care folosesc Hikari intern.
+  pool-settings:
+    # Numărul maxim de conexiuni fizice la baza de date pe care această instanță Grim le poate ține deschise.
+    maximum-pool-size: 5
+    # Numărul minim de conexiuni inactive ținute pregătite. Păstrează-l egal cu maximum-pool-size
+    # pentru un pool de dimensiune fixă sau micșorează-l dacă baza ta de date are limite stricte.
+    minimum-idle: 5
+    # Retrage conexiunile după atâtea milisecunde. 1800000 sunt cele 30 de minute
+    # implicite din Hikari; folosește 0 doar dacă baza de date/proxy-ul gestionează durata de viață.
+    maximum-lifetime-ms: 1800000
+    # Trimite periodic ping conexiunilor inactive. 0 dezactivează keepalive.
+    keepalive-time-ms: 0
+    # Timpul maxim de așteptare pentru o conexiune din pool înainte de eșec.
+    connection-timeout-ms: 5000
+
+  # Parametri URL suplimentari adăugați după `?`. Lasă gol dacă nu știi sigur
+  # că ai nevoie de ceva anume.
+  extra-jdbc-params: ""
+
+  batch-flush-cap: 256
+
+  # Suprascrieri pentru numele tabelelor. Numele implicite sunt mai jos.
+  tables:
+    meta: grim_meta
+    checks: grim_checks
+    players: grim_players
+    sessions: grim_sessions
+    violations: grim_violations
+    settings: grim_settings
+
+# Markeri de schemă — vezi comentariul din antetul config.yml.
+config-flavor: V2
+config-version: 2

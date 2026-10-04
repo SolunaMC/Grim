@@ -1,0 +1,25 @@
+# Pentru ajutor cu webhook-urile: https://support.discord.com/hc/en-us/articles/228383668
+
+enabled: false
+webhook: ""
+# Setează pe true pentru a ocoli validarea formatului URL-ului de webhook Discord.
+# Permite orice URL HTTPS valid (util pentru proxy-uri sau forwardere Matrix).
+disable-webhook-validation: false
+embed-title: "**Alertă Grim**"
+embed-color: "#00FFFF"
+include-timestamp: true
+# Înlocuiește backtick-urile din valori (cum ar fi brandurile clienților) ca să nu strice formatarea textului pe Discord.
+# Setează pe "`" pentru a dezactiva această înlocuire.
+backtick-replacement-char: "ˋ" # Implicit U+02CB
+violation-content:
+    - "**Jucător**: `%player%`"
+    - "**Check**: %check%"
+    - "**Încălcări**: %violations%"
+    - "**Versiune client**: %version%"
+    - "**Brand**: `%brand%`"
+    - "**Ping**: %ping%"
+    - "**TPS**: %tps%"
+
+# Markeri de schemă — vezi comentariul din antetul config.yml.
+config-flavor: V2
+config-version: 1

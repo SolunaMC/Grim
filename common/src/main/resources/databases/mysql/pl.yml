@@ -1,0 +1,63 @@
+# ===========================================================================
+#  Ustawienia backendu MySQL.
+#
+#  MySQL obsługuje wdrożenia wieloserwerowe (kilka instancji Grim zapisujących
+#  do jednej centralnej bazy danych). Wymaga sterownika MySQL Connector/J
+#  w czasie działania; jeśli go brak, backend wyłącza się przy starcie
+#  i zapisuje czytelny błąd w logach, a routing kierowany do tego backendu
+#  przechodzi na to, co jeszcze jest skonfigurowane.
+# ===========================================================================
+
+# Każdy klucz znajduje się pod `mysql:`, aby przestrzeń kluczy tego pliku nie
+# kolidowała z sąsiednimi plikami backendów (sqlite:, postgres:, mongo:, redis:),
+# gdy Configuralize scala je wszystkie w jedną globalną przestrzeń nazw.
+mysql:
+  # Cel połączenia.
+  host: "localhost"
+  port: 3306
+  database: "grim"
+  user: "root"
+  password: ""
+
+  # Ustawienia puli połączeń HikariCP. Dotyczą tylko backendów SQL,
+  # które wewnętrznie używają Hikari.
+  pool-settings:
+    # Maksymalna liczba fizycznych połączeń z bazą, które ta instancja Grim może utrzymywać.
+    maximum-pool-size: 10
+    # Minimalna liczba bezczynnych połączeń utrzymywanych w gotowości. Ustaw tyle samo
+    # co maximum-pool-size dla puli o stałym rozmiarze lub mniej, jeśli Twoja baza ma ścisłe limity.
+    minimum-idle: 10
+    # Wycofuje połączenia po tylu milisekundach. 1800000 to domyślne 30 minut
+    # Hikari; używaj 0 tylko wtedy, gdy czasem życia zarządza Twoja baza/proxy.
+    maximum-lifetime-ms: 1800000
+    # Okresowo pinguje bezczynne połączenia. 0 wyłącza keepalive.
+    keepalive-time-ms: 0
+    # Maksymalny czas oczekiwania na połączenie z puli, zanim nastąpi błąd.
+    connection-timeout-ms: 5000
+
+  # Dodatkowe parametry URL dołączane po standardowym zestawie
+  # (useSSL=false&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true).
+  # Zostaw puste, chyba że wiesz, że potrzebujesz czegoś konkretnego — wartości
+  # domyślne odpowiadają potrzebom lokalnej instalacji deweloperskiej.
+  extra-jdbc-params: ""
+
+  # Limit opróżniania partii na handler. Każdy handler bufora pierścieniowego
+  # zbiera zdarzenia w partię PreparedStatement i zatwierdza ją przy endOfBatch
+  # LUB gdy partia osiągnie ten limit, w zależności od tego, co nastąpi pierwsze.
+  # Wyższe wartości zwiększają przepustowość kosztem opóźnienia przy długotrwałych skokach.
+  batch-flush-cap: 256
+
+  # Nadpisania nazw tabel. Zmień nazwę dowolnego z sześciu logicznych magazynów,
+  # aby kilka instancji Grim mogło współdzielić jedną bazę MySQL lub aby dopasować
+  # się do istniejącego firmowego schematu nazewnictwa. Wartości domyślne poniżej.
+  tables:
+    meta: grim_meta
+    checks: grim_checks
+    players: grim_players
+    sessions: grim_sessions
+    violations: grim_violations
+    settings: grim_settings
+
+# Znaczniki schematu — zobacz komentarz nagłówkowy w config.yml.
+config-flavor: V2
+config-version: 2

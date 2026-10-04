@@ -1,0 +1,121 @@
+# ===========================================================================
+#  Stocarea de date Grim
+#
+#  Direcționează categoriile DataStore (violation / session / player-identity /
+#  setting / blob) către anumite instanțe de backend. Fiecare backend listat în
+#  `routing:` are propriul fișier de setări în `databases/<backend-id>.yml`.
+#
+#  La prima pornire, dacă stocarea veche (violations.sqlite) există, aceasta
+#  este migrată automat în noua stocare. Setează migration.skip pe true
+#  dacă preferi să muți datele manual mai târziu.
+# ===========================================================================
+
+# Fiecare cheie a stocării de date se află sub acest wrapper de nivel superior,
+# astfel încât spațiul de chei are un namespace natural — Configuralize unește
+# toate fișierele yml într-un singur spațiu global de chei la runtime, iar un
+# layout plat aici s-ar ciocni cu chei identice de nivel superior din config.yml /
+# discord.yml (`enabled`, `history` etc.).
+database:
+
+  # Comutatorul principal. Setează false pentru a dezactiva complet istoricul
+  # încălcărilor și /grim history. Check-urile anticheat continuă să ruleze;
+  # flag-urile pur și simplu nu sunt salvate.
+  enabled: true
+
+  # Categorii → id-uri de backend. Fiecare id distinct de aici trebuie să aibă
+  # un fișier `databases/<id>.yml` corespunzător (creat automat din valorile
+  # implicite incluse la prima pornire) și un BackendProvider înregistrat la
+  # runtime. `none` dezactivează complet salvarea pentru acea categorie.
+  # Backend-urile mixte sunt permise — de ex. încălcările într-o bază SQL în
+  # rețea și blob-urile într-o stocare de obiecte.
+  routing:
+    violation: sqlite
+    session: sqlite
+    player-identity: sqlite
+    setting: sqlite
+    blob: none
+
+  session:
+    # Folosit doar la migrare — cititorul vechi V0 nu are semnale de
+    # intrare/ieșire, așa că SessionReconstructor grupează încălcările în sesiuni
+    # când flag-urile consecutive se încadrează în acest interval. Sesiunile live
+    # sunt delimitate de conexiune, nu de această valoare.
+    gap-ms: 600000
+    scope-per-server: true
+    # Cât de des un heartbeat al jucătorului conectat face upsert pe rândul
+    # sesiunii, astfel încât last_activity_epoch_ms să rămână actual. Limitează
+    # durata aparentă a sesiunii dacă serverul se prăbușește (deconectările
+    # corecte setează întotdeauna closed_at). Cost: ~un UPSERT de rând per
+    # jucător online per interval. 0 dezactivează.
+    heartbeat-interval-ms: 30000
+
+  ownership:
+    # Împiedică două servere active cu același UUID persistent de stocare să
+    # scrie în aceeași bază de date. Dezactivează asta doar dacă accepți
+    # intenționat scriitori duplicați.
+    enforce-persistent-uuid-ownership: true
+    # Opțiuni:
+    # - disable-storage: check-urile continuă să ruleze, dar scrierile în DB sunt dezactivate pentru această pornire.
+    # - fail-startup: oprește pornirea stocării Grim la un UUID duplicat activ.
+    # - allow-unsafe: doar pentru experți; ocolește aplicarea proprietății.
+    duplicate-persistent-uuid-action: disable-storage
+    renew-interval-ms: 10000
+    lease-ttl-ms: 20000
+    startup-wait-ms: 20000
+    safety-margin-ms: 5000
+    stale-startup-ttl-ms: 30000
+    recovery-sweep-interval-ms: 60000
+    cleanup-other-servers: true
+
+  write-path:
+    # queue-capacity trebuie să fie o putere pozitivă a lui doi (cerință a ring buffer-ului).
+    # Valori tipice: 4096, 8192, 16384, 32768, 65536.
+    queue-capacity: 16384
+    batch-size: 256
+    flush-interval-ms: 1000
+    warn-rate-ms: 10000
+    shutdown-drain-timeout-ms: 5000
+    # Strategia de așteptare a ring buffer-ului. BLOCKING este valoarea implicită
+    # sigură: o așteptare pe variabilă de condiție care minimizează consumul de CPU
+    # cu prețul unei latențe mici la vârfuri extreme de încărcare. Alege YIELDING
+    # sau BUSY_SPIN doar dacă ai un nucleu liber disponibil și ai măsurat un câștig
+    # față de BLOCKING.
+    # Opțiuni: BLOCKING, TIMEOUT_BLOCKING, SLEEPING, YIELDING, BUSY_SPIN.
+    wait-strategy: BLOCKING
+
+  retention:
+    session:
+      enabled: true
+      max-age-days: 90
+    violation:
+      enabled: true
+      max-age-days: 365
+    player-identity:
+      enabled: false
+    setting:
+      enabled: false
+    blob:
+      enabled: true
+      max-age-days: 30
+
+  migration:
+    skip: false
+    max-duration-ms: 0        # 0 = fără limită de timp
+
+  name-resolution:
+    # Ordinea contează — câștigă primul rezultat care nu este gol.
+    # local-cache citește categoria PlayerIdentity.
+    # offline-mode-uuid derivă UUID.nameUUIDFromBytes (doar servere offline).
+    chain: [local-cache, offline-mode-uuid]
+
+  history:
+    entries-per-page: 15
+    group-interval-ms: 30000
+
+  # Etichetă doar pentru afișare, adăugată pe noile înregistrări de sesiune. Afișată
+  # în linia de antet a sesiunii din `/grim history`. Poate fi schimbată în siguranță în timpul funcționării.
+  server-name: "ChangeMe"
+
+# Markeri de schemă — vezi comentariul din antetul config.yml.
+config-flavor: V2
+config-version: 1

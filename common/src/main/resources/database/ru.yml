@@ -49,6 +49,24 @@ database:
     # UPSERT строки на онлайн-игрока за интервал. 0 — отключено.
     heartbeat-interval-ms: 30000
 
+  ownership:
+    # Не даёт двум работающим серверам с одинаковым постоянным UUID
+    # хранилища писать в одну и ту же БД. Отключайте только если вы
+    # сознательно допускаете дублирующих писателей.
+    enforce-persistent-uuid-ownership: true
+    # Варианты:
+    # - disable-storage: проверки продолжают работать, но запись в БД отключена до перезапуска.
+    # - fail-startup: запуск хранилища Grim завершается ошибкой при активном дубликате UUID.
+    # - allow-unsafe: только для экспертов; обходит контроль владения.
+    duplicate-persistent-uuid-action: disable-storage
+    renew-interval-ms: 10000
+    lease-ttl-ms: 20000
+    startup-wait-ms: 20000
+    safety-margin-ms: 5000
+    stale-startup-ttl-ms: 30000
+    recovery-sweep-interval-ms: 60000
+    cleanup-other-servers: true
+
   write-path:
     # queue-capacity должно быть положительной степенью двойки (требование
     # ring buffer). Типичные значения: 4096, 8192, 16384, 32768, 65536.

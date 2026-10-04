@@ -252,6 +252,7 @@ experimental-checks: false
 reset-item-usage-on-item-update: true
 reset-item-usage-on-attack: true
 reset-item-usage-on-slot-change: true
+reset-item-usage-on-item-use: true
 
 # Grim uneori anulează pachete ilegale precum timer, după X pachete anulate într-o secundă, când să
 # deconectăm jucătorul? Este necesar deoarece unele limitatoare de pachete nu numără pachetele anulate de Grim.

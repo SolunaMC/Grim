@@ -40,6 +40,23 @@ database:
     # 成本约为每个在线玩家每个间隔执行一次行 UPSERT。0 表示禁用。
     heartbeat-interval-ms: 30000
 
+  ownership:
+    # 防止持久化存储 UUID 相同的两台在线服务器写入同一个 DB。
+    # 仅当你有意接受重复写入方时才关闭此项。
+    enforce-persistent-uuid-ownership: true
+    # 选项：
+    # - disable-storage: 检查继续运行，但本次启动期间禁用 DB 写入。
+    # - fail-startup: 存在在线的重复 UUID 时，Grim 存储启动失败。
+    # - allow-unsafe: 仅限专家；绕过所有权强制。
+    duplicate-persistent-uuid-action: disable-storage
+    renew-interval-ms: 10000
+    lease-ttl-ms: 20000
+    startup-wait-ms: 20000
+    safety-margin-ms: 5000
+    stale-startup-ttl-ms: 30000
+    recovery-sweep-interval-ms: 60000
+    cleanup-other-servers: true
+
   write-path:
     # queue-capacity 必须是正的 2 的整数次幂（环形缓冲区要求）。
     # 常用值：4096、8192、16384、32768、65536。

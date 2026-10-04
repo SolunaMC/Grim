@@ -1,0 +1,25 @@
+# Pomoc dotycząca webhooków: https://support.discord.com/hc/en-us/articles/228383668
+
+enabled: false
+webhook: ""
+# Ustaw na true, aby pominąć sprawdzanie formatu adresu URL webhooka Discorda.
+# Pozwala to na użycie dowolnego poprawnego adresu HTTPS (przydatne dla proxy lub przekierowań do Matrixa).
+disable-webhook-validation: false
+embed-title: "**Alert Grim**"
+embed-color: "#00FFFF"
+include-timestamp: true
+# Zastępuje backticki w wartościach (np. markach klienta), aby nie psuły formatowania tekstu na Discordzie.
+# Ustaw na "`", aby wyłączyć to zastępowanie.
+backtick-replacement-char: "ˋ" # Domyślnie U+02CB
+violation-content:
+    - "**Gracz**: `%player%`"
+    - "**Kontrola**: %check%"
+    - "**Naruszenia**: %violations%"
+    - "**Wersja klienta**: %version%"
+    - "**Marka**: `%brand%`"
+    - "**Ping**: %ping%"
+    - "**TPS**: %tps%"
+
+# Znaczniki schematu — zobacz komentarz nagłówkowy w config.yml.
+config-flavor: V2
+config-version: 1

@@ -1,0 +1,35 @@
+# ===========================================================================
+#  Setările backend-ului MongoDB.
+#
+#  Necesită driver-ul MongoDB sync la runtime; dacă lipsește, backend-ul
+#  se dezactivează singur, iar routing-ul trece pe varianta de rezervă.
+# ===========================================================================
+
+# Fiecare cheie se află sub `mongo:`, astfel încât spațiul de chei al acestui
+# fișier să nu se ciocnească cu fișierele celorlalte backend-uri atunci când
+# Configuralize le unește pe toate într-un singur namespace global.
+mongo:
+  # Connection string-ul MongoDB. Credențialele sunt codificate în URL conform
+  # standardului driver-ului (mongodb://user:pass@host:port/?authSource=admin).
+  connection-string: "mongodb://localhost:27017"
+
+  # Baza de date în care se scrie. Colecțiile din această bază de date provin
+  # din blocul `tables:` de mai jos.
+  database: "grim"
+
+  # Dimensiunea bulkWrite() per handler. Driver-ul Mongo gestionează intern un
+  # pool de conexiuni, așa că aceasta controlează gruparea commit-urilor, nu numărul de conexiuni.
+  batch-flush-cap: 256
+
+  # Suprascrieri pentru numele colecțiilor. Numele implicite sunt mai jos.
+  tables:
+    meta: grim_meta
+    checks: grim_checks
+    players: grim_players
+    sessions: grim_sessions
+    violations: grim_violations
+    settings: grim_settings
+
+# Markeri de schemă — vezi comentariul din antetul config.yml.
+config-flavor: V2
+config-version: 1
