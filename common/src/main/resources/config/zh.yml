@@ -219,6 +219,15 @@ debug-pipeline-on-join: false
 # 启用实验性检查
 experimental-checks: false
 
+# 实验性：检查基岩版玩家 (Geyser/Floodgate)，而不是将其豁免。
+# 只有下面列出的检查会作用于他们，参见 BEDROCK.md。
+bedrock:
+  enabled: false
+  # 匹配方式与 punishments.yml 相同："Exploit" 匹配 ExploitA 和 ExploitB。
+  checks:
+    - Crash
+    - Exploit
+
 # 取消有问题的格挡
 reset-item-usage-on-item-update: true
 reset-item-usage-on-attack: true
@@ -256,4 +265,4 @@ max-ping-firework-boost: 1000
 update-permission-ticks: -1
 
 config-flavor: V2
-config-version: 11
+config-version: 12

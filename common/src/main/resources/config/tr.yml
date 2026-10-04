@@ -199,6 +199,15 @@ debug-pipeline-on-join: false
 # Deneysel kontrolleri etkinleştir
 experimental-checks: false
 
+# Deneysel: Bedrock oyuncularını (Geyser/Floodgate) muaf tutmak yerine kontrol et.
+# Onlara yalnızca aşağıda listelenen kontroller uygulanır, bkz. BEDROCK.md.
+bedrock:
+  enabled: false
+  # Eşleşme punishments.yml ile aynıdır: "Exploit", ExploitA ve ExploitB ile eşleşir.
+  checks:
+    - Crash
+    - Exploit
+
 reset-item-usage-on-item-update: true
 reset-item-usage-on-attack: true
 reset-item-usage-on-slot-change: true
@@ -239,4 +248,4 @@ max-ping-firework-boost: 1000
 update-permission-ticks: -1
 
 config-flavor: V2
-config-version: 11
+config-version: 12

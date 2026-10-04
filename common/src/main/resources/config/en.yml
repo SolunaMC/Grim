@@ -199,6 +199,15 @@ debug-pipeline-on-join: false
 # Enables experimental checks
 experimental-checks: false
 
+# Experimental: track Bedrock (Geyser/Floodgate) players instead of exempting them.
+# They are only checked by the checks listed below, see BEDROCK.md.
+bedrock:
+  enabled: false
+  # Matching works like punishments.yml: "Exploit" matches ExploitA and ExploitB.
+  checks:
+    - Crash
+    - Exploit
+
 reset-item-usage-on-item-update: true
 reset-item-usage-on-attack: true
 reset-item-usage-on-slot-change: true
@@ -236,4 +245,4 @@ update-permission-ticks: -1
 #   config-version: bumped on every breaking shape change. Old configs
 #                   auto-migrate up via the bundled updater on next start.
 config-flavor: V2
-config-version: 11
+config-version: 12
