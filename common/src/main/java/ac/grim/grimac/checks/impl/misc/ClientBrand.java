@@ -129,12 +129,15 @@ public class ClientBrand extends GrimProcessor implements PacketReceiveListener 
         final boolean hasReachHacks = brand.contains("forge")
                 && player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_18_2)
                 && player.getClientVersion().isOlderThan(ClientVersion.V_1_19_4);
-        if (hasReachHacks && GrimAPI.INSTANCE.getConfigManager().isBlockBlacklistedForgeClients()) {
-            player.disconnect(MessageUtil.miniMessage(MessageUtil.replacePlaceholders(player, GrimAPI.INSTANCE.getConfigManager().getDisconnectBlacklistedForge())));
-        }
-
         boolean firstBrand = !hasBrand;
         hasBrand = true;
+
+        if (hasReachHacks && GrimAPI.INSTANCE.getConfigManager().isBlockBlacklistedForgeClients()) {
+            if (notificationPending) sendNotification(); // staff still see the brand of kicked players
+            player.disconnect(MessageUtil.miniMessage(MessageUtil.replacePlaceholders(player, GrimAPI.INSTANCE.getConfigManager().getDisconnectBlacklistedForge())));
+            return;
+        }
+
         if (firstBrand) {
             onClientInfoChanged();
         }
@@ -195,6 +198,7 @@ public class ClientBrand extends GrimProcessor implements PacketReceiveListener 
         if (rule.action() == ClientRule.Action.KICK) {
             String message = rule.message() != null ? rule.message()
                     : config.getStringElse("client-brand.rule-kick-message", "<red>Your client or one of your mods is not allowed on this server.");
+            if (notificationPending) sendNotification(); // staff still see the brand of kicked players
             LogUtil.info(player.getName() + " was kicked by client-brand rule \"" + rule.pattern().pattern() + "\" (matched \"" + match + "\")");
             player.disconnect(ClientDetectionMessages.render(player, message, values));
             return true;
