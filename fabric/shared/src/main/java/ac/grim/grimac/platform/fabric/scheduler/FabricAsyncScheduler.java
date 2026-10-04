@@ -4,6 +4,7 @@ import ac.grim.grimac.api.plugin.GrimPlugin;
 import ac.grim.grimac.platform.api.scheduler.AsyncScheduler;
 import ac.grim.grimac.platform.api.scheduler.PlatformScheduler;
 import ac.grim.grimac.platform.api.scheduler.TaskHandle;
+import ac.grim.grimac.utils.anticheat.LogUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -80,13 +81,23 @@ public class FabricAsyncScheduler implements AsyncScheduler {
         Tracked tracked = new Tracked(plugin);
         tasks.put(token, tracked);
 
-        Runnable body = oneShot ? () -> {
+        // Catch everything like Bukkit's scheduler does: an exception escaping a repeating task would
+        // make the executor cancel it silently forever, and one-shot failures would never be logged.
+        Runnable safeTask = () -> {
             try {
                 task.run();
+            } catch (Throwable t) {
+                LogUtil.error("Async task threw an exception", t);
+            }
+        };
+
+        Runnable body = oneShot ? () -> {
+            try {
+                safeTask.run();
             } finally {
                 tasks.remove(token);
             }
-        } : task;
+        } : safeTask;
 
         tracked.future = submit.apply(body);
 
