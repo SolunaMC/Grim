@@ -1,7 +1,7 @@
 # Experimental Bedrock support
 
 > [!WARNING]
-> This lives on the `experimental/bedrock` branch and is **off by default**. Test it on a
+> This lives on the `feat/geyser-player-checks` branch and is **off by default**. Test it on a
 > staging server before using it anywhere else.
 
 Out of the box, Grim exempts Bedrock players (Geyser/Floodgate) completely. Bedrock
