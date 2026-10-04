@@ -5,7 +5,8 @@
   "name": "GrimAC",
   "description": "Libre simulation anticheat designed for 26.1 with 1.8-26.1 support, powered by PacketEvents 2.0.",
   "authors": [
-    "GrimAC"
+    "GrimAC",
+    "M4xi2312"
   ],
   "license": "GPLv3",
   "environment": "server",

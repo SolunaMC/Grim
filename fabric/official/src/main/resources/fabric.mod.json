@@ -4,6 +4,10 @@
   "version": "${version}",
   "name": "GrimAC (Fabric, official mappings)",
   "description": "GrimAC anticheat for Minecraft 26.1-26.3. Official-mapped platform compiled directly against the deobfuscated 26.X jar, sibling to fabric-intermediary, which covers 1.16.1-1.21.11. Per-version submodules contribute grim26MainLoad entrypoints.",
+  "authors": [
+    "GrimAC",
+    "M4xi2312"
+  ],
   "license": "GPLv3",
   "environment": "server",
   "entrypoints": {
