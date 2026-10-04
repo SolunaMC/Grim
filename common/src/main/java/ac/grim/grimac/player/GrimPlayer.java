@@ -759,11 +759,19 @@ public class GrimPlayer implements GrimUser {
     }
 
     public boolean exemptOnGround() {
-        return inVehicle()
-                || Collections.max(uncertaintyHandler.pistonX) != 0 || Collections.max(uncertaintyHandler.pistonY) != 0
-                || Collections.max(uncertaintyHandler.pistonZ) != 0 || uncertaintyHandler.isStepMovement
+        // Called for every candidate vector, so check the cheap flags before the piston queues
+        return inVehicle() || uncertaintyHandler.isStepMovement
                 || isFlying || compensatedEntities.self.isDead || isInBed || lastInBed || uncertaintyHandler.lastFlyingStatusChange.hasOccurredSince(30)
-                || uncertaintyHandler.lastHardCollidingLerpingEntity.hasOccurredSince(3) || uncertaintyHandler.isOrWasNearGlitchyBlock;
+                || uncertaintyHandler.lastHardCollidingLerpingEntity.hasOccurredSince(3) || uncertaintyHandler.isOrWasNearGlitchyBlock
+                || hasNonZero(uncertaintyHandler.pistonX) || hasNonZero(uncertaintyHandler.pistonY) || hasNonZero(uncertaintyHandler.pistonZ);
+    }
+
+    // Same as Collections.max(queue) != 0 as piston pushes are never negative, without the iterator and comparisons
+    private static boolean hasNonZero(List<Double> queue) {
+        for (int i = 0; i < queue.size(); i++) {
+            if (queue.get(i) != 0) return true;
+        }
+        return false;
     }
 
     public void handleMountVehicle(int vehicleID) {

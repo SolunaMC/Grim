@@ -33,7 +33,7 @@ public class UncertaintyHandler {
     // Meaning no matter what, just trust the player's onGround status
     public boolean isStepMovement;
     // What directions could slime block pistons be pushing the player from
-    public HashSet<BlockFace> slimePistonBounces;
+    public final HashSet<BlockFace> slimePistonBounces = new HashSet<>();
     // Handles general uncertainty such as entity pushing and the 1.14+ X Z collision bug where X momentum is maintained
     public double xNegativeUncertainty = 0;
     public double xPositiveUncertainty = 0;
@@ -132,7 +132,7 @@ public class UncertaintyHandler {
         isSteppingNearBubbleColumn = false;
         isSteppingNearScaffolding = false;
 
-        slimePistonBounces = new HashSet<>();
+        slimePistonBounces.clear();
         tickFireworksBox();
     }
 
