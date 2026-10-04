@@ -33,7 +33,7 @@ dependencies {
     compileOnly(libs.packetevents.api)
     compileOnly(libs.packetevents.fabric.common)
     compileOnly("org.slf4j:slf4j-api:2.0.20")
-    compileOnly("org.apache.logging.log4j:log4j-api:2.24.3")
+    compileOnly("org.apache.logging.log4j:log4j-api:2.26.1")
 }
 
 // The configurations below will only apply to :fabric and its submodules, not its siblings or the root project
