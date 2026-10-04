@@ -15,7 +15,8 @@ import java.util.regex.PatternSyntaxException;
  */
 public class BaseConfigManager {
 
-    private final List<Pattern> ignoredClientPatterns = new ArrayList<>();
+    // Replaced as a whole on reload: netty threads iterate it in isIgnoredClient
+    private volatile List<Pattern> ignoredClientPatterns = List.of();
     @Getter
     private ConfigManager config = null;
     @Getter
@@ -54,17 +55,18 @@ public class BaseConfigManager {
             LogUtil.warn("Detected invalid max-transaction-time! This setting is clamped between 1 and 180 to prevent issues. Attempting to disable or set this too high can result in memory usage issues.");
         }
 
-        ignoredClientPatterns.clear();
+        List<Pattern> patterns = new ArrayList<>();
         List<String> ignoredClients = config.getStringList("client-brand.ignored-clients");
         if (ignoredClients != null) {
             for (String string : ignoredClients) {
                 try {
-                    ignoredClientPatterns.add(Pattern.compile(string));
+                    patterns.add(Pattern.compile(string));
                 } catch (PatternSyntaxException e) {
-                    throw new RuntimeException("Failed to compile client pattern", e);
+                    LogUtil.error("Skipping invalid client-brand.ignored-clients pattern: " + string, e);
                 }
             }
         }
+        ignoredClientPatterns = List.copyOf(patterns);
 
         printAlertsToConsole = config.getBooleanElse("alerts.print-to-console", true);
         prefix = config.getStringElse("prefix", "&bGrim &8»");
