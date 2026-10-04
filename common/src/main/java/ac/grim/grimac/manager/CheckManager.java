@@ -14,11 +14,15 @@ import ac.grim.grimac.checks.impl.chat.ChatA;
 import ac.grim.grimac.checks.impl.chat.ChatB;
 import ac.grim.grimac.checks.impl.chat.ChatC;
 import ac.grim.grimac.checks.impl.chat.ChatD;
+import ac.grim.grimac.checks.impl.chat.ChatE;
 import ac.grim.grimac.checks.impl.combat.*;
 import ac.grim.grimac.checks.impl.crash.*;
 import ac.grim.grimac.checks.impl.elytra.*;
 import ac.grim.grimac.checks.impl.exploit.ExploitA;
 import ac.grim.grimac.checks.impl.exploit.ExploitB;
+import ac.grim.grimac.checks.impl.exploit.ExploitC;
+import ac.grim.grimac.checks.impl.exploit.ExploitD;
+import ac.grim.grimac.checks.impl.exploit.ExploitE;
 import ac.grim.grimac.checks.impl.groundspoof.NoFall;
 import ac.grim.grimac.checks.impl.misc.ClientBrand;
 import ac.grim.grimac.checks.impl.misc.GhostBlockMitigation;
@@ -95,6 +99,7 @@ public class CheckManager implements BasicReloadable {
                 .put(ChatB.class, new ChatB(player))
                 .put(ChatC.class, new ChatC(player))
                 .put(ChatD.class, new ChatD(player))
+                .put(ChatE.class, new ChatE(player))
                 .put(BadPacketsA.class, new BadPacketsA(player))
                 .put(BadPacketsC.class, new BadPacketsC(player))
                 .put(BadPacketsF.class, new BadPacketsF(player))
@@ -127,6 +132,9 @@ public class CheckManager implements BasicReloadable {
                 .put(NoFall.class, new NoFall(player))
                 .put(ExploitA.class, new ExploitA(player))
                 .put(ExploitB.class, new ExploitB(player))
+                .put(ExploitC.class, new ExploitC(player))
+                .put(ExploitD.class, new ExploitD(player))
+                .put(ExploitE.class, new ExploitE(player))
                 .put(BadPacketsD.class, new BadPacketsD(player))
                 .put(BadPacketsE.class, new BadPacketsE(player))
                 .put(BadPacketsJ.class, new BadPacketsJ(player))

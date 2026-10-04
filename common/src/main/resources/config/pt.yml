@@ -197,6 +197,24 @@ exploit:
     # Esse ajuste, influído pela opção acima, define a distância para verificar blocos fantasmas.
     # O valor válido é limitado de 2 a 4.
     distance-to-check-if-ghostblocks: 2
+    # Limites contra exploits de crash e lag, veja docs/EXPLOIT-CHECKS.md. -1 desativa um limite.
+    # Pedidos de autocompletar por segundo (CrashH)
+    tab-completes-per-second: 100
+    # Maior pacote de criativo/clique de inventário em bytes e aninhamento máximo de itens (CrashB, ExploitE)
+    max-item-packet-bytes: 2097152
+    max-item-nbt-depth: 128
+    # Placas (ExploitC): caracteres por linha, caracteres no total, rejeitar caracteres de controle, rejeitar códigos §
+    max-sign-line-length: 100
+    max-sign-length: 256
+    sign-block-control-characters: true
+    sign-block-format-codes: false
+    # Mensagens de plugin (ExploitD): por segundo, tamanho máximo em bytes, canais bloqueados ("nome" ou "prefixo*")
+    payloads-per-second: 500
+    max-payload-bytes: 1048576
+    blocked-payload-channels: []
+    # Comandos (ChatE): por segundo e comando mais longo em caracteres
+    commands-per-second: 20
+    max-command-length: 2048
 
 # Registra plugins que são injetados na netty ao entrar para depurar erros de compatibilidade.
 debug-pipeline-on-join: false
@@ -245,4 +263,4 @@ max-ping-firework-boost: 1000
 update-permission-ticks: -1
 
 config-flavor: V2
-config-version: 11
+config-version: 12

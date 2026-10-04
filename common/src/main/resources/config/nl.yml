@@ -192,6 +192,24 @@ exploit:
     # Deze instelling, beïnvloed door de boolean hierboven, bepaalt de afstand om te controleren op ghostblocks
     # Het geldige bereik is beperkt van 2 tot 4
     distance-to-check-if-ghostblocks: 2
+    # Limieten tegen crash- en lag-exploits, zie docs/EXPLOIT-CHECKS.md. -1 schakelt een limiet uit.
+    # Tab-aanvullingsverzoeken per seconde (CrashH)
+    tab-completes-per-second: 100
+    # Grootste creatief-/inventarisklikpakket in bytes en diepste item-nesting (CrashB, ExploitE)
+    max-item-packet-bytes: 2097152
+    max-item-nbt-depth: 128
+    # Borden (ExploitC): tekens per regel, tekens in totaal, stuurtekens weigeren, §-codes weigeren
+    max-sign-line-length: 100
+    max-sign-length: 256
+    sign-block-control-characters: true
+    sign-block-format-codes: false
+    # Pluginberichten (ExploitD): per seconde, grootste grootte in bytes, geblokkeerde kanalen ("naam" of "prefix*")
+    payloads-per-second: 500
+    max-payload-bytes: 1048576
+    blocked-payload-channels: []
+    # Commando's (ChatE): per seconde en langste commando in tekens
+    commands-per-second: 20
+    max-command-length: 2048
 
 # Logging plugins inschakelen die geïnjecteerd zijn in netty on join om compatibiliteitsproblemen te debuggen
 debug-pipeline-on-join: false
@@ -239,4 +257,4 @@ max-ping-firework-boost: 1000
 update-permission-ticks: -1
 
 config-flavor: V2
-config-version: 11
+config-version: 12

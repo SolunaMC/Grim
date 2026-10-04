@@ -192,6 +192,24 @@ exploit:
     # Această setare, influențată de booleanul de mai sus, definește distanța verificată pentru ghostblocks
     # Interval valid: 2 până la 4
     distance-to-check-if-ghostblocks: 2
+    # Limite împotriva exploit-urilor de crash și lag, vezi docs/EXPLOIT-CHECKS.md. -1 dezactivează o limită.
+    # Cereri de completare automată pe secundă (CrashH)
+    tab-completes-per-second: 100
+    # Cel mai mare pachet creativ/clic în inventar în octeți și cea mai adâncă imbricare a obiectelor (CrashB, ExploitE)
+    max-item-packet-bytes: 2097152
+    max-item-nbt-depth: 128
+    # Plăcuțe (ExploitC): caractere pe linie, caractere în total, respinge caracterele de control, respinge codurile §
+    max-sign-line-length: 100
+    max-sign-length: 256
+    sign-block-control-characters: true
+    sign-block-format-codes: false
+    # Mesaje de plugin (ExploitD): pe secundă, dimensiunea maximă în octeți, canale blocate ("nume" sau "prefix*")
+    payloads-per-second: 500
+    max-payload-bytes: 1048576
+    blocked-payload-channels: []
+    # Comenzi (ChatE): pe secundă și cea mai lungă comandă în caractere
+    commands-per-second: 20
+    max-command-length: 2048
 
 # Activează logarea pluginurilor care s-au injectat în netty la intrare pentru debugging de compatibilitate
 debug-pipeline-on-join: false
@@ -239,4 +257,4 @@ max-ping-firework-boost: 1000
 update-permission-ticks: -1
 
 config-flavor: V2
-config-version: 11
+config-version: 12

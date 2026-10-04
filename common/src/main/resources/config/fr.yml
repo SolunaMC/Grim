@@ -188,6 +188,24 @@ exploit:
     # Cette option atténue le placement du joueur sur les ghostblocks en resynchronisant le joueur lorsque cela se produit.
     allow-building-on-ghostblocks: true
     distance-to-check-if-ghostblocks: 2
+    # Limites contre les exploits de crash et de lag, voir docs/EXPLOIT-CHECKS.md. -1 désactive une limite.
+    # Requêtes d'autocomplétion par seconde (CrashH)
+    tab-completes-per-second: 100
+    # Plus grand paquet créatif/clic d'inventaire en octets et imbrication maximale d'objets (CrashB, ExploitE)
+    max-item-packet-bytes: 2097152
+    max-item-nbt-depth: 128
+    # Panneaux (ExploitC) : caractères par ligne, caractères au total, refuser les caractères de contrôle, refuser les codes §
+    max-sign-line-length: 100
+    max-sign-length: 256
+    sign-block-control-characters: true
+    sign-block-format-codes: false
+    # Messages de plugin (ExploitD) : par seconde, taille maximale en octets, canaux bloqués ("nom" ou "préfixe*")
+    payloads-per-second: 500
+    max-payload-bytes: 1048576
+    blocked-payload-channels: []
+    # Commandes (ChatE) : par seconde et commande la plus longue en caractères
+    commands-per-second: 20
+    max-command-length: 2048
 
 # Activer l'enregistrement des plugins ayant injecté dans Netty lors de la connexion pour déboguer les problèmes de compatibilité
 debug-pipeline-on-join: false
@@ -237,4 +255,4 @@ max-ping-firework-boost: 1000
 update-permission-ticks: -1
 
 config-flavor: V2
-config-version: 11
+config-version: 12

@@ -192,6 +192,24 @@ exploit:
     # Bu ayar, yukarıdaki boolean ile etkilenen hayalet blokları kontrol etmek için mesafeyi tanımlar
     # Geçerli aralığı 2 ile 4 arasında sınırlıdır
     distance-to-check-if-ghostblocks: 2
+    # Çökme ve lag açıklarına karşı sınırlar, bkz. docs/EXPLOIT-CHECKS.md. -1 bir sınırı kapatır.
+    # Saniyede sekme tamamlama isteği (CrashH)
+    tab-completes-per-second: 100
+    # Bayt cinsinden en büyük yaratıcı/envanter tıklama paketi ve en derin eşya iç içeliği (CrashB, ExploitE)
+    max-item-packet-bytes: 2097152
+    max-item-nbt-depth: 128
+    # Tabelalar (ExploitC): satır başına karakter, toplam karakter, kontrol karakterlerini reddet, § kodlarını reddet
+    max-sign-line-length: 100
+    max-sign-length: 256
+    sign-block-control-characters: true
+    sign-block-format-codes: false
+    # Eklenti mesajları (ExploitD): saniyede, bayt cinsinden en büyük boyut, engellenen kanallar ("ad" veya "önek*")
+    payloads-per-second: 500
+    max-payload-bytes: 1048576
+    blocked-payload-channels: []
+    # Komutlar (ChatE): saniyede ve karakter cinsinden en uzun komut
+    commands-per-second: 20
+    max-command-length: 2048
 
 # Netty'ye enjekte olan eklentileri giriş sırasında günlüklemeyi etkinleştirerek uyumluluk sorunlarını gider
 debug-pipeline-on-join: false
@@ -239,4 +257,4 @@ max-ping-firework-boost: 1000
 update-permission-ticks: -1
 
 config-flavor: V2
-config-version: 11
+config-version: 12

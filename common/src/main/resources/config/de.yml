@@ -192,6 +192,24 @@ exploit:
     # Diese Option, abhängig von der oben genannten Einstellung, definiert wie weit man nach Geisterblöcken suchen soll
     # Ihr gültiger Bereich ist von 2 bis 4 begrenzt
     distance-to-check-if-ghostblocks: 2
+    # Grenzen gegen Crash- und Lag-Exploits, siehe docs/EXPLOIT-CHECKS.md. -1 schaltet eine Grenze ab.
+    # Tab-Complete-Anfragen pro Sekunde (CrashH)
+    tab-completes-per-second: 100
+    # Größtes Creative-/Inventarklick-Paket in Bytes und tiefste Item-Verschachtelung (CrashB, ExploitE)
+    max-item-packet-bytes: 2097152
+    max-item-nbt-depth: 128
+    # Schilder (ExploitC): Zeichen pro Zeile, Zeichen insgesamt, Steuerzeichen ablehnen, §-Codes ablehnen
+    max-sign-line-length: 100
+    max-sign-length: 256
+    sign-block-control-characters: true
+    sign-block-format-codes: false
+    # Plugin-Nachrichten (ExploitD): pro Sekunde, größte Größe in Bytes, gesperrte Channels ("name" oder "präfix*")
+    payloads-per-second: 500
+    max-payload-bytes: 1048576
+    blocked-payload-channels: []
+    # Befehle (ChatE): pro Sekunde und längster Befehl in Zeichen
+    commands-per-second: 20
+    max-command-length: 2048
 
 # Aktivieren Sie die Protokollierung von Plugins, die in netty on join injiziert wurden, um Kompatibilitätsprobleme zu beheben.
 debug-pipeline-on-join: false
@@ -239,4 +257,4 @@ max-ping-firework-boost: 1000
 update-permission-ticks: -1
 
 config-flavor: V2
-config-version: 11
+config-version: 12
