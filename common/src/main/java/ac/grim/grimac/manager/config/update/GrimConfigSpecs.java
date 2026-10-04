@@ -53,12 +53,14 @@ public final class GrimConfigSpecs {
      * config. No explicit migration is needed; the updater's default rewrite
      * adds the key, and auto-lift preserves an existing user value if present.
      *
-     * <p>v11 → v12: adds the exploit limits (sign, payload, command, tab-complete
-     * and item data) to the {@code exploit:} section. Like v11, the updater's
-     * default rewrite adds them and keeps existing user values.
+     * <p>v11 → v11.1 (fork revision, the major number follows upstream): adds
+     * the exploit limits (sign, payload, command, tab-complete and item data)
+     * to the {@code exploit:} section. The updater's default rewrite adds them
+     * and keeps existing user values.
      */
     public static @NotNull ConfigUpdater.Spec mainConfig() {
-        return ConfigUpdater.Spec.builder("/config/", 12, ConfigUpdater.ConfigFlavor.V2)
+        return ConfigUpdater.Spec.builder("/config/", 11, ConfigUpdater.ConfigFlavor.V2)
+                .minor(1)
                 .migration(10, ctx -> {
                     String typeRaw = ctx.input().getString("history.database.type");
                     String type = typeRaw == null ? null : typeRaw.trim().toUpperCase(Locale.ROOT);
