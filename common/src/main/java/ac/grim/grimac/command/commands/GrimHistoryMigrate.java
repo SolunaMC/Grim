@@ -116,9 +116,10 @@ public class GrimHistoryMigrate implements BuildableCommand {
         // cross-backend hammer once more targets exist.
         SqliteBackend v1 = lifecycle.sqliteBackendForCommands();
         if (v1 == null) {
+            // The v2 storage no longer exposes a v1 SqliteBackend and there is no v2 migrator yet.
             throw new BackendException(
-                    "no SQLite backend in routing — legacy migration needs SQLite as its target; "
-                            + "switch a category to sqlite in database.yml or use /grim history copy instead");
+                    "legacy migration is not available with the current storage backend in this build; "
+                            + "the old data is left untouched");
         }
         CheckRegistry registry = lifecycle.checkRegistryForCommands();
         long gapMs = lifecycle.config().session().gapMs();

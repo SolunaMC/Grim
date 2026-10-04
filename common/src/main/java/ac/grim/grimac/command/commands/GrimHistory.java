@@ -503,7 +503,13 @@ public class GrimHistory implements BuildableCommand {
             return;
         }
 
-        Backend backend = lifecycle.allBackendsForCommands().get(backendId);
+        Map<String, Backend> backends = lifecycle.allBackendsForCommands();
+        if (backends.isEmpty()) {
+            // The v2 storage no longer exposes v1 backends and there is no v2 repair yet.
+            sender.sendMessage(Component.text("Check-id repair is not available with the current storage in this build.", NamedTextColor.RED));
+            return;
+        }
+        Backend backend = backends.get(backendId);
         if (backend == null) {
             sender.sendMessage(Component.text("Violation backend '" + backendId + "' is not active.", NamedTextColor.RED));
             return;

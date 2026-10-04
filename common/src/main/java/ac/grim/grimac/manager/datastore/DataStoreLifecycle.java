@@ -187,6 +187,7 @@ public final class DataStoreLifecycle implements StartableInitable, StoppableIni
 
         try {
             this.loaded = buildAndStart(dataFolder);
+            if (loaded) warnAboutUnmigratedLegacyStore(dataFolder);
         } catch (FatalStorageStartupException e) {
             logger.log(Level.SEVERE, "[grim-datastore] fatal storage startup failure - shutting down server", e);
             try { close(); } catch (Exception closeEx) { logger.log(Level.FINE, "[grim-datastore] close during shutdown failed", closeEx); }
@@ -1059,6 +1060,19 @@ public final class DataStoreLifecycle implements StartableInitable, StoppableIni
             }
         }
         return new NameResolverChain(links);
+    }
+
+    /**
+     * The v2 store has no migrator for the legacy (v0) history yet: {@link #maybeMigrateLegacy} needs a v1
+     * SqliteBackend, which the v2 storage no longer creates. Say so instead of silently ignoring old data.
+     */
+    private void warnAboutUnmigratedLegacyStore(Path dataFolder) {
+        if (config.migration().skip()) return;
+        V0Sources.V0Source source = V0Sources.detect(dataFolder, GrimAPI.INSTANCE.getConfigManager().getConfig());
+        if (source == null) return;
+        logger.warning("[grim-datastore] legacy history store found (" + source.summary() + "), but automatic"
+                + " migration into the current storage is not available in this build. The old data is left untouched."
+                + " Set datastore migration.skip to true to hide this warning.");
     }
 
     private void maybeMigrateLegacy(Path dataFolder, SqliteBackend sqliteBackend) {
