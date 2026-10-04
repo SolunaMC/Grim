@@ -1,6 +1,7 @@
 package ac.grim.grimac.events.packets;
 
 import ac.grim.grimac.GrimAPI;
+import ac.grim.grimac.manager.SetbackTeleportUtil;
 import ac.grim.grimac.player.GrimPlayer;
 import ac.grim.grimac.utils.data.IntToObjectPair;
 import ac.grim.grimac.utils.math.Location;
@@ -111,8 +112,12 @@ public class PacketServerTeleport extends PacketListenerAbstract {
             }
 
             // 1.21.2+ client ignore teleports if player is inside vehicle, ABSOLUTE CINEMA MOJANG
+            // (lastKnownGoodPosition is null between a respawn and the spawn teleport, the client accepts the teleport then)
             if (player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_21_2) && player.compensatedEntities.serverPlayerVehicle != null) {
-                pos = player.getSetbackTeleportUtil().lastKnownGoodPosition.getPos();
+                SetbackTeleportUtil.SetbackPosWithVector lastKnownGoodPosition = player.getSetbackTeleportUtil().lastKnownGoodPosition;
+                if (lastKnownGoodPosition != null) {
+                    pos = lastKnownGoodPosition.getPos();
+                }
             }
 
             player.sendTransaction();

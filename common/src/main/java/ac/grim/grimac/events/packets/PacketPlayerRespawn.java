@@ -145,6 +145,11 @@ public class PacketPlayerRespawn extends PacketListenerAbstract {
             player.getSetbackTeleportUtil().hasAcceptedSpawnTeleport = false;
             player.getSetbackTeleportUtil().lastKnownGoodPosition = null;
 
+            // All entities get removed on respawn
+            // This is server-side state (like the mount/dismount handlers), so clear it now instead of on the transaction,
+            // or a vehicle the server mounts us on before the client answers would get cleared
+            player.compensatedEntities.serverPlayerVehicle = null;
+
             // clear server entity positions when the world changes
             if (isWorldChange(player, respawn)) {
                 player.compensatedEntities.serverPositionsMap.clear();
@@ -210,7 +215,6 @@ public class PacketPlayerRespawn extends PacketListenerAbstract {
                 player.dimensionType = respawn.getDimensionType();
                 player.worldName = respawn.getWorldName().orElse(null);
 
-                player.compensatedEntities.serverPlayerVehicle = null; // All entities get removed on respawn
                 player.compensatedEntities.self = new PacketEntitySelf(player, player.compensatedEntities.self);
                 player.compensatedEntities.selfTrackedEntity = new TrackerData(0, 0, 0, 0, 0, EntityTypes.PLAYER, player.lastTransactionSent.get());
 
