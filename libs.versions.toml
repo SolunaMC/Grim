@@ -26,7 +26,7 @@ slf4j = "2.0.17"
 jetbrains-annotations = "24.1.0"
 mongoDriverSync = "5.3.1"
 netty = "4.1.85.Final"
-snakeyaml = "2.2"
+snakeyaml = "2.7"
 configuralize = "1.4.1" # :slim classifier is applied in build.gradle.kts
 
 # --- Build & Tooling ---
