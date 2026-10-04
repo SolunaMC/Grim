@@ -46,6 +46,7 @@ public class ConfigManagerFileImpl implements ConfigManager, BasicReloadable {
         Map<File, ConfigUpdater.Spec> batch = new LinkedHashMap<>();
         batch.put(getConfigFile("config.yml"), GrimConfigSpecs.mainConfig());
         batch.put(getConfigFile("discord.yml"), GrimConfigSpecs.discord());
+        batch.put(getConfigFile("bedrock.yml"), GrimConfigSpecs.bedrock());
         batch.put(getConfigFile("messages.yml"), GrimConfigSpecs.messages());
         batch.put(getConfigFile("database.yml"), GrimConfigSpecs.database());
         for (String id : BACKEND_IDS) {
@@ -70,6 +71,8 @@ public class ConfigManagerFileImpl implements ConfigManager, BasicReloadable {
             config.addSource(GrimAPI.class, "config", getConfigFile("config.yml"));
             config.addSource(GrimAPI.class, "messages", getConfigFile("messages.yml"));
             config.addSource(GrimAPI.class, "discord", getConfigFile("discord.yml"));
+            // Experimental Bedrock support; keys are under a `bedrock:` wrapper like database.yml
+            config.addSource(GrimAPI.class, "bedrock", getConfigFile("bedrock.yml"));
             config.addSource(GrimAPI.class, "punishments", getConfigFile("punishments.yml"));
             // database.yml + per-backend files load through here too; their
             // keys are namespaced under `database:` / `<id>:` wrappers so

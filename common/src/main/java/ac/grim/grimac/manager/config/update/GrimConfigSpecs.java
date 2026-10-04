@@ -52,12 +52,9 @@ public final class GrimConfigSpecs {
      * <p>v10 → v11: adds {@code update-permission-ticks} to the bundled
      * config. No explicit migration is needed; the updater's default rewrite
      * adds the key, and auto-lift preserves an existing user value if present.
-     *
-     * <p>v11 → v12: adds the experimental {@code bedrock} block. Like v11, the
-     * updater's default rewrite adds it and keeps existing user values.
      */
     public static @NotNull ConfigUpdater.Spec mainConfig() {
-        return ConfigUpdater.Spec.builder("/config/", 12, ConfigUpdater.ConfigFlavor.V2)
+        return ConfigUpdater.Spec.builder("/config/", 11, ConfigUpdater.ConfigFlavor.V2)
                 .migration(10, ctx -> {
                     String typeRaw = ctx.input().getString("history.database.type");
                     String type = typeRaw == null ? null : typeRaw.trim().toUpperCase(Locale.ROOT);
@@ -114,6 +111,12 @@ public final class GrimConfigSpecs {
 
     public static @NotNull ConfigUpdater.Spec discord() {
         return ConfigUpdater.Spec.builder("/discord/", 1, ConfigUpdater.ConfigFlavor.V2)
+                .build();
+    }
+
+    /** Experimental Bedrock support (top-level {@code bedrock:} wrapper), see BEDROCK.md. */
+    public static @NotNull ConfigUpdater.Spec bedrock() {
+        return ConfigUpdater.Spec.builder("/bedrock/", 1, ConfigUpdater.ConfigFlavor.V2)
                 .build();
     }
 

@@ -1,0 +1,13 @@
+# Experimental: verificar jogadores Bedrock (Geyser/Floodgate) em vez de isentá-los.
+# Apenas os checks listados abaixo se aplicam a eles, veja BEDROCK.md.
+
+bedrock:
+  enabled: false
+  # Funciona como no punishments.yml: "Exploit" corresponde a ExploitA e ExploitB.
+  checks:
+    - Crash
+    - Exploit
+
+# Marcadores de esquema — veja o comentário no início do config.yml.
+config-flavor: V2
+config-version: 1

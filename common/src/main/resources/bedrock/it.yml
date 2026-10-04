@@ -1,0 +1,13 @@
+# Sperimentale: controlla i giocatori Bedrock (Geyser/Floodgate) invece di esentarli.
+# Vengono controllati solo dai check elencati sotto, vedi BEDROCK.md.
+
+bedrock:
+  enabled: false
+  # Funziona come in punishments.yml: "Exploit" corrisponde a ExploitA ed ExploitB.
+  checks:
+    - Crash
+    - Exploit
+
+# Marcatori di schema — vedi il commento iniziale in config.yml.
+config-flavor: V2
+config-version: 1

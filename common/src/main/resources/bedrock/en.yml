@@ -1,0 +1,13 @@
+# Experimental: track Bedrock (Geyser/Floodgate) players instead of exempting them.
+# They are only checked by the checks listed below, see BEDROCK.md.
+
+bedrock:
+  enabled: false
+  # Matching works like punishments.yml: "Exploit" matches ExploitA and ExploitB.
+  checks:
+    - Crash
+    - Exploit
+
+# Schema markers — see header comment in config.yml.
+config-flavor: V2
+config-version: 1

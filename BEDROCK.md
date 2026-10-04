@@ -20,9 +20,9 @@ With the experimental support turned on, Bedrock players are tracked instead of 
 
 ## Enabling it
 
-The bundled `config.yml` (config version 12 on this branch) has the block below, and
-existing configs get it added automatically on the next start. Set `enabled: true` and run
-`/grim reload`:
+The options live in their own file, `plugins/GrimAC/bedrock.yml` (or the Fabric config
+folder). Grim creates it on the next start; `config.yml` is not touched. Set
+`enabled: true` and run `/grim reload`:
 
 ```yaml
 bedrock:
@@ -41,5 +41,5 @@ Bedrock players who are online during the reload are picked up the next time the
   a protocol violation, so watch the alerts before adding punishments for Bedrock players.
 - Movement, combat (reach, aim) and timer checks stay off for Bedrock players. Supporting
   them would need a Bedrock physics model, which Grim doesn't have.
-- This branch bumps the config version to 12. If upstream later uses version 12 for
-  something else, the two need to be reconciled when merging upstream changes.
+- The options are in `bedrock.yml`, so `config.yml` and its config version stay the same
+  as upstream.

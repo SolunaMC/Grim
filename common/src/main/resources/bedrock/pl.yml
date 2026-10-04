@@ -1,0 +1,13 @@
+# Eksperymentalne: sprawdzaj graczy Bedrock (Geyser/Floodgate) zamiast ich pomijać.
+# Obejmują ich tylko checki wymienione poniżej, zobacz BEDROCK.md.
+
+bedrock:
+  enabled: false
+  # Dopasowanie jak w punishments.yml: "Exploit" pasuje do ExploitA i ExploitB.
+  checks:
+    - Crash
+    - Exploit
+
+# Znaczniki schematu — zobacz komentarz na początku config.yml.
+config-flavor: V2
+config-version: 1

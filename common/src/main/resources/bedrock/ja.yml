@@ -1,0 +1,13 @@
+# 実験的: Bedrock プレイヤー (Geyser/Floodgate) を除外せずにチェックします。
+# 下に記載したチェックのみが適用されます。BEDROCK.md を参照してください。
+
+bedrock:
+  enabled: false
+  # punishments.yml と同じ一致方法です: "Exploit" は ExploitA と ExploitB に一致します。
+  checks:
+    - Crash
+    - Exploit
+
+# スキーママーカー — config.yml 冒頭のコメントを参照してください。
+config-flavor: V2
+config-version: 1

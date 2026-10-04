@@ -10,31 +10,31 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.logging.Logger;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BedrockConfigUpdateTest {
 
     @Test
-    void v11ConfigGainsBedrockBlockAndKeepsUserValues(@TempDir Path dir) throws Exception {
-        String bundled;
-        try (InputStream in = ConfigUpdater.class.getResourceAsStream("/config/en.yml")) {
-            bundled = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+    void everyBundledLanguageHasABedrockFile() throws Exception {
+        for (String lang : new String[]{"en", "de", "es", "fr", "it", "ja", "nl", "pl", "pt", "ro", "ru", "tr", "zh"}) {
+            try (InputStream in = ConfigUpdater.class.getResourceAsStream("/bedrock/" + lang + ".yml")) {
+                assertNotNull(in, "missing /bedrock/" + lang + ".yml");
+                String content = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+                assertTrue(content.contains("bedrock:") && content.contains("enabled: false"), lang);
+            }
         }
-        // Rebuild what a v11 config looked like: no bedrock block, version 11, plus a user change
-        String v11 = bundled
-                .replaceAll("(?s)\n# Experimental: track Bedrock.*?    - Exploit\n", "\n")
-                .replace("config-version: 12", "config-version: 11")
-                .replace("experimental-checks: false", "experimental-checks: true");
-        assertFalse(v11.contains("bedrock:"), "fixture has no bedrock block");
-        File config = dir.resolve("config.yml").toFile();
-        Files.writeString(config.toPath(), v11, StandardCharsets.UTF_8);
+    }
 
-        new ConfigUpdater(ConfigUpdater.class, Logger.getLogger("test")).update(config, GrimConfigSpecs.mainConfig());
+    @Test
+    void updaterKeepsUserValues(@TempDir Path dir) throws Exception {
+        // A current-version user file is left as is; missing keys fall back to the defaults in code
+        File bedrock = dir.resolve("bedrock.yml").toFile();
+        Files.writeString(bedrock.toPath(), "bedrock:\n  enabled: true\nconfig-flavor: V2\nconfig-version: 1\n", StandardCharsets.UTF_8);
 
-        String updated = Files.readString(config.toPath(), StandardCharsets.UTF_8);
-        assertTrue(updated.contains("config-version: 12"), "version bumped");
-        assertTrue(updated.contains("bedrock:"), "bedrock block added");
-        assertTrue(updated.contains("experimental-checks: true"), "user value kept");
+        new ConfigUpdater(ConfigUpdater.class, Logger.getLogger("test")).update(bedrock, GrimConfigSpecs.bedrock());
+
+        String updated = Files.readString(bedrock.toPath(), StandardCharsets.UTF_8);
+        assertTrue(updated.contains("enabled: true"), "user value kept");
     }
 }

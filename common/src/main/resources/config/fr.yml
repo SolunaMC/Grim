@@ -195,15 +195,6 @@ debug-pipeline-on-join: false
 # Active les vérifications expérimentales
 experimental-checks: false
 
-# Expérimental : vérifier les joueurs Bedrock (Geyser/Floodgate) au lieu de les exempter.
-# Seuls les checks listés ci-dessous s'appliquent à eux, voir BEDROCK.md.
-bedrock:
-  enabled: false
-  # Même correspondance que punishments.yml : "Exploit" couvre ExploitA et ExploitB.
-  checks:
-    - Crash
-    - Exploit
-
 reset-item-usage-on-item-update: true
 reset-item-usage-on-attack: true
 reset-item-usage-on-slot-change: true
@@ -246,4 +237,4 @@ max-ping-firework-boost: 1000
 update-permission-ticks: -1
 
 config-flavor: V2
-config-version: 12
+config-version: 11

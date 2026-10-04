@@ -1,0 +1,13 @@
+# Deneysel: Bedrock oyuncularını (Geyser/Floodgate) muaf tutmak yerine kontrol et.
+# Onlara yalnızca aşağıda listelenen kontroller uygulanır, bkz. BEDROCK.md.
+
+bedrock:
+  enabled: false
+  # Eşleşme punishments.yml ile aynıdır: "Exploit", ExploitA ve ExploitB ile eşleşir.
+  checks:
+    - Crash
+    - Exploit
+
+# Şema işaretleri — config.yml başındaki açıklamaya bakın.
+config-flavor: V2
+config-version: 1
