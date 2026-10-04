@@ -1,0 +1,129 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "group:allNonMajor",
+    "schedule:weekly"
+  ],
+  "timezone": "Europe/Berlin",
+  "forkProcessing": "enabled",
+  "prConcurrentLimit": 3,
+  "prHourlyLimit": 2,
+  "major": {
+    "dependencyDashboardApproval": true
+  },
+  "packageRules": [
+    {
+      "matchPackageNames": [
+        "me.clip:placeholderapi"
+      ],
+      "registryUrls": [
+        "https://repo.extendedclip.com/content/repositories/placeholderapi/"
+      ]
+    },
+    {
+      "matchPackageNames": [
+        "github.scarsz:configuralize"
+      ],
+      "registryUrls": [
+        "https://nexus.scarsz.me/content/repositories/releases"
+      ]
+    },
+    {
+      "matchPackageNames": [
+        "com.viaversion:viaversion",
+        "com.viaversion:viabackwards"
+      ],
+      "registryUrls": [
+        "https://repo.viaversion.com"
+      ]
+    },
+    {
+      "matchPackageNames": [
+        "org.geysermc.api:base-api"
+      ],
+      "registryUrls": [
+        "https://repo.opencollab.dev/maven-releases/"
+      ]
+    },
+    {
+      "matchPackageNames": [
+        "org.geysermc.floodgate:api"
+      ],
+      "registryUrls": [
+        "https://repo.opencollab.dev/maven-snapshots/"
+      ]
+    },
+    {
+      "matchPackageNames": [
+        "ac.grim.grimac:GrimAPI",
+        "ac.grim.grimac:grim-internal",
+        "ac.grim.grimac:grim-internal-shims",
+        "ac.grim.grimac:grim-bukkit-internal",
+        "ac.grim.grimac:grim-fabric-internal"
+      ],
+      "registryUrls": [
+        "https://maven.grim.ac/public/releases",
+        "https://maven.grim.ac/public/snapshots",
+        "https://repo.grim.ac/snapshots"
+      ]
+    },
+    {
+      "matchPackageNames": [
+        "com.github.retrooper:packetevents-api",
+        "com.github.retrooper:packetevents-fabric",
+        "com.github.retrooper:packetevents-fabric-common",
+        "com.github.retrooper:packetevents-spigot"
+      ],
+      "registryUrls": [
+        "https://maven.grim.ac/public/releases",
+        "https://maven.grim.ac/public/snapshots",
+        "https://repo.grim.ac/snapshots"
+      ]
+    },
+    {
+      "matchPackageNames": [
+        "net.fabricmc:fabric-loader",
+        "net.fabricmc.fabric-api:fabric-api"
+      ],
+      "registryUrls": [
+        "https://maven.fabricmc.net/"
+      ]
+    },
+    {
+      "matchPackageNames": [
+        "com.mojang:minecraft"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "GitHub Actions in einem eigenen PR bündeln (auch Majors)",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "groupName": "GitHub Actions",
+      "dependencyDashboardApproval": false
+    },
+    {
+      "description": "Keine SNAPSHOT-Versionen vorschlagen (PacketEvents, Grim, ...)",
+      "matchDatasources": [
+        "maven"
+      ],
+      "allowedVersions": "!/SNAPSHOT$/"
+    },
+    {
+      "description": "Fabric API muss zur Minecraft-Version passen (official = 26.2)",
+      "matchPackageNames": [
+        "net.fabricmc.fabric-api:fabric-api"
+      ],
+      "allowedVersions": "/\\+26\\.2$/"
+    },
+    {
+      "description": "paper-api nutzt eine dynamische Version (26.2.build.+); MC-Updates macht man von Hand",
+      "matchPackageNames": [
+        "io.papermc.paper:paper-api"
+      ],
+      "enabled": false
+    }
+  ]
+}
