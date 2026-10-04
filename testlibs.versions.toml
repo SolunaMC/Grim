@@ -1,10 +1,10 @@
 [versions]
-junit = "5.11.3"
+junit = "5.14.4"
 
 
 [libraries]
 junitJupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
-junitPlatformLauncher = { module = "org.junit.platform:junit-platform-launcher", version = "1.11.3" }
+junitPlatformLauncher = { module = "org.junit.platform:junit-platform-launcher", version = "1.14.4" }
 
 
 [bundles]
