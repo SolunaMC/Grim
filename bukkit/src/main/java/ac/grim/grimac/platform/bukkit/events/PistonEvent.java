@@ -18,6 +18,7 @@ import org.bukkit.event.block.BlockPistonRetractEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class PistonEvent implements Listener {
 
@@ -32,6 +33,21 @@ public class PistonEvent implements Listener {
         return Math.abs(vectorA.getX() - vectorB.getX()) <= MAX_HORIZONTAL_DISTANCE
                 && Math.abs(vectorA.getY() - vectorB.getY()) <= MAX_VERTICAL_DISTANCE
                 && Math.abs(vectorA.getZ() - vectorB.getZ()) <= MAX_HORIZONTAL_DISTANCE;
+    }
+
+    // A piston at the same coordinates in another world must not affect the player
+    private static boolean isInWorld(GrimPlayer player, UUID worldUID) {
+        UUID playerWorld = player.getWorldUID();
+        return playerWorld == null || playerWorld.equals(worldUID);
+    }
+
+    private static void addPiston(GrimPlayer player, int chunkX, int chunkZ, PistonData data) {
+        // The compensated chunk map is only safe to read on the netty thread, so check it inside the task
+        player.latencyUtils.addRealTimeTaskAsync(data.lastTransactionSent, () -> {
+            if (player.compensatedWorld.isChunkLoaded(chunkX, chunkZ)) {
+                player.compensatedWorld.activePistons.add(data);
+            }
+        });
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -72,12 +88,13 @@ public class PistonEvent implements Listener {
         final int chunkZ = event.getBlock().getZ() >> 4;
         final BlockFace blockFace = BukkitConversionUtils.fromBukkitFace(event.getDirection());
         final Vector3i sourcePos = new Vector3i(piston.getX(), piston.getY(), piston.getZ());
+        final UUID worldUID = piston.getWorld().getUID();
 
         for (GrimPlayer player : GrimAPI.INSTANCE.getPlayerDataManager().getEntries()) {
-            if (isCloseEnough(sourcePos, player.compensatedEntities.self.trackedServerPosition.getPos()) && player.compensatedWorld.isChunkLoaded(chunkX, chunkZ)) {
+            if (isCloseEnough(sourcePos, player.compensatedEntities.self.trackedServerPosition.getPos()) && isInWorld(player, worldUID)) {
                 final int lastTrans = player.lastTransactionSent.get();
                 PistonData data = new PistonData(blockFace, boxes, lastTrans, true, hasSlimeBlock, hasHoneyBlock);
-                player.latencyUtils.addRealTimeTaskAsync(lastTrans, () -> player.compensatedWorld.activePistons.add(data));
+                addPiston(player, chunkX, chunkZ, data);
             }
         }
     }
@@ -130,12 +147,13 @@ public class PistonEvent implements Listener {
         final int chunkX = event.getBlock().getX() >> 4;
         final int chunkZ = event.getBlock().getZ() >> 4;
         Vector3i sourcePos = new Vector3i(event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ());
+        UUID worldUID = event.getBlock().getWorld().getUID();
 
         for (GrimPlayer player : GrimAPI.INSTANCE.getPlayerDataManager().getEntries()) {
-            if (isCloseEnough(sourcePos, player.compensatedEntities.self.trackedServerPosition.getPos()) && player.compensatedWorld.isChunkLoaded(chunkX, chunkZ)) {
+            if (isCloseEnough(sourcePos, player.compensatedEntities.self.trackedServerPosition.getPos()) && isInWorld(player, worldUID)) {
                 int lastTrans = player.lastTransactionSent.get();
                 PistonData data = new PistonData(face, boxes, lastTrans, false, hasSlimeBlock, hasHoneyBlock);
-                player.latencyUtils.addRealTimeTaskAsync(lastTrans, () -> player.compensatedWorld.activePistons.add(data));
+                addPiston(player, chunkX, chunkZ, data);
             }
         }
     }

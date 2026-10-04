@@ -26,6 +26,8 @@ public class MultiActionsF extends BlockPlaceCheck implements PacketReceiveListe
     private static final int ACTION_PLACE = 0;
     private static final int ACTION_ENTITY = 1;
     private static final int ACTION_DIG = 2;
+    // Deferred flags are only drained on a movement packet, don't let a client that stops sending them grow this forever
+    private static final int MAX_DEFERRED_FLAGS = 32;
 
     private final List<FlagData> flags = new ArrayList<>();
     private boolean entity, block;
@@ -47,7 +49,7 @@ public class MultiActionsF extends BlockPlaceCheck implements PacketReceiveListe
                     place.resync();
                 }
             } else {
-                flags.add(new FlagData(ACTION_PLACE));
+                if (flags.size() < MAX_DEFERRED_FLAGS) flags.add(new FlagData(ACTION_PLACE));
             }
         }
     }
@@ -65,7 +67,7 @@ public class MultiActionsF extends BlockPlaceCheck implements PacketReceiveListe
                         player.onPacketCancel();
                     }
                 } else {
-                    flags.add(new FlagData(ACTION_ENTITY));
+                    if (flags.size() < MAX_DEFERRED_FLAGS) flags.add(new FlagData(ACTION_ENTITY));
                 }
             }
         }
@@ -85,7 +87,7 @@ public class MultiActionsF extends BlockPlaceCheck implements PacketReceiveListe
                         blockBreak.cancel();
                     }
                 } else {
-                    flags.add(new FlagData(ACTION_DIG));
+                    if (flags.size() < MAX_DEFERRED_FLAGS) flags.add(new FlagData(ACTION_DIG));
                 }
             }
         }

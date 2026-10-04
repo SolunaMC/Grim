@@ -33,7 +33,7 @@ public class UncertaintyHandler {
     // Meaning no matter what, just trust the player's onGround status
     public boolean isStepMovement;
     // What directions could slime block pistons be pushing the player from
-    public HashSet<BlockFace> slimePistonBounces;
+    public final HashSet<BlockFace> slimePistonBounces = new HashSet<>();
     // Handles general uncertainty such as entity pushing and the 1.14+ X Z collision bug where X momentum is maintained
     public double xNegativeUncertainty = 0;
     public double xPositiveUncertainty = 0;
@@ -132,7 +132,7 @@ public class UncertaintyHandler {
         isSteppingNearBubbleColumn = false;
         isSteppingNearScaffolding = false;
 
-        slimePistonBounces = new HashSet<>();
+        slimePistonBounces.clear();
         tickFireworksBox();
     }
 
@@ -341,10 +341,11 @@ public class UncertaintyHandler {
 
     private boolean striderCollision(SimpleCollisionBox expandedBB) {
         // Stiders can walk on top of other striders
-        if (player.compensatedEntities.self.getRiding() instanceof PacketEntityStrider) {
+        final PacketEntity riding = player.compensatedEntities.self.getRiding();
+        if (riding instanceof PacketEntityStrider) {
             for (PacketEntity entity : player.compensatedEntities.entityMap.values()) {
-                if (entity.getType() == EntityTypes.STRIDER && entity != player.compensatedEntities.self.getRiding()
-                        && !entity.hasPassenger(entity) && entity.getPossibleCollisionBoxes().isIntersected(expandedBB)) {
+                if (entity.getType() == EntityTypes.STRIDER && entity != riding
+                        && !riding.hasPassenger(entity) && entity.getPossibleCollisionBoxes().isIntersected(expandedBB)) {
                     return true;
                 }
             }

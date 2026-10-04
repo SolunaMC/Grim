@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -71,6 +72,7 @@ public final class PlayerToggleStoreImpl implements PlayerToggleStore {
     }
 
     private static final long DEFAULT_FLUSH_DELAY_MS = 500L;
+    private static final long SHUTDOWN_TIMEOUT_MS = 2_000L;
 
     private final DataStore store;
     private final Logger logger;
@@ -78,6 +80,7 @@ public final class PlayerToggleStoreImpl implements PlayerToggleStore {
     private final long flushDelayMs;
     private final boolean ownsScheduler;
     private final Map<UUID, ToggleSlot> slots = new ConcurrentHashMap<>();
+    private final AtomicBoolean shutDown = new AtomicBoolean();
 
     public PlayerToggleStoreImpl(@NotNull DataStore store, @NotNull Logger logger) {
         this(store, logger, defaultScheduler(), DEFAULT_FLUSH_DELAY_MS, true);
@@ -182,10 +185,17 @@ public final class PlayerToggleStoreImpl implements PlayerToggleStore {
      */
     private void scheduleFlush(ToggleSlot slot, UUID uuid) {
         if (slot.pendingFlush.get() != null) return;
-        ScheduledFuture<?> f = scheduler.schedule(() -> {
-            slot.pendingFlush.set(null);
+        ScheduledFuture<?> f;
+        try {
+            f = scheduler.schedule(() -> {
+                slot.pendingFlush.set(null);
+                flushDirty(slot, uuid);
+            }, flushDelayMs, TimeUnit.MILLISECONDS);
+        } catch (RejectedExecutionException e) {
+            // Store already shut down (stale reference across a reload); write through instead of dropping it.
             flushDirty(slot, uuid);
-        }, flushDelayMs, TimeUnit.MILLISECONDS);
+            return;
+        }
         if (!slot.pendingFlush.compareAndSet(null, f)) f.cancel(false);
     }
 
@@ -253,6 +263,20 @@ public final class PlayerToggleStoreImpl implements PlayerToggleStore {
 
     @Override
     public void shutdown() {
-        if (ownsScheduler) scheduler.shutdownNow();
+        if (!shutDown.compareAndSet(false, true)) return;
+        // Write out toggles still inside their coalescing delay; dropping the queued flushes would lose them.
+        for (Map.Entry<UUID, ToggleSlot> entry : slots.entrySet()) {
+            ScheduledFuture<?> f = entry.getValue().pendingFlush.getAndSet(null);
+            if (f != null) f.cancel(false);
+            flushDirty(entry.getValue(), entry.getKey());
+        }
+        if (!ownsScheduler) return;
+        scheduler.shutdown();
+        try {
+            if (!scheduler.awaitTermination(SHUTDOWN_TIMEOUT_MS, TimeUnit.MILLISECONDS)) scheduler.shutdownNow();
+        } catch (InterruptedException e) {
+            scheduler.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
     }
 }

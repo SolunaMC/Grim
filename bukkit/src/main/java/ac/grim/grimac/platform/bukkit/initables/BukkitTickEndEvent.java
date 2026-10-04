@@ -2,6 +2,7 @@ package ac.grim.grimac.platform.bukkit.initables;
 
 import ac.grim.grimac.GrimAPI;
 import ac.grim.grimac.manager.init.start.AbstractTickEndEvent;
+import ac.grim.grimac.manager.init.stop.StoppableInitable;
 import ac.grim.grimac.platform.api.Platform;
 import ac.grim.grimac.platform.bukkit.player.BukkitPlatformPlayer;
 import ac.grim.grimac.platform.bukkit.utils.reflection.PaperUtils;
@@ -24,7 +25,9 @@ import java.util.List;
 
 // Copied from: https://github.com/ThomasOM/Pledge/blob/master/src/main/java/dev/thomazz/pledge/inject/ServerInjector.java
 @SuppressWarnings(value = {"unchecked", "deprecated"})
-public class BukkitTickEndEvent extends AbstractTickEndEvent implements Listener {
+public class BukkitTickEndEvent extends AbstractTickEndEvent implements Listener, StoppableInitable {
+    // Puts the original connections list back, so a reload doesn't stack hooks and leak this classloader
+    private Runnable uninject;
 
     private Boolean getLateBindState() {
         Class<?> spigotConfig = ReflectionUtils.getClass("org.spigotmc.SpigotConfig");
@@ -108,14 +111,34 @@ public class BukkitTickEndEvent extends AbstractTickEndEvent implements Listener
                 }
             });
 
+            // The field is final, so Unsafe is needed to replace it; newer JDKs may deny this, which is caught below
             Field unsafeField = Unsafe.class.getDeclaredField("theUnsafe");
             unsafeField.setAccessible(true);
             Unsafe unsafe = (Unsafe) unsafeField.get(null);
-            unsafe.putObject(connection, unsafe.objectFieldOffset(connectionsList), wrapper);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            LogUtil.error("Failed to inject into the end of tick event via reflection", e);
+            long offset = unsafe.objectFieldOffset(connectionsList);
+            unsafe.putObject(connection, offset, wrapper);
+
+            uninject = () -> {
+                // Don't overwrite another plugin's hook if it replaced the list after us
+                if (unsafe.getObject(connection, offset) == wrapper) {
+                    unsafe.putObject(connection, offset, endOfTickObject);
+                }
+            };
+        } catch (Throwable t) {
+            LogUtil.error("Failed to inject into the end of tick event via reflection", t);
             return false;
         }
         return true;
+    }
+
+    @Override
+    public void stop() {
+        if (uninject == null) return;
+        try {
+            uninject.run();
+        } catch (Throwable t) {
+            LogUtil.error("Failed to remove the end of tick injection", t);
+        }
+        uninject = null;
     }
 }

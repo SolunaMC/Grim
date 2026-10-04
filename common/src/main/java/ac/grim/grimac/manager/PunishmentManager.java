@@ -57,52 +57,65 @@ public class PunishmentManager implements ConfigReloadable {
                 check.setEnabled(false);
             }
 
-            for (Object s : punish) {
-                LinkedHashMap<String, Object> map = (LinkedHashMap<String, Object>) s;
-
-                List<String> checks = (List<String>) map.getOrDefault("checks", new ArrayList<>());
-                List<String> commands = (List<String>) map.getOrDefault("commands", new ArrayList<>());
-                int removeViolationsAfter = (int) map.getOrDefault("remove-violations-after", 300);
-
-                List<ParsedCommand> parsed = new ArrayList<>();
-                List<AbstractCheck> checksList = new ArrayList<>();
-                List<AbstractCheck> excluded = new ArrayList<>();
-                for (String command : checks) {
-                    command = command.toLowerCase(Locale.ROOT);
-                    boolean exclude = false;
-                    if (command.startsWith("!")) {
-                        exclude = true;
-                        command = command.substring(1);
+            // Parse each group on its own, so one malformed entry doesn't disable every group after it
+            for (Object s : (List<?>) punish) {
+                try {
+                    if (!(s instanceof Map<?, ?> raw)) {
+                        LogUtil.error("Skipping invalid entry in punishments.yml (expected a group): " + s);
+                        continue;
                     }
-                    for (AbstractCheck check : player.getChecks()) { // o(n) * o(n)?
-                        if (check.getCheckName() != null &&
-                                (check.getCheckName().toLowerCase(Locale.ROOT).contains(command)
-                                        || check.getAlternativeName().toLowerCase(Locale.ROOT).contains(command))) { // Some checks have equivalent names like AntiKB and AntiKnockback
-                            if (exclude) {
-                                excluded.add(check);
-                            } else {
-                                checksList.add(check);
+                    Map<String, Object> map = (Map<String, Object>) raw;
+
+                    List<String> checks = (List<String>) map.getOrDefault("checks", new ArrayList<>());
+                    List<String> commands = (List<String>) map.getOrDefault("commands", new ArrayList<>());
+                    int removeViolationsAfter = ((Number) map.getOrDefault("remove-violations-after", 300)).intValue();
+
+                    List<ParsedCommand> parsed = new ArrayList<>();
+                    List<AbstractCheck> checksList = new ArrayList<>();
+                    List<AbstractCheck> excluded = new ArrayList<>();
+                    for (String command : checks) {
+                        command = command.toLowerCase(Locale.ROOT);
+                        boolean exclude = false;
+                        if (command.startsWith("!")) {
+                            exclude = true;
+                            command = command.substring(1);
+                        }
+                        for (AbstractCheck check : player.getChecks()) { // o(n) * o(n)?
+                            if (check.getCheckName() != null &&
+                                    (check.getCheckName().toLowerCase(Locale.ROOT).contains(command)
+                                            || check.getAlternativeName().toLowerCase(Locale.ROOT).contains(command))) { // Some checks have equivalent names like AntiKB and AntiKnockback
+                                if (exclude) {
+                                    excluded.add(check);
+                                } else {
+                                    checksList.add(check);
+                                }
                             }
                         }
+                        for (AbstractCheck check : excluded) checksList.remove(check);
                     }
-                    for (AbstractCheck check : excluded) checksList.remove(check);
+
+                    for (String command : commands) {
+                        try {
+                            String firstNum = command.substring(0, command.indexOf(":"));
+                            String secondNum = command.substring(command.indexOf(":"), command.indexOf(" "));
+
+                            int threshold = Integer.parseInt(firstNum);
+                            int interval = Integer.parseInt(secondNum.substring(1));
+                            String commandString = command.substring(command.indexOf(" ") + 1);
+
+                            parsed.add(new ParsedCommand(threshold, interval, commandString));
+                        } catch (RuntimeException e) {
+                            LogUtil.error("Skipping invalid punishment command in punishments.yml (expected \"<threshold>:<interval> <command>\"): " + command);
+                        }
+                    }
+
+                    for (AbstractCheck check : checksList) {
+                        check.setEnabled(true);
+                    }
+                    groups.add(new PunishGroup(checksList, parsed, removeViolationsAfter * 1000));
+                } catch (RuntimeException e) {
+                    LogUtil.error("Skipping invalid punishment group in punishments.yml: " + s, e);
                 }
-                for (AbstractCheck check : checksList) {
-                    check.setEnabled(true);
-                }
-
-                for (String command : commands) {
-                    String firstNum = command.substring(0, command.indexOf(":"));
-                    String secondNum = command.substring(command.indexOf(":"), command.indexOf(" "));
-
-                    int threshold = Integer.parseInt(firstNum);
-                    int interval = Integer.parseInt(secondNum.substring(1));
-                    String commandString = command.substring(command.indexOf(" ") + 1);
-
-                    parsed.add(new ParsedCommand(threshold, interval, commandString));
-                }
-
-                groups.add(new PunishGroup(checksList, parsed, removeViolationsAfter * 1000));
             }
         } catch (Exception e) {
             LogUtil.error("Error while loading punishments.yml! This is likely your fault!", e);

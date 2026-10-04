@@ -24,9 +24,10 @@ public class ComplexCollisionBox implements CollisionBox {
     }
 
     public boolean add(SimpleCollisionBox collisionBox) {
+        if (currentLength >= boxes.length) return false;
         boxes[currentLength] = collisionBox;
         currentLength++;
-        return currentLength <= boxes.length;
+        return true;
     }
 
     @Override

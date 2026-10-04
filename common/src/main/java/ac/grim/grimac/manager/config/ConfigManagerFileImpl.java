@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -123,7 +124,7 @@ public class ConfigManagerFileImpl implements ConfigManager, BasicReloadable {
         File config = new File(GrimAPI.INSTANCE.getGrimPlugin().getDataFolder(), "config.yml");
         if (config.exists()) {
             try {
-                String configString = new String(Files.readAllBytes(config.toPath()));
+                String configString = new String(Files.readAllBytes(config.toPath()), StandardCharsets.UTF_8);
 
                 int configVersion = configString.indexOf("config-version: ");
 
@@ -135,7 +136,7 @@ public class ConfigManagerFileImpl implements ConfigManager, BasicReloadable {
                     configVersion = Integer.parseInt(configStringVersion);
                     // TODO: Do we have to hardcode this?
                     configString = configString.replaceAll("config-version: " + configStringVersion, "config-version: 9");
-                    Files.write(config.toPath(), configString.getBytes());
+                    Files.write(config.toPath(), configString.getBytes(StandardCharsets.UTF_8));
 
                     upgradeModernConfig(config, configString, configVersion);
                 } else {
@@ -188,7 +189,7 @@ public class ConfigManagerFileImpl implements ConfigManager, BasicReloadable {
                 "# How long should players have until we keep them for timing out? Default = 2 minutes\n" +
                 "max-ping: 120";
 
-        Files.write(config.toPath(), configString.getBytes());
+        Files.write(config.toPath(), configString.getBytes(StandardCharsets.UTF_8));
     }
 
     // TODO: Write conversion for this... I'm having issues with windows new lines
@@ -197,7 +198,7 @@ public class ConfigManagerFileImpl implements ConfigManager, BasicReloadable {
         String configString;
         if (config.exists()) {
             try {
-                configString = new String(Files.readAllBytes(config.toPath()));
+                configString = new String(Files.readAllBytes(config.toPath()), StandardCharsets.UTF_8);
 
                 // If it works, it isn't stupid.  Only replace it if it exactly matches the default config.
                 int commentIndex = configString.indexOf("  # As of 2.2.2 these are just placeholders, there are no Killaura/Aim/Autoclicker checks other than those that");
@@ -220,7 +221,7 @@ public class ConfigManagerFileImpl implements ConfigManager, BasicReloadable {
                             "      - \"20:40 [alert]\"\n";
                 }
 
-                Files.write(config.toPath(), configString.getBytes());
+                Files.write(config.toPath(), configString.getBytes(StandardCharsets.UTF_8));
             } catch (IOException ignored) {
             }
         }
@@ -229,7 +230,7 @@ public class ConfigManagerFileImpl implements ConfigManager, BasicReloadable {
     private void fixBadPacketsAndAdjustPingConfig(File config, String configString) {
         try {
             configString = configString.replaceAll("max-ping: \\d+", "max-transaction-time: 60");
-            Files.write(config.toPath(), configString.getBytes());
+            Files.write(config.toPath(), configString.getBytes(StandardCharsets.UTF_8));
         } catch (IOException ignored) {
         }
 
@@ -237,9 +238,9 @@ public class ConfigManagerFileImpl implements ConfigManager, BasicReloadable {
         String punishConfigString;
         if (punishConfig.exists()) {
             try {
-                punishConfigString = new String(Files.readAllBytes(punishConfig.toPath()));
+                punishConfigString = new String(Files.readAllBytes(punishConfig.toPath()), StandardCharsets.UTF_8);
                 punishConfigString = punishConfigString.replace("commands:", "commands:");
-                Files.write(punishConfig.toPath(), punishConfigString.getBytes());
+                Files.write(punishConfig.toPath(), punishConfigString.getBytes(StandardCharsets.UTF_8));
             } catch (IOException ignored) {
             }
         }
@@ -250,9 +251,9 @@ public class ConfigManagerFileImpl implements ConfigManager, BasicReloadable {
         String configString;
         if (config.exists()) {
             try {
-                configString = new String(Files.readAllBytes(config.toPath()));
+                configString = new String(Files.readAllBytes(config.toPath()), StandardCharsets.UTF_8);
                 configString = configString.replace("      - \"EntityControl\"\n", "      - \"EntityControl\"\n      - \"Baritone\"\n      - \"FastBreak\"\n");
-                Files.write(config.toPath(), configString.getBytes());
+                Files.write(config.toPath(), configString.getBytes(StandardCharsets.UTF_8));
             } catch (IOException ignored) {
             }
         }
@@ -261,13 +262,13 @@ public class ConfigManagerFileImpl implements ConfigManager, BasicReloadable {
     private void newOffsetNewDiscordConf(File config, String configString) throws IOException {
         configString = configString.replace("threshold: 0.0001", "threshold: 0.001"); // 1e-5 -> 1e-4 default flag level
         configString = configString.replace("threshold: 0.00001", "threshold: 0.001"); // 1e-6 -> 1e-4 antikb flag
-        Files.write(config.toPath(), configString.getBytes());
+        Files.write(config.toPath(), configString.getBytes(StandardCharsets.UTF_8));
 
         File discordFile = new File(GrimAPI.INSTANCE.getGrimPlugin().getDataFolder(), "discord.yml");
 
         if (discordFile.exists()) {
             try {
-                String discordString = new String(Files.readAllBytes(discordFile.toPath()));
+                String discordString = new String(Files.readAllBytes(discordFile.toPath()), StandardCharsets.UTF_8);
                 discordString += "\nembed-color: \"#00FFFF\"\n" +
                         "violation-content:\n" +
                         "  - \"**Player**: %player%\"\n" +
@@ -277,7 +278,7 @@ public class ConfigManagerFileImpl implements ConfigManager, BasicReloadable {
                         "  - \"**Brand**: %brand%\"\n" +
                         "  - \"**Ping**: %ping%\"\n" +
                         "  - \"**TPS**: %tps%\"\n";
-                Files.write(discordFile.toPath(), discordString.getBytes());
+                Files.write(discordFile.toPath(), discordString.getBytes(StandardCharsets.UTF_8));
             } catch (IOException ignored) {
             }
         }
@@ -292,17 +293,17 @@ public class ConfigManagerFileImpl implements ConfigManager, BasicReloadable {
         }
         configString += "\nverbose:\n" +
                 "  print-to-console: false\n";
-        Files.write(config.toPath(), configString.getBytes());
+        Files.write(config.toPath(), configString.getBytes(StandardCharsets.UTF_8));
 
         File messageFile = new File(GrimAPI.INSTANCE.getGrimPlugin().getDataFolder(), "messages.yml");
         if (messageFile.exists()) {
             try {
-                String messagesString = new String(Files.readAllBytes(messageFile.toPath()));
+                String messagesString = new String(Files.readAllBytes(messageFile.toPath()), StandardCharsets.UTF_8);
                 messagesString += "\n\nupload-log: \"%prefix% &fUploaded debug to: %url%\"\n" +
                         "upload-log-start: \"%prefix% &fUploading log... please wait\"\n" +
                         "upload-log-not-found: \"%prefix% &cUnable to find that log\"\n" +
                         "upload-log-upload-failure: \"%prefix% &cSomething went wrong while uploading this log, see console for more info\"\n";
-                Files.write(messageFile.toPath(), messagesString.getBytes());
+                Files.write(messageFile.toPath(), messagesString.getBytes(StandardCharsets.UTF_8));
             } catch (IOException ignored) {
             }
         }
@@ -311,14 +312,14 @@ public class ConfigManagerFileImpl implements ConfigManager, BasicReloadable {
     private void removeAlertsOnJoin(File config, String configString) throws IOException {
         configString = configString.replaceAll("  # Should players with grim\\.alerts permission automatically enable alerts on join\\?\r?\n  enable-on-join: (?:true|false)\r?\n", ""); // en
         configString = configString.replaceAll("  # 管理员进入时是否自动开启警告？\r?\n  enable-on-join: (?:true|false)\r?\n", ""); // zh
-        Files.write(config.toPath(), configString.getBytes());
+        Files.write(config.toPath(), configString.getBytes(StandardCharsets.UTF_8));
     }
 
     private void addPacketSpamThreshold(File config, String configString) throws IOException {
         configString += "\n# Grim sometimes cancels illegal packets such as with timer, after X packets in a second cancelled, when should\n" +
                 "# we simply kick the player? This is required as some packet limiters don't count packets cancelled by grim.\n" +
                 "packet-spam-threshold: 150\n";
-        Files.write(config.toPath(), configString.getBytes());
+        Files.write(config.toPath(), configString.getBytes(StandardCharsets.UTF_8));
     }
 
     private void newOffsetHandlingAntiKB(File config, String configString) throws IOException {
@@ -337,7 +338,7 @@ public class ConfigManagerFileImpl implements ConfigManager, BasicReloadable {
                         "  # This is to stop the player from gathering too many violations and never being able to clear them all\n" +
                         "  max-ceiling: 4"
         );
-        Files.write(config.toPath(), configString.getBytes());
+        Files.write(config.toPath(), configString.getBytes(StandardCharsets.UTF_8));
     }
 
     @Override

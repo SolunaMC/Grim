@@ -17,6 +17,8 @@ import java.util.ArrayList;
 @CheckData(name = "MultiInteractB", stableKey = "grim.multiinteract.interact_at_position_changed", description = "Sent multiple entity interaction packets with different hit positions in one tick", experimental = true)
 public class MultiInteractB extends Check implements PacketReceiveListener, PostPredictionListener {
     private static final Verbose V = Verbose.of("pos={f64}, {f64}, {f64}, lastPos={f64}, {f64}, {f64}");
+    // Deferred flags are only drained on a movement packet, don't let a client that stops sending them grow this forever
+    private static final int MAX_DEFERRED_FLAGS = 32;
 
     private final ArrayList<FlagData> flags = new ArrayList<>();
     private Vector3d lastPos;
@@ -43,7 +45,7 @@ public class MultiInteractB extends Check implements PacketReceiveListener, Post
                         player.onPacketCancel();
                     }
                 } else {
-                    flags.add(new FlagData(pos.x, pos.y, pos.z, lastPos.x, lastPos.y, lastPos.z));
+                    if (flags.size() < MAX_DEFERRED_FLAGS) flags.add(new FlagData(pos.x, pos.y, pos.z, lastPos.x, lastPos.y, lastPos.z));
                 }
             }
 

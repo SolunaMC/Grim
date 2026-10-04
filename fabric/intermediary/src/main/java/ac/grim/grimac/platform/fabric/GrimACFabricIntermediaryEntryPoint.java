@@ -21,6 +21,7 @@ public class GrimACFabricIntermediaryEntryPoint extends AbstractGrimACFabricEntr
     @Override
     protected void setPlatformLoader(GrimACFabricIntermediaryLoaderPlugin platformLoader) {
         GrimACFabricIntermediaryLoaderPlugin.LOADER = platformLoader;
+        platformLoader.configurePlatformServices();
     }
 
     @Override

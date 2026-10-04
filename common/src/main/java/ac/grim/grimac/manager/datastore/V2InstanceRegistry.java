@@ -33,6 +33,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
 final class V2InstanceRegistry {
@@ -41,6 +43,8 @@ final class V2InstanceRegistry {
     static final Backend ROUTER_SENTINEL_BACKEND = new RouterSentinelBackend();
 
     private static final int PAGE_SIZE = 512;
+    /** Upper bound for one registry read or session close; callers include shutdown and reload, which must not hang on a dead DB. */
+    private static final long AWAIT_TIMEOUT_MS = 30_000L;
 
     private final DataStore store;
     private final StorageEventHandler<ServerStartupEvent> directStartupWriter;
@@ -198,7 +202,7 @@ final class V2InstanceRegistry {
     private static <T> T await(@NotNull java.util.concurrent.CompletionStage<T> stage,
                                @NotNull String action) {
         try {
-            return stage.toCompletableFuture().get();
+            return stage.toCompletableFuture().get(AWAIT_TIMEOUT_MS, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException(action + " interrupted", e);
@@ -206,6 +210,8 @@ final class V2InstanceRegistry {
             Throwable cause = e.getCause();
             if (cause instanceof CompletionException ce && ce.getCause() != null) cause = ce.getCause();
             throw new RuntimeException(action + " failed", cause);
+        } catch (TimeoutException e) {
+            throw new RuntimeException(action + " timed out after " + AWAIT_TIMEOUT_MS + "ms", e);
         }
     }
 

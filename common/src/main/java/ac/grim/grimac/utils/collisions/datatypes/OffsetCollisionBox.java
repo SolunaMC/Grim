@@ -81,18 +81,21 @@ public class OffsetCollisionBox extends SimpleCollisionBox {
                 offsetY = ((double) ((float) (l >> 4 & 15L) / 15.0F) - 1.0) * (double) maxVerticalModelOffset;
                 offsetX = GrimMath.clamp(((double) ((float) (l & 15L) / 15.0F) - 0.5) * 0.5, -maxHorizontalModelOffset, maxHorizontalModelOffset);
                 offsetZ = GrimMath.clamp(((double) ((float) (l >> 8 & 15L) / 15.0F) - 0.5) * 0.5, -maxHorizontalModelOffset, maxHorizontalModelOffset);
-                yield super.offset(x + offsetX, offsetY, z + offsetZ);
+                yield super.offset(x + offsetX, y + offsetY, z + offsetZ);
             }
         };
     }
 
     public void resetBlockStateOffSet() {
-        this.minX += offsetX;
-        this.minY += offsetY;
-        this.minZ += offsetZ;
-        this.maxX += offsetX;
-        this.maxY += offsetY;
-        this.maxZ += offsetZ;
+        this.minX -= offsetX;
+        this.minY -= offsetY;
+        this.minZ -= offsetZ;
+        this.maxX -= offsetX;
+        this.maxY -= offsetY;
+        this.maxZ -= offsetZ;
+        this.offsetX = 0;
+        this.offsetY = 0;
+        this.offsetZ = 0;
     }
 
     public enum OffsetType {

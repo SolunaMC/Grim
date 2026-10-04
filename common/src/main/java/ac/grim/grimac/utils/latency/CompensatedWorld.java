@@ -91,6 +91,8 @@ public class CompensatedWorld implements PacketWorld {
     private boolean isCurrentlyPredicting = false;
     public boolean isRaining = false;
 
+    // ViaBackwards strips every block below y=0 for clients <= 1.16.4
+    @Getter
     private final boolean noNegativeBlocks;
 
     public CompensatedWorld(GrimPlayer player) {
@@ -394,7 +396,7 @@ public class CompensatedWorld implements PacketWorld {
 
             BlockFace direction;
             if (data.entity == null) {
-                WrappedBlockState state = getBlock(data.blockPos.getX(), data.blockPos.getY(), data.blockPos.getZ());
+                WrappedBlockState state = getBlock(data.blockPos.getX(), data.blockPos.getY(), data.blockPos.getZ(), false);
                 direction = state.getFacing();
             } else {
                 direction = ((PacketEntityShulker) data.entity).facing.getOppositeFace();
@@ -417,7 +419,7 @@ public class CompensatedWorld implements PacketWorld {
                 modZ = Math.max(modZ, Math.abs(direction.getModZ() * 0.51D));
 
                 playerBox.expandMax(modX, modY, modZ);
-                playerBox.expandMin(modX, modY, modZ);
+                playerBox.expandMin(-modX, -modY, -modZ);
 
                 player.uncertaintyHandler.isSteppingNearShulker = true;
             }
@@ -442,7 +444,7 @@ public class CompensatedWorld implements PacketWorld {
         // Remove if a shulker is not in this block position anymore
         openShulkerBoxes.removeIf(box -> {
             if (box.blockPos != null) { // Block is no longer valid
-                return !Materials.isShulker(getBlock(box.blockPos).getType());
+                return !Materials.isShulker(getBlock(box.blockPos.x, box.blockPos.y, box.blockPos.z, false).getType());
             } else { // Entity is no longer valid
                 return !player.compensatedEntities.entityMap.containsValue(box.entity);
             }
@@ -454,6 +456,11 @@ public class CompensatedWorld implements PacketWorld {
     }
 
     public WrappedBlockState getBlock(int x, int y, int z) {
+        return getBlock(x, y, z, true);
+    }
+
+    // Callers may mutate the returned state, so it is cloned unless the caller only reads it
+    private WrappedBlockState getBlock(int x, int y, int z, boolean clone) {
         if (noNegativeBlocks && y < 0) return airData;
 
         try {
@@ -464,7 +471,7 @@ public class CompensatedWorld implements PacketWorld {
 
             BaseChunk chunk = column.chunks()[y >> 4];
             if (chunk != null) {
-                return chunk.get(blockVersion, x & 0xF, y & 0xF, z & 0xF);
+                return chunk.get(blockVersion, x & 0xF, y & 0xF, z & 0xF, clone);
             }
         } catch (Exception ignored) {
         }
@@ -495,7 +502,7 @@ public class CompensatedWorld implements PacketWorld {
     // Trapped chests give power but there's no packet to the client to actually apply this... ignore trapped chests
     // just like mojang did!
     public int getRawPowerAtState(BlockFace face, int x, int y, int z) {
-        WrappedBlockState block = getBlock(x, y, z);
+        WrappedBlockState block = getBlock(x, y, z, false);
 
         if (block.getType() == StateTypes.REDSTONE_BLOCK) {
             return 15;
@@ -564,7 +571,7 @@ public class CompensatedWorld implements PacketWorld {
 
     // Redstone can power blocks indirectly by directly powering a block next to the block to power
     public int getDirectSignalAtState(BlockFace face, int x, int y, int z) {
-        WrappedBlockState block = getBlock(x, y, z);
+        WrappedBlockState block = getBlock(x, y, z, false);
 
         if (block.getType() == StateTypes.DETECTOR_RAIL) { // Rails hard power block below itself
             boolean isPowered = block.hasProperty(StateValue.POWERED) && block.isPowered();
@@ -665,7 +672,7 @@ public class CompensatedWorld implements PacketWorld {
     }
 
     public StateType getBlockType(double x, double y, double z) {
-        return getBlock((int) Math.floor(x), (int) Math.floor(y), (int) Math.floor(z)).getType();
+        return getBlock((int) Math.floor(x), (int) Math.floor(y), (int) Math.floor(z), false).getType();
     }
 
     public WrappedBlockState getBlock(double x, double y, double z) {
@@ -677,7 +684,7 @@ public class CompensatedWorld implements PacketWorld {
     }
 
     public boolean isWaterSourceBlock(int x, int y, int z) {
-        WrappedBlockState bukkitBlock = getBlock(x, y, z);
+        WrappedBlockState bukkitBlock = getBlock(x, y, z, false);
         return Materials.isWaterSource(player.getClientVersion(), bukkitBlock);
     }
 
@@ -686,8 +693,8 @@ public class CompensatedWorld implements PacketWorld {
     }
 
     public float getLavaFluidLevelAt(int x, int y, int z) {
-        WrappedBlockState magicBlockState = getBlock(x, y, z);
-        WrappedBlockState magicBlockStateAbove = getBlock(x, y + 1, z);
+        WrappedBlockState magicBlockState = getBlock(x, y, z, false);
+        WrappedBlockState magicBlockStateAbove = getBlock(x, y + 1, z, false);
 
         if (magicBlockState.getType() != StateTypes.LAVA) return 0f;
         if (magicBlockStateAbove.getType() == StateTypes.LAVA) return 1f;
@@ -712,13 +719,13 @@ public class CompensatedWorld implements PacketWorld {
     }
 
     public float getWaterFluidLevelAt(int x, int y, int z) {
-        WrappedBlockState wrappedBlock = getBlock(x, y, z);
+        WrappedBlockState wrappedBlock = getBlock(x, y, z, false);
         boolean isWater = Materials.isWater(player.getClientVersion(), wrappedBlock);
 
         if (!isWater) return 0f;
 
         // If water has water above it, it's block height is 1, even if it's waterlogged
-        if (Materials.isWater(player.getClientVersion(), getBlock(x, y + 1, z))) {
+        if (Materials.isWater(player.getClientVersion(), getBlock(x, y + 1, z, false))) {
             return 1f;
         }
 

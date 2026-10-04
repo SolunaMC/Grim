@@ -21,6 +21,7 @@ public class GrimACFabricOfficialEntryPoint extends AbstractGrimACFabricEntryPoi
     @Override
     protected void setPlatformLoader(GrimACFabricOfficialLoaderPlugin platformLoader) {
         GrimACFabricOfficialLoaderPlugin.LOADER = platformLoader;
+        platformLoader.configurePlatformServices();
     }
 
     @Override

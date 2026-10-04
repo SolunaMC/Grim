@@ -109,8 +109,8 @@ public class PacketPlayerDigging extends PacketListenerAbstract {
             CheckManagerListener.handleQueuedPlaces(player, false, 0, 0, System.currentTimeMillis());
 
             if (player.packetStateData.lastSlotSelected != slot) {
-                if (player.isResetItemUsageOnSlotChange() && GrimAPI.INSTANCE.getItemResetHandler().getItemUsageHand(player.platformPlayer) == InteractionHand.MAIN_HAND) {
-                    GrimAPI.INSTANCE.getItemResetHandler().resetItemUsage(player.platformPlayer);
+                if (player.isResetItemUsageOnSlotChange()) {
+                    GrimAPI.INSTANCE.getItemResetHandler().resetItemUsage(player.platformPlayer, InteractionHand.MAIN_HAND);
                 }
 
                 boolean usingInMainHand = player.packetStateData.isSlowedByUsingItem() && player.packetStateData.itemInUseHand == InteractionHand.MAIN_HAND;

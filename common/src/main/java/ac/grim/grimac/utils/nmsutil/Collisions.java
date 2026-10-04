@@ -269,7 +269,8 @@ public final class Collisions {
         int maxBlockZ = (int) Math.floor(expandedBB.maxZ + COLLISION_EPSILON) + 1;
 
         final int minSection = player.compensatedWorld.getMinHeight() >> 4;
-        final int minBlock = minSection << 4;
+        // Consistent with CompensatedWorld#getBlock, clients <= 1.16.4 have no blocks below y=0
+        final int minBlock = player.compensatedWorld.isNoNegativeBlocks() ? Math.max(0, minSection << 4) : minSection << 4;
         final int maxBlock = player.compensatedWorld.getMaxHeight() - 1;
 
         int minChunkX = minBlockX >> 4;
@@ -725,7 +726,8 @@ public final class Collisions {
         int maxBlockZ = (int) Math.floor(checkBox.maxZ);
 
         final int minSection = player.compensatedWorld.getMinHeight() >> 4;
-        final int minBlock = minSection << 4;
+        // Consistent with CompensatedWorld#getBlock, clients <= 1.16.4 have no blocks below y=0
+        final int minBlock = player.compensatedWorld.isNoNegativeBlocks() ? Math.max(0, minSection << 4) : minSection << 4;
         final int maxBlock = player.compensatedWorld.getMaxHeight() - 1;
 
         int minChunkX = minBlockX >> 4;
@@ -790,7 +792,8 @@ public final class Collisions {
         int maxBlockZ = (int) Math.floor(checkBox.maxZ + COLLISION_EPSILON) + 1;
 
         final int minSection = player.compensatedWorld.getMinHeight() >> 4;
-        final int minBlock = minSection << 4;
+        // Consistent with CompensatedWorld#getBlock, clients <= 1.16.4 have no blocks below y=0
+        final int minBlock = player.compensatedWorld.isNoNegativeBlocks() ? Math.max(0, minSection << 4) : minSection << 4;
         final int maxBlock = player.compensatedWorld.getMaxHeight() - 1;
 
         int minChunkX = minBlockX >> 4;

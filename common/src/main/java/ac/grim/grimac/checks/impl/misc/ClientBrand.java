@@ -15,6 +15,8 @@ import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPl
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 
+import java.nio.charset.StandardCharsets;
+
 public class ClientBrand extends GrimProcessor implements PacketReceiveListener {
 
     private static final String CHANNEL = PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_13) ? "minecraft:brand" : "MC|Brand";
@@ -48,7 +50,7 @@ public class ClientBrand extends GrimProcessor implements PacketReceiveListener 
             byte[] minusLength = new byte[data.length - 1];
             System.arraycopy(data, 1, minusLength, 0, minusLength.length);
 
-            brand = new String(minusLength).replace(" (Velocity)", ""); // removes velocity's brand suffix
+            brand = new String(minusLength, StandardCharsets.UTF_8).replace(" (Velocity)", ""); // removes velocity's brand suffix
             brand = MessageUtil.stripColor(brand); // strip color codes from client brand
             if (!GrimAPI.INSTANCE.getConfigManager().isIgnoredClient(brand)) {
                 String message = GrimAPI.INSTANCE.getConfigManager().getConfig().getStringElse("client-brand-format", "%prefix% &f%player% joined using %brand%");

@@ -63,6 +63,7 @@ import ac.grim.grimac.internal.storage.verbose.VerboseRegistry;
 import ac.grim.grimac.internal.storage.verbose.VerboseRegistryImpl;
 import ac.grim.grimac.manager.init.start.StartableInitable;
 import ac.grim.grimac.manager.init.stop.StoppableInitable;
+import ac.grim.grimac.player.GrimPlayer;
 import com.mongodb.client.MongoDatabase;
 import lombok.Getter;
 import org.bson.BsonBinarySubType;
@@ -109,35 +110,43 @@ public final class DataStoreLifecycle implements StartableInitable, StoppableIni
     private final Logger logger;
     private final BackendRegistry backendRegistry;
 
-    private DataStoreConfig config;
-    private DataStoreImpl dataStore;
-    private CheckRegistry checkRegistry;
-    private VerboseRegistry verboseRegistry;
-    private HistoryServiceImpl historyService;
+    private static final long RETENTION_SWEEP_INITIAL_DELAY_MS = TimeUnit.MINUTES.toMillis(5);
+    private static final long RETENTION_SWEEP_INTERVAL_MS = TimeUnit.HOURS.toMillis(1);
+
+    // Read off-thread (netty, ownership heartbeat, sweeps, async reload): volatile so swaps publish safely.
+    private volatile DataStoreConfig config;
+    private volatile DataStoreImpl dataStore;
+    private volatile CheckRegistry checkRegistry;
+    private volatile VerboseRegistry verboseRegistry;
+    private volatile HistoryServiceImpl historyService;
     private PlayerIdentityService playerIdentityService;
-    private NameResolver nameResolver;
-    private ViolationSinkImpl violationSink;
+    private volatile NameResolver nameResolver;
+    private volatile ViolationSinkImpl violationSink;
     private RetentionSweeper retentionSweeper;
-    private SessionTracker sessionTracker = SessionTracker.NOOP;
-    private LiveWriteHooks liveWriteHooks = LiveWriteHooks.NOOP;
-    private PlayerToggleStore playerToggleStore = PlayerToggleStore.NOOP;
-    private V2InstanceRegistry instanceRegistry;
+    private volatile SessionTracker sessionTracker = SessionTracker.NOOP;
+    private volatile LiveWriteHooks liveWriteHooks = LiveWriteHooks.NOOP;
+    private volatile PlayerToggleStore playerToggleStore = PlayerToggleStore.NOOP;
+    private volatile V2InstanceRegistry instanceRegistry;
     private HeartbeatScheduler heartbeatScheduler;
     private OwnershipHeartbeatScheduler ownershipHeartbeatScheduler;
     private ServerOwnershipAdapter ownershipAdapter;
-    private ServerOwnershipGate ownershipGate = ServerOwnershipGate.disabled();
-    private LeaseStartupLiveness startupLiveness;
+    private volatile ServerOwnershipGate ownershipGate = ServerOwnershipGate.disabled();
+    private volatile LeaseStartupLiveness startupLiveness;
     private UUID instanceId;
-    private UUID startupId;
+    private volatile UUID startupId;
     private UUID ownershipFence;
     private long startupStartedEpochMs;
     private ScheduledExecutorService duplicateWarningExecutor;
+    /** Guards the sweep executors only; never held while waiting on storage, so the lost-ownership path can take it. */
+    private final Object sweepLock = new Object();
     private ScheduledExecutorService recoverySweepExecutor;
+    private ScheduledExecutorService retentionSweepExecutor;
+    private volatile boolean stopped;
 
     @Getter
-    private boolean enabled = true;
+    private volatile boolean enabled = true;
     @Getter
-    private boolean loaded;
+    private volatile boolean loaded;
 
     private final List<BackendV2> v2Backends = new ArrayList<>();
 
@@ -149,6 +158,11 @@ public final class DataStoreLifecycle implements StartableInitable, StoppableIni
 
     @Override
     public void start() {
+        this.stopped = false;
+        startStorage();
+    }
+
+    private void startStorage() {
         Path dataFolder = plugin.getDataFolder().toPath();
         DataStoreConfigBuilder builder = new DataStoreConfigBuilder(
                 backendRegistry,
@@ -173,6 +187,7 @@ public final class DataStoreLifecycle implements StartableInitable, StoppableIni
 
         try {
             this.loaded = buildAndStart(dataFolder);
+            if (loaded) warnAboutUnmigratedLegacyStore(dataFolder);
         } catch (FatalStorageStartupException e) {
             logger.log(Level.SEVERE, "[grim-datastore] fatal storage startup failure - shutting down server", e);
             try { close(); } catch (Exception closeEx) { logger.log(Level.FINE, "[grim-datastore] close during shutdown failed", closeEx); }
@@ -292,8 +307,12 @@ public final class DataStoreLifecycle implements StartableInitable, StoppableIni
         boolean enforceOwnership = config.ownership().enforcePersistentUuidOwnership()
                 && config.ownership().duplicatePersistentUuidAction() != DuplicatePersistentUuidAction.ALLOW_UNSAFE;
         this.ownershipGate = new ServerOwnershipGate(enforceOwnership);
+        // Without a lease the startup row's heartbeat decides, so the TTL must outlast a few missed heartbeats.
+        long staleStartupTtlMs = enforceOwnership
+                ? config.ownership().staleStartupTtlMs()
+                : Math.max(config.ownership().staleStartupTtlMs(), 3L * instanceHeartbeatIntervalMs());
         this.startupLiveness = new LeaseStartupLiveness(enforceOwnership ? ownershipAdapter : null,
-                OWNERSHIP_STORE, this::dbNowBestEffort, config.ownership().staleStartupTtlMs());
+                OWNERSHIP_STORE, this::dbNowBestEffort, staleStartupTtlMs);
         this.dataStore = new DataStoreImpl(router, config.writePath(), logger);
         this.dataStore.withV2Routes(routes);
         this.dataStore.withOwnershipGate(ownershipGate);
@@ -524,6 +543,7 @@ public final class DataStoreLifecycle implements StartableInitable, StoppableIni
         this.nameResolver = buildNameResolver(dataStore, config.nameResolutionChain(), playerIdentityRouted);
         this.violationSink = violationRouted ? new ViolationSinkImpl(dataStore) : null;
         this.retentionSweeper = new RetentionSweeper(dataStore, config.retention(), logger);
+        startRetentionSweep(retentionSweeper);
         if (sessionRouted) {
             this.sessionTracker = new SessionTrackerImpl(
                     dataStore, config.serverName(), config.session().heartbeatIntervalMs(), startupId);
@@ -665,11 +685,12 @@ public final class DataStoreLifecycle implements StartableInitable, StoppableIni
                     logger);
             heartbeatScheduler.start();
         }
+        // Template registration runs on netty threads (CheckManager.init); publish the manifest without waiting on the DB.
         if (manifestRegistry != null) {
             if (ownershipHeartbeatScheduler != null) {
-                manifestRegistry.onChange(ownershipHeartbeatScheduler::publishNowAndWait);
+                manifestRegistry.onChange(ownershipHeartbeatScheduler::publishNow);
             } else if (heartbeatScheduler != null) {
-                manifestRegistry.onChange(heartbeatScheduler::publishNowAndWait);
+                manifestRegistry.onChange(heartbeatScheduler::publishNow);
             }
         }
         startRecoverySweep();
@@ -760,21 +781,27 @@ public final class DataStoreLifecycle implements StartableInitable, StoppableIni
 
     private void startRecoverySweep() {
         if (!config.ownership().cleanupOtherServers() || instanceRegistry == null || startupId == null) return;
-        stopRecoverySweep();
-        recoverySweepExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
-            Thread t = new Thread(r, "grim-storage-recovery-sweep");
-            t.setDaemon(true);
-            return t;
-        });
-        // Boot never repairs; the first sweep runs one stale TTL plus jitter later, on this thread pool only.
-        scheduleRecoverySweep(config.ownership().staleStartupTtlMs());
+        synchronized (sweepLock) {
+            stopRecoverySweep();
+            recoverySweepExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
+                Thread t = new Thread(r, "grim-storage-recovery-sweep");
+                t.setDaemon(true);
+                return t;
+            });
+            // Boot never repairs; the first sweep runs one stale TTL plus jitter later, on this thread pool only.
+            scheduleRecoverySweep(config.ownership().staleStartupTtlMs());
+        }
     }
 
-    /** Synchronized with the stop paths so a tick never reschedules onto an executor that was just shut down. */
-    private synchronized void scheduleRecoverySweep(long baseDelayMs) {
-        if (recoverySweepExecutor == null) return;
-        long jitterMs = ThreadLocalRandom.current().nextLong(config.ownership().recoverySweepIntervalMs());
-        recoverySweepExecutor.schedule(this::runRecoverySweep, baseDelayMs + jitterMs, TimeUnit.MILLISECONDS);
+    /** Locked with the stop paths so a tick never reschedules onto an executor that was just shut down. */
+    private void scheduleRecoverySweep(long baseDelayMs) {
+        DataStoreConfig current = config;
+        if (current == null) return;
+        synchronized (sweepLock) {
+            if (recoverySweepExecutor == null) return;
+            long jitterMs = ThreadLocalRandom.current().nextLong(current.ownership().recoverySweepIntervalMs());
+            recoverySweepExecutor.schedule(this::runRecoverySweep, baseDelayMs + jitterMs, TimeUnit.MILLISECONDS);
+        }
     }
 
     private void runRecoverySweep() {
@@ -799,9 +826,43 @@ public final class DataStoreLifecycle implements StartableInitable, StoppableIni
     }
 
     private void stopRecoverySweep() {
-        if (recoverySweepExecutor != null) {
-            recoverySweepExecutor.shutdownNow();
-            recoverySweepExecutor = null;
+        synchronized (sweepLock) {
+            if (recoverySweepExecutor != null) {
+                recoverySweepExecutor.shutdownNow();
+                recoverySweepExecutor = null;
+            }
+        }
+    }
+
+    private void startRetentionSweep(@NotNull RetentionSweeper sweeper) {
+        synchronized (sweepLock) {
+            stopRetentionSweep();
+            retentionSweepExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
+                Thread t = new Thread(r, "grim-storage-retention-sweep");
+                t.setDaemon(true);
+                return t;
+            });
+            retentionSweepExecutor.scheduleWithFixedDelay(() -> runRetentionSweep(sweeper),
+                    RETENTION_SWEEP_INITIAL_DELAY_MS, RETENTION_SWEEP_INTERVAL_MS, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    private void runRetentionSweep(@NotNull RetentionSweeper sweeper) {
+        if (!ownershipGate.allowWrites()) return;
+        try {
+            sweeper.sweepOnce();
+        } catch (RuntimeException e) {
+            // A throw would cancel the fixed-delay schedule; log and sweep again next interval.
+            logger.log(Level.WARNING, "[grim-datastore] retention sweep failed", e);
+        }
+    }
+
+    private void stopRetentionSweep() {
+        synchronized (sweepLock) {
+            if (retentionSweepExecutor != null) {
+                retentionSweepExecutor.shutdownNow();
+                retentionSweepExecutor = null;
+            }
         }
     }
 
@@ -1001,6 +1062,19 @@ public final class DataStoreLifecycle implements StartableInitable, StoppableIni
         return new NameResolverChain(links);
     }
 
+    /**
+     * The v2 store has no migrator for the legacy (v0) history yet: {@link #maybeMigrateLegacy} needs a v1
+     * SqliteBackend, which the v2 storage no longer creates. Say so instead of silently ignoring old data.
+     */
+    private void warnAboutUnmigratedLegacyStore(Path dataFolder) {
+        if (config.migration().skip()) return;
+        V0Sources.V0Source source = V0Sources.detect(dataFolder, GrimAPI.INSTANCE.getConfigManager().getConfig());
+        if (source == null) return;
+        logger.warning("[grim-datastore] legacy history store found (" + source.summary() + "), but automatic"
+                + " migration into the current storage is not available in this build. The old data is left untouched."
+                + " Set datastore migration.skip to true to hide this warning.");
+    }
+
     private void maybeMigrateLegacy(Path dataFolder, SqliteBackend sqliteBackend) {
         if (sqliteBackend == null) return;
         if (config.migration().skip()) {
@@ -1035,23 +1109,47 @@ public final class DataStoreLifecycle implements StartableInitable, StoppableIni
     }
 
     @Override
-    public void stop() {
+    public synchronized void stop() {
+        stopped = true;
         close();
     }
 
+    /** Blocks on storage I/O (drain, ownership wait, pool setup); callers run it off the main thread. */
     public synchronized void reload() {
+        if (stopped) return;
         logger.info("[grim-datastore] /grim reload: tearing down datastore...");
         close();
-        start();
+        startStorage();
+        if (loaded) reopenOnlineSessions();
+    }
+
+    /** The new tracker has no state for players who stayed online; without this their sessions stay closed until they rejoin. */
+    private void reopenOnlineSessions() {
+        LiveWriteHooks hooks = liveWriteHooks;
+        long now = System.currentTimeMillis();
+        for (GrimPlayer player : GrimAPI.INSTANCE.getPlayerDataManager().getEntries()) {
+            try {
+                hooks.onJoin(player.getUniqueId(), player.getName(), now,
+                        LiveWriteHooks.clientMetaFor(player.user, player));
+            } catch (RuntimeException e) {
+                logger.log(Level.WARNING, "[grim-datastore] failed to reopen session for "
+                        + player.getName() + " after reload", e);
+            }
+        }
     }
 
     private synchronized void close() {
         stopDuplicateWarning();
         stopRecoverySweep();
+        stopRetentionSweep();
         if (!enabled) return;
         stopHeartbeatSchedulersForShutdown();
-        playerToggleStore.shutdown();
-        if (violationSink != null) violationSink.shutDown();
+        PlayerToggleStore toggles = playerToggleStore;
+        playerToggleStore = PlayerToggleStore.NOOP;
+        toggles.shutdown();
+        ViolationSinkImpl sink = violationSink;
+        violationSink = null;
+        if (sink != null) sink.shutDown();
         shutdownInstanceRegistry();
         if (dataStore != null && config != null) dataStore.flushAndClose(config.writePath().shutdownDrainTimeoutMs());
         closeOwnership("graceful");
@@ -1123,15 +1221,21 @@ public final class DataStoreLifecycle implements StartableInitable, StoppableIni
         }
     }
 
-    private synchronized void disablePersistenceAfterLostOwnership() {
+    /**
+     * Runs on the ownership heartbeat thread. Not synchronized: close() holds the lifecycle lock while it
+     * waits for that thread, so taking the lock here would deadlock a reload or shutdown racing a lost lease.
+     */
+    private void disablePersistenceAfterLostOwnership() {
         stopRecoverySweep();
+        stopRetentionSweep();
         sessionTracker = SessionTracker.NOOP;
         liveWriteHooks = LiveWriteHooks.NOOP;
+        PlayerToggleStore toggles = playerToggleStore;
         playerToggleStore = PlayerToggleStore.NOOP;
-        if (violationSink != null) {
-            violationSink.shutDown();
-            violationSink = null;
-        }
+        toggles.shutdown();
+        ViolationSinkImpl sink = violationSink;
+        violationSink = null;
+        if (sink != null) sink.shutDown();
     }
 
     public @Nullable DataStore dataStore() { return loaded ? dataStore : null; }

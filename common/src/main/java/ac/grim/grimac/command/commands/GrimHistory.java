@@ -47,9 +47,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -74,6 +77,11 @@ public class GrimHistory implements BuildableCommand {
     private static final int MAX_SUGGESTIONS = 30;
     private static final int MAX_PLAYER_SUGGESTIONS = 25;
     private static final String LATEST_ALIAS = "latest";
+
+    private static final long SUGGESTION_CACHE_TTL_MS = 10_000L;
+    private static final int SUGGESTION_CACHE_MAX = 512;
+    private static final Map<String, CachedSuggestion> SUGGESTION_CACHE = new ConcurrentHashMap<>();
+    private static final Set<String> SUGGESTION_LOADS = ConcurrentHashMap.newKeySet();
 
     @Override
     public void register(CommandManager<Sender> commandManager, CloudPlatformCommandArguments arguments) {
@@ -495,7 +503,13 @@ public class GrimHistory implements BuildableCommand {
             return;
         }
 
-        Backend backend = lifecycle.allBackendsForCommands().get(backendId);
+        Map<String, Backend> backends = lifecycle.allBackendsForCommands();
+        if (backends.isEmpty()) {
+            // The v2 storage no longer exposes v1 backends and there is no v2 repair yet.
+            sender.sendMessage(Component.text("Check-id repair is not available with the current storage in this build.", NamedTextColor.RED));
+            return;
+        }
+        Backend backend = backends.get(backendId);
         if (backend == null) {
             sender.sendMessage(Component.text("Violation backend '" + backendId + "' is not active.", NamedTextColor.RED));
             return;
@@ -707,20 +721,23 @@ public class GrimHistory implements BuildableCommand {
 
             DataStoreLifecycle dsl = GrimAPI.INSTANCE.getDataStoreLifecycle();
             if (dsl == null || !dsl.isLoaded() || dsl.dataStore() == null) return out;
-            try {
-                Page<PlayerIdentity> page = dsl.dataStore().query(
-                                Categories.PLAYER_IDENTITY,
-                                Queries.listPlayersByNamePrefix(partialLower, MAX_PLAYER_SUGGESTIONS))
-                        .toCompletableFuture().get(1, TimeUnit.SECONDS);
-                for (PlayerIdentity id : page.items()) {
-                    if (id.currentName() == null) continue;
-                    if (seen.add(id.currentName().toLowerCase(Locale.ROOT))) {
-                        out.add(Suggestion.suggestion(id.currentName()));
-                        if (out.size() >= MAX_PLAYER_SUGGESTIONS) return out;
-                    }
+            List<String> names = cachedLookup("names:" + partialLower, () -> dsl.dataStore().query(
+                            Categories.PLAYER_IDENTITY,
+                            Queries.listPlayersByNamePrefix(partialLower, MAX_PLAYER_SUGGESTIONS))
+                    .thenApply(page -> {
+                        List<String> found = new ArrayList<>();
+                        for (PlayerIdentity id : page.items()) {
+                            if (id.currentName() != null) found.add(id.currentName());
+                        }
+                        return found;
+                    }));
+            // Not cached yet: the online-only list stands until the lookup lands.
+            if (names == null) return out;
+            for (String name : names) {
+                if (seen.add(name.toLowerCase(Locale.ROOT))) {
+                    out.add(Suggestion.suggestion(name));
+                    if (out.size() >= MAX_PLAYER_SUGGESTIONS) return out;
                 }
-            } catch (Exception e) {
-                // Datastore unavailable or timed out — online-only fallback already populated.
             }
             return out;
         });
@@ -733,15 +750,11 @@ public class GrimHistory implements BuildableCommand {
             if (uuid == null) return List.of();
             DataStoreLifecycle dsl = GrimAPI.INSTANCE.getDataStoreLifecycle();
             if (dsl == null || !dsl.isLoaded() || dsl.historyService() == null) return List.of();
-            try {
-                long total = dsl.historyService().countSessions(uuid)
-                        .toCompletableFuture().get(1, TimeUnit.SECONDS);
-                int entriesPerPage = dsl.config().history().entriesPerPage();
-                int maxPages = Math.max(1, (int) ((total + entriesPerPage - 1) / Math.max(1, entriesPerPage)));
-                return rangeSuggestions(1, Math.min(maxPages, MAX_SUGGESTIONS));
-            } catch (Exception e) {
-                return List.of();
-            }
+            Long total = cachedSessionCount(uuid, dsl.historyService());
+            if (total == null) return List.of();
+            int entriesPerPage = dsl.config().history().entriesPerPage();
+            int maxPages = Math.max(1, (int) ((total + entriesPerPage - 1) / Math.max(1, entriesPerPage)));
+            return rangeSuggestions(1, Math.min(maxPages, MAX_SUGGESTIONS));
         });
     }
 
@@ -754,17 +767,13 @@ public class GrimHistory implements BuildableCommand {
             if (dsl == null || !dsl.isLoaded() || dsl.historyService() == null) {
                 return List.of(Suggestion.suggestion(LATEST_ALIAS));
             }
-            try {
-                long total = dsl.historyService().countSessions(uuid)
-                        .toCompletableFuture().get(1, TimeUnit.SECONDS);
-                int max = (int) Math.min(total, MAX_SUGGESTIONS);
-                List<Suggestion> out = new ArrayList<>(max + 1);
-                out.add(Suggestion.suggestion(LATEST_ALIAS));
-                for (int i = 1; i <= max; i++) out.add(Suggestion.suggestion(Integer.toString(i)));
-                return out;
-            } catch (Exception e) {
-                return List.of(Suggestion.suggestion(LATEST_ALIAS));
-            }
+            Long total = cachedSessionCount(uuid, dsl.historyService());
+            if (total == null) return List.of(Suggestion.suggestion(LATEST_ALIAS));
+            int max = (int) Math.min(total, MAX_SUGGESTIONS);
+            List<Suggestion> out = new ArrayList<>(max + 1);
+            out.add(Suggestion.suggestion(LATEST_ALIAS));
+            for (int i = 1; i <= max; i++) out.add(Suggestion.suggestion(Integer.toString(i)));
+            return out;
         });
     }
 
@@ -781,34 +790,91 @@ public class GrimHistory implements BuildableCommand {
             if (dsl == null || !dsl.isLoaded() || dsl.historyService() == null) return List.of();
             String sessionRaw = ctx.getOrDefault("session", null);
             if (sessionRaw == null) return List.of();
-            try {
-                Integer ordinal = resolveSessionOrdinal(sessionRaw, uuid, dsl.historyService());
-                if (ordinal == null) return List.of();
-                SessionDetail detail;
-                if (!(dsl.historyService() instanceof ac.grim.grimac.internal.storage.history.HistoryServiceImpl impl)) {
-                    return List.of();
-                }
-                detail = impl.getSessionDetailByOrdinal(uuid, ordinal)
-                        .toCompletableFuture().get(1, TimeUnit.SECONDS);
-                if (detail == null) return List.of();
-                int entriesPerPage = dsl.config().history().entriesPerPage();
-                // Page unit depends on --detailed; without that info here, suggest
-                // the larger of the two so we never under-offer. Detailed mode
-                // paginates violations (larger count); grouped paginates buckets.
-                int rows = Math.max(detail.violations().size(), detail.buckets().size());
-                int maxPages = Math.max(1, (rows + entriesPerPage - 1) / Math.max(1, entriesPerPage));
-                return rangeSuggestions(1, Math.min(maxPages, MAX_SUGGESTIONS));
-            } catch (Exception e) {
+            if (!(dsl.historyService() instanceof ac.grim.grimac.internal.storage.history.HistoryServiceImpl impl)) {
                 return List.of();
             }
+            Integer ordinal = cachedSessionOrdinal(sessionRaw, uuid, impl);
+            if (ordinal == null) return List.of();
+            // Page unit depends on --detailed; without that info here, suggest
+            // the larger of the two so we never under-offer. Detailed mode
+            // paginates violations (larger count); grouped paginates buckets.
+            Integer rows = cachedLookup("rows:" + uuid + ":" + ordinal, () -> impl.getSessionDetailByOrdinal(uuid, ordinal)
+                    .thenApply(detail -> detail == null ? null
+                            : Math.max(detail.violations().size(), detail.buckets().size())));
+            if (rows == null) return List.of();
+            int entriesPerPage = dsl.config().history().entriesPerPage();
+            int maxPages = Math.max(1, (rows + entriesPerPage - 1) / Math.max(1, entriesPerPage));
+            return rangeSuggestions(1, Math.min(maxPages, MAX_SUGGESTIONS));
         });
+    }
+
+    /** Non-blocking twin of {@link #resolveSessionOrdinal}; null until a {@code latest} count is cached. */
+    private static @Nullable Integer cachedSessionOrdinal(String raw, UUID uuid, HistoryService history) {
+        String trimmed = raw.trim().toLowerCase(Locale.ROOT);
+        if (trimmed.equals(LATEST_ALIAS) || trimmed.equals("last") || trimmed.equals("l")) {
+            Long total = cachedSessionCount(uuid, history);
+            return total != null && total >= 1 ? (int) Math.min(Integer.MAX_VALUE, total) : null;
+        }
+        try {
+            int n = Integer.parseInt(trimmed);
+            return n >= 1 ? n : null;
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private static @Nullable Long cachedSessionCount(UUID uuid, HistoryService history) {
+        return cachedLookup("count:" + uuid, () -> history.countSessions(uuid));
     }
 
     private static @Nullable UUID resolveTargetUuid(CommandContext<Sender> ctx) {
         String target = ctx.getOrDefault("target", null);
         if (target == null) return null;
-        return resolveUuid(target, GrimAPI.INSTANCE.getDataStoreLifecycle(), null);
+        DataStoreLifecycle lifecycle = GrimAPI.INSTANCE.getDataStoreLifecycle();
+        if (lifecycle != null && lifecycle.isLoaded()) {
+            NameResolver resolver = lifecycle.nameResolver();
+            if (resolver != null) {
+                Optional<UUID> hit = cachedLookup("uuid:" + target.toLowerCase(Locale.ROOT),
+                        () -> resolver.resolveByName(target));
+                if (hit != null && hit.isPresent()) return hit.get();
+            }
+        }
+        try {
+            return UUID.fromString(target);
+        } catch (IllegalArgumentException ignored) {
+            return null;
+        }
     }
+
+    /**
+     * Tab completion runs on the main thread on most platforms, so suggestion
+     * lookups never wait on the datastore: they return the cached result (or
+     * null) at once and refresh it off-thread when missing or older than
+     * {@link #SUGGESTION_CACHE_TTL_MS}. The next keystroke sees the result.
+     */
+    @SuppressWarnings("unchecked")
+    private static <T> @Nullable T cachedLookup(String key, Supplier<CompletionStage<T>> loader) {
+        CachedSuggestion cached = SUGGESTION_CACHE.get(key);
+        if ((cached == null || System.currentTimeMillis() - cached.loadedAtMs() > SUGGESTION_CACHE_TTL_MS)
+                && SUGGESTION_LOADS.add(key)) {
+            try {
+                loader.get().whenComplete((value, err) -> {
+                    if (err == null) {
+                        if (SUGGESTION_CACHE.size() >= SUGGESTION_CACHE_MAX) SUGGESTION_CACHE.clear();
+                        SUGGESTION_CACHE.put(key, new CachedSuggestion(value, System.currentTimeMillis()));
+                    }
+                    SUGGESTION_LOADS.remove(key);
+                });
+            } catch (RuntimeException e) {
+                SUGGESTION_LOADS.remove(key);
+            }
+            // An already-completed stage fills the cache inline.
+            cached = SUGGESTION_CACHE.get(key);
+        }
+        return cached == null ? null : (T) cached.value();
+    }
+
+    private record CachedSuggestion(@Nullable Object value, long loadedAtMs) {}
 
     /**
      * Resolve history targets without platform offline-player lookups. Those

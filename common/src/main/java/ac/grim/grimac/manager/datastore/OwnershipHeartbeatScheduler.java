@@ -10,12 +10,15 @@ import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.UUID;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -102,6 +105,13 @@ final class OwnershipHeartbeatScheduler {
         }
     }
 
+    /** Queues a heartbeat without waiting for it; safe from threads that must not block on the DB. */
+    void publishNow() {
+        synchronized (lifecycleLock) {
+            if (executor != null && !lost.get()) executor.execute(this::tick);
+        }
+    }
+
     void publishNowAndWait() {
         ScheduledExecutorService current;
         synchronized (lifecycleLock) {
@@ -112,13 +122,24 @@ final class OwnershipHeartbeatScheduler {
             tick();
             return;
         }
-        Future<?> future = current.submit(this::tick);
+        Future<?> future;
         try {
-            future.get();
+            future = current.submit(this::tick);
+        } catch (RejectedExecutionException e) {
+            return; // stopped concurrently
+        }
+        try {
+            // Bounded: a hung DB call must not pin the caller (reload/shutdown) past the lease it is renewing.
+            future.get(Math.max(1_000L, leaseTtlMs), TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (ExecutionException e) {
             logger.log(Level.WARNING, "ownership heartbeat failed for startup " + startupId, e.getCause());
+        } catch (CancellationException e) {
+            // stop() dropped the queued heartbeat (lost ownership or shutdown); nothing left to publish.
+        } catch (TimeoutException e) {
+            logger.warning("[grim-datastore] ownership heartbeat for startup " + startupId
+                    + " did not finish within " + Math.max(1_000L, leaseTtlMs) + "ms; continuing without it");
         }
     }
 
@@ -129,7 +150,10 @@ final class OwnershipHeartbeatScheduler {
                 task = null;
             }
             if (executor != null) {
-                executor.shutdownNow();
+                // Cancel queued one-shot heartbeats so publishNowAndWait callers are released instead of waiting forever.
+                for (Runnable queued : executor.shutdownNow()) {
+                    if (queued instanceof Future<?> f) f.cancel(false);
+                }
                 executor = null;
                 schedulerThread = null;
             }

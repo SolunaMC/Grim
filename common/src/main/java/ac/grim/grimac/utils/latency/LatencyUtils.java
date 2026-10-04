@@ -32,16 +32,28 @@ public class LatencyUtils {
     }
 
     public void addRealTimeTask(int transaction, boolean async, Runnable runnable) {
-        if (player.lastTransactionReceived.get() >= transaction) { // If the player already responded to this transaction
-            if (async) {
-                player.runSafely(runnable);
-            } else {
-                runnable.run();
-            }
-            return;
-        }
+        // Check and insert under the same lock as handleNettySyncTransaction, otherwise a task added from another
+        // thread can miss the transaction it was meant for and only run on the next one
         synchronized (this) {
-            transactionMap.add(new IntToObjectPair<>(transaction, runnable));
+            if (player.lastTransactionReceived.get() < transaction) {
+                // Keep the list ordered by transaction, tasks added from other threads may be out of order
+                ListIterator<IntToObjectPair<Runnable>> iterator = transactionMap.listIterator(transactionMap.size());
+                while (iterator.hasPrevious()) {
+                    if (iterator.previous().first() <= transaction) {
+                        iterator.next();
+                        break;
+                    }
+                }
+                iterator.add(new IntToObjectPair<>(transaction, runnable));
+                return;
+            }
+        }
+
+        // The player already responded to this transaction
+        if (async) {
+            player.runSafely(runnable);
+        } else {
+            runnable.run();
         }
     }
 

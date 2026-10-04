@@ -69,6 +69,11 @@ public class GrimHistoryCopy implements BuildableCommand {
         }
 
         Map<String, Backend> backends = lifecycle.allBackendsForCommands();
+        if (backends.isEmpty()) {
+            // The v2 storage no longer exposes v1 backends and there is no v2 copier yet.
+            sender.sendMessage(Component.text("Copying between backends is not available with the current storage in this build.", NamedTextColor.RED));
+            return;
+        }
         Backend src = backends.get(srcId);
         Backend dst = backends.get(dstId);
         if (src == null) {

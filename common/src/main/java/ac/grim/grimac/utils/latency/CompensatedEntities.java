@@ -51,6 +51,8 @@ public class CompensatedEntities {
     public TrackerData selfTrackedEntity;
     public PacketEntitySelf self;
     private final GrimPlayer player;
+    private PacketEntity lastLookedUpEntity;
+    private int lastLookedUpEntityID;
 
     public CompensatedEntities(GrimPlayer player) {
         this.player = player;
@@ -59,9 +61,17 @@ public class CompensatedEntities {
     }
 
     public int getPacketEntityID(PacketEntity entity) {
+        if (entity == null) return Integer.MIN_VALUE;
+        // Called several times per vehicle packet with the same entity, avoid scanning the whole map each time
+        if (entity == lastLookedUpEntity && entityMap.get(lastLookedUpEntityID) == entity) {
+            return lastLookedUpEntityID;
+        }
+
         for (Map.Entry<Integer, PacketEntity> entry : entityMap.int2ObjectEntrySet()) {
             if (entry.getValue() == entity) {
-                return entry.getKey();
+                lastLookedUpEntity = entity;
+                lastLookedUpEntityID = entry.getKey();
+                return lastLookedUpEntityID;
             }
         }
         return Integer.MIN_VALUE;
@@ -412,7 +422,7 @@ public class CompensatedEntities {
         }
 
         if (entity instanceof PacketEntityHorse horse) {
-            if (PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_9_4)) {
+            if (PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_9)) {
                 int offset = 0;
 
                 if (PacketEvents.getAPI().getServerManager().getVersion().isOlderThanOrEquals(ServerVersion.V_1_9_4)) {
