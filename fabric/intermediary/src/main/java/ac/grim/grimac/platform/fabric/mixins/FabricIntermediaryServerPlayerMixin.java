@@ -1,5 +1,8 @@
 package ac.grim.grimac.platform.fabric.mixins;
 
+import ac.grim.grimac.GrimAPI;
+import ac.grim.grimac.platform.fabric.inject.FabricServerPlayerHandle;
+import ac.grim.grimac.platform.fabric.player.FabricPlatformPlayerFactory;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -9,6 +12,9 @@ import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.UUID;
 
@@ -18,6 +24,13 @@ abstract class FabricIntermediaryServerPlayerMixin extends Player {
 
     public FabricIntermediaryServerPlayerMixin(Level level, BlockPos blockPos, GameProfile gameProfile) {
         super(level, blockPos, gameProfile);
+    }
+
+    // Respawn and End exit create a new ServerPlayer; point the cached platform player at it
+    @Inject(method = "restoreFrom", at = @At("TAIL"))
+    private void onRestoreFrom(ServerPlayer oldPlayer, boolean alive, CallbackInfo ci) {
+        ((FabricPlatformPlayerFactory) GrimAPI.INSTANCE.getPlatformPlayerFactory())
+                .replaceNativePlayer(oldPlayer.getUUID(), (FabricServerPlayerHandle) (Object) this);
     }
 
     public void grim$resyncSharedFlags() {
