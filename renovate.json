@@ -158,6 +158,14 @@
         "net.kyori:**"
       ],
       "allowedVersions": "<5"
+    },
+    {
+      "description": "Kotlin-Plugin in buildSrc muss zur in Gradle eingebetteten Kotlin-Version passen; wird mit Gradle-Updates angehoben",
+      "matchPackageNames": [
+        "org.jetbrains.kotlin.plugin.serialization",
+        "org.jetbrains.kotlin.plugin.serialization:**"
+      ],
+      "enabled": false
     }
   ]
 }
