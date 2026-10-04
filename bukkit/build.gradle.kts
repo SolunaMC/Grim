@@ -54,7 +54,7 @@ val configuredLiteSharedProviderJar = providers.gradleProperty("grim.liteSharedP
 
 // PE's published Spigot artifact is thin. Its runtime jar bundles these modules,
 // with text serializers relocated into PE's own namespace.
-val liteSharedLibraries by configurations.creating {
+val liteSharedLibraries = configurations.create("liteSharedLibraries") {
     isCanBeConsumed = false
     isTransitive = false
 }

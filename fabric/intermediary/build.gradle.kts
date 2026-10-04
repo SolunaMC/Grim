@@ -1,9 +1,9 @@
 import versioning.BuildConfig
 
 @Suppress("PropertyName")
-val minecraft_version: String by project
+val minecraft_version = property("minecraft_version") as String
 @Suppress("PropertyName")
-val fabric_version: String by project
+val fabric_version = property("fabric_version") as String
 
 plugins {
     `maven-publish`

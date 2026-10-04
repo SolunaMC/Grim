@@ -6,7 +6,7 @@ plugins {
     `java-library`
 }
 
-val jijDependencies: Configuration by project.configurations.creating {
+val jijDependencies: Configuration = project.configurations.create("jijDependencies") {
     isCanBeResolved = true
     isCanBeConsumed = false
     extendsFrom(project.configurations.getByName("implementation"))
@@ -268,7 +268,7 @@ fun processDependencies(
                         ?: throw IllegalStateException("Project dependency not found: ${dep.moduleName}")
                     project.logger.debug("Including project dependency as JIJ: $projectPath")
                     project.dependencies {
-                        "include"(project.project(projectPath))
+                        "include"(project.dependencies.project(projectPath))
                     }
                     actuallyIncludedDependencies.add(depId)
                 } else {
@@ -337,8 +337,10 @@ project.afterEvaluate {
 }
 
 tasks.withType<Jar>().configureEach {
+    // Captured at configuration time: Task.project must not be used while the task runs.
+    val owner = project
     doFirst {
-        project.logger.debug("Resolving JIJ dependencies for JAR inclusion")
+        owner.logger.debug("Resolving JIJ dependencies for JAR inclusion")
         val resolvedDependencies =
             jijDependencies.resolvedConfiguration.firstLevelModuleDependencies
         val processed = mutableSetOf<String>()
@@ -352,10 +354,10 @@ tasks.withType<Jar>().configureEach {
                     processed.add(depKey)
                     val jarFile = dep.moduleArtifacts.firstOrNull()?.file
                     if (jarFile != null && jarFile.exists()) {
-                        val embeddedJars = extractEmbeddedJars(jarFile, project)
+                        val embeddedJars = extractEmbeddedJars(jarFile, owner)
                         embeddedJars.forEach { embeddedDep ->
                             allEmbeddedDependencies[embeddedDep] = jarFile
-                            project.logger.debug(
+                            owner.logger.debug(
                                 "Collected embedded dependency for JAR: {} from {}",
                                 embeddedDep,
                                 jarFile
@@ -378,11 +380,11 @@ tasks.withType<Jar>().configureEach {
                 val depId = DependencyIdentifier(dep.moduleGroup, dep.moduleName, dep.moduleVersion)
                 if (!processed.contains(depKey)) {
                     processed.add(depKey)
-                    project.logger.debug("Resolved JIJ dependency for JAR: {}", depId)
+                    owner.logger.debug("Resolved JIJ dependency for JAR: {}", depId)
 
                     val jarFile = dep.moduleArtifacts.firstOrNull()?.file
                     if (jarFile != null && jarFile.exists()) {
-                        val embeddedJars = extractEmbeddedJars(jarFile, project)
+                        val embeddedJars = extractEmbeddedJars(jarFile, owner)
                         embeddedJars.forEach { embeddedDep ->
                             allEmbeddedDependencies[embeddedDep] = jarFile
                         }
@@ -392,10 +394,10 @@ tasks.withType<Jar>().configureEach {
                             dep,
                             allEmbeddedDependencies.keys,
                             actuallyIncludedDependencies,
-                            project
+                            owner
                         )
                     ) {
-                        project.logger.debug("Including JIJ dependency in JAR: {}", depId)
+                        owner.logger.debug("Including JIJ dependency in JAR: {}", depId)
                         actuallyIncludedDependencies.add(depId)
                     }
                     logDependencies(dep.children)
