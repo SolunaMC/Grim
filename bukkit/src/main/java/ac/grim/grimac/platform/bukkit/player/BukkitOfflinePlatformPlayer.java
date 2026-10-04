@@ -31,4 +31,9 @@ public class BukkitOfflinePlatformPlayer implements OfflinePlatformPlayer {
     public boolean equals(Object o) {
         return o instanceof OfflinePlatformPlayer player && this.getUniqueId().equals(player.getUniqueId());
     }
+
+    @Override
+    public int hashCode() {
+        return this.getUniqueId().hashCode();
+    }
 }
