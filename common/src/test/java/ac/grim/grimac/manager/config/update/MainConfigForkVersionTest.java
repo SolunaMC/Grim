@@ -19,16 +19,24 @@ class MainConfigForkVersionTest {
 
     @Test
     void v11ConfigIsUpdatedTo11_1AndKeepsUserValues(@TempDir Path dir) throws Exception {
-        String bundled;
-        try (InputStream in = ConfigUpdater.class.getResourceAsStream("/config/en.yml")) {
-            bundled = new String(in.readAllBytes(), StandardCharsets.UTF_8);
-        }
+        updatesV11Config(dir, "\n");
+    }
+
+    // Windows checkouts (core.autocrlf) and configs edited on Windows use CRLF
+    @Test
+    void v11ConfigWithCrlfIsUpdated(@TempDir Path dir) throws Exception {
+        updatesV11Config(dir, "\r\n");
+    }
+
+    private static void updatesV11Config(Path dir, String lineSeparator) throws Exception {
+        String bundled = bundledEnglish();
         // Rebuild a v11 config: no exploit limits, version 11, plus a user change
         String v11 = bundled
                 .replaceAll("(?s)(    distance-to-check-if-ghostblocks: 2\\n).*?    max-command-length: 2048\\n", "$1")
                 .replace("config-version: 11.1", "config-version: 11")
                 .replace("experimental-checks: false", "experimental-checks: true");
         assertFalse(v11.contains("max-sign-length"), "fixture has no exploit limits");
+        v11 = v11.replace("\n", lineSeparator);
 
         File config = dir.resolve("config.yml").toFile();
         Files.writeString(config.toPath(), v11, StandardCharsets.UTF_8);
@@ -43,10 +51,7 @@ class MainConfigForkVersionTest {
 
     @Test
     void currentConfigIsLeftAlone(@TempDir Path dir) throws Exception {
-        String bundled;
-        try (InputStream in = ConfigUpdater.class.getResourceAsStream("/config/en.yml")) {
-            bundled = new String(in.readAllBytes(), StandardCharsets.UTF_8);
-        }
+        String bundled = bundledEnglish();
         String current = bundled.replace("experimental-checks: false", "experimental-checks: true");
         File config = dir.resolve("config.yml").toFile();
         Files.writeString(config.toPath(), current, StandardCharsets.UTF_8);
@@ -79,6 +84,13 @@ class MainConfigForkVersionTest {
                     assertTrue(content.contains("    " + key + ": "), lang + " " + key);
                 }
             }
+        }
+    }
+
+    // Normalised to LF: the resource has CRLF line endings when built from a Windows checkout
+    private static String bundledEnglish() throws Exception {
+        try (InputStream in = ConfigUpdater.class.getResourceAsStream("/config/en.yml")) {
+            return new String(in.readAllBytes(), StandardCharsets.UTF_8).replace("\r\n", "\n");
         }
     }
 }
