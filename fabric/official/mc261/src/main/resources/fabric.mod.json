@@ -4,6 +4,10 @@
   "version": "${version}",
   "name": "GrimAC mc261",
   "description": "Per-version chain participant for Minecraft 26.1+. Registers a grim26ChainLoad entrypoint so fabric-official can dispatch into 26.X-specific code once compiled against official-mapped sources.",
+  "authors": [
+    "GrimAC",
+    "M4xi2312"
+  ],
   "license": "GPLv3",
   "environment": "server",
   "entrypoints": {
