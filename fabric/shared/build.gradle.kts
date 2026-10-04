@@ -38,8 +38,8 @@ dependencies {
     compileOnly(libs.cloud.fabric)
     compileOnly(libs.luckperms)
 
-    compileOnly("org.yaml:snakeyaml:2.2")
-    compileOnly("org.slf4j:slf4j-api:2.0.17")
-    compileOnly("org.apache.logging.log4j:log4j-api:2.24.3")
+    compileOnly("org.yaml:snakeyaml:2.7")
+    compileOnly("org.slf4j:slf4j-api:2.0.20")
+    compileOnly("org.apache.logging.log4j:log4j-api:2.26.1")
     compileOnly(libs.jetbrains.annotations)
 }
