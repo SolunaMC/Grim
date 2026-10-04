@@ -90,6 +90,12 @@
       "registryUrls": [
         "https://maven.fabricmc.net/"
       ]
+    },
+    {
+      "matchPackageNames": [
+        "com.mojang:minecraft"
+      ],
+      "enabled": false
     }
   ]
 }
