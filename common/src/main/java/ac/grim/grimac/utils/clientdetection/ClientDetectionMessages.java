@@ -9,9 +9,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
+import java.util.regex.Pattern;
 
 @UtilityClass
 public class ClientDetectionMessages {
+    private static final Pattern PLACEHOLDER = Pattern.compile("%[a-zA-Z0-9_]+%");
 
     /**
      * Renders a configured message. {@code values} are inserted as plain text after
@@ -25,13 +27,15 @@ public class ClientDetectionMessages {
         if (player != null) {
             component = MessageUtil.replacePlaceholders(player, component);
         }
-        for (Map.Entry<String, String> entry : values.entrySet()) {
-            component = component.replaceText(TextReplacementConfig.builder()
-                    .matchLiteral(entry.getKey())
-                    .replacement(Component.text(entry.getValue()))
-                    .build());
-        }
-        return component;
+        if (values.isEmpty()) return component;
+        // One pass, so a value containing another placeholder isn't expanded again
+        return component.replaceText(TextReplacementConfig.builder()
+                .match(PLACEHOLDER)
+                .replacement((match, builder) -> {
+                    String value = values.get(match.group());
+                    return value == null ? builder : Component.text(value);
+                })
+                .build());
     }
 
     /** @return the detected mods joined for display, or {@code "none"} */
