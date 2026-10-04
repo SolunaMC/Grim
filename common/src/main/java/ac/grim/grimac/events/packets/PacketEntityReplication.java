@@ -331,8 +331,8 @@ public class PacketEntityReplication extends GrimProcessor implements PacketRece
                             player.packetStateData.setSlowedByUsingItem(false);
                         }
 
-                        if (player.isResetItemUsageOnItemUpdate() && hand == GrimAPI.INSTANCE.getItemResetHandler().getItemUsageHand(player.platformPlayer)) {
-                            GrimAPI.INSTANCE.getItemResetHandler().resetItemUsage(player.platformPlayer);
+                        if (player.isResetItemUsageOnItemUpdate()) {
+                            GrimAPI.INSTANCE.getItemResetHandler().resetItemUsage(player.platformPlayer, hand);
                         }
                     }
                 };
@@ -356,8 +356,8 @@ public class PacketEntityReplication extends GrimProcessor implements PacketRece
                                 player.packetStateData.setSlowedByUsingItem(false);
                             }
 
-                            if (player.isResetItemUsageOnItemUpdate() && GrimAPI.INSTANCE.getItemResetHandler().getItemUsageHand(player.platformPlayer) == InteractionHand.OFF_HAND) {
-                                GrimAPI.INSTANCE.getItemResetHandler().resetItemUsage(player.platformPlayer);
+                            if (player.isResetItemUsageOnItemUpdate()) {
+                                GrimAPI.INSTANCE.getItemResetHandler().resetItemUsage(player.platformPlayer, InteractionHand.OFF_HAND);
                             }
                         }
 
@@ -366,8 +366,8 @@ public class PacketEntityReplication extends GrimProcessor implements PacketRece
                                 player.packetStateData.setSlowedByUsingItem(false);
                             }
 
-                            if (player.isResetItemUsageOnItemUpdate() && GrimAPI.INSTANCE.getItemResetHandler().getItemUsageHand(player.platformPlayer) == InteractionHand.MAIN_HAND) {
-                                GrimAPI.INSTANCE.getItemResetHandler().resetItemUsage(player.platformPlayer);
+                            if (player.isResetItemUsageOnItemUpdate()) {
+                                GrimAPI.INSTANCE.getItemResetHandler().resetItemUsage(player.platformPlayer, InteractionHand.MAIN_HAND);
                             }
                         }
                     }

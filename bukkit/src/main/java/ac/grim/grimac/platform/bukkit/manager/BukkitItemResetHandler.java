@@ -1,21 +1,27 @@
 package ac.grim.grimac.platform.bukkit.manager;
 
+import ac.grim.grimac.GrimAPI;
+import ac.grim.grimac.platform.api.Platform;
 import ac.grim.grimac.platform.api.manager.ItemResetHandler;
 import ac.grim.grimac.platform.api.player.PlatformPlayer;
 import ac.grim.grimac.platform.bukkit.utils.reflection.PaperUtils;
+import ac.grim.grimac.utils.anticheat.LogUtil;
 import ac.grim.grimac.utils.reflection.ReflectionUtils;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.manager.server.ServerVersion;
 import com.github.retrooper.packetevents.protocol.player.InteractionHand;
+import io.github.retrooper.packetevents.util.SpigotReflectionUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -24,10 +30,20 @@ public class BukkitItemResetHandler implements ItemResetHandler {
     private static final Consumer<Player> resetItemUsage;
     private static final Predicate<Player> isUsingItem;
     private static final Function<Player, InteractionHand> getItemUsageHand;
+    // the NMS server, an Executor on 1.14+ which inbound packets are queued onto in the order they arrive
+    private static final @Nullable Executor serverExecutor;
 
     @Override
     public void resetItemUsage(@Nullable PlatformPlayer player) {
-        if (player != null) resetItemUsage.accept((Player) player.getNative());
+        if (player != null) runOnOwningThread(player, () -> resetItemUsage.accept((Player) player.getNative()));
+    }
+
+    @Override
+    public void resetItemUsage(@Nullable PlatformPlayer player, @NotNull InteractionHand hand) {
+        if (player != null) runOnOwningThread(player, () -> {
+            Player bukkitPlayer = (Player) player.getNative();
+            if (getItemUsageHand.apply(bukkitPlayer) == hand) resetItemUsage.accept(bukkitPlayer);
+        });
     }
 
     @Override
@@ -40,10 +56,43 @@ public class BukkitItemResetHandler implements ItemResetHandler {
         return player != null && isUsingItem.test((Player) player.getNative());
     }
 
+    // The entity must only be modified by the thread owning it, and the reset has to happen before the server handles
+    // any packet received after this call, otherwise it could cancel an item use the player started afterwards
+    private static void runOnOwningThread(PlatformPlayer player, Runnable task) {
+        if (GrimAPI.INSTANCE.getPlatform() == Platform.FOLIA) {
+            if (Bukkit.isOwnedByCurrentRegion((Player) player.getNative())) {
+                task.run();
+            } else {
+                // Folia handles packets through the player's entity scheduler with a delay of 1 tick, so this runs before any later packet
+                GrimAPI.INSTANCE.getScheduler().getEntityScheduler().execute(player, GrimAPI.INSTANCE.getGrimPlugin(), task, null, 1);
+            }
+        } else if (Bukkit.isPrimaryThread()) {
+            task.run();
+        } else if (serverExecutor != null) {
+            serverExecutor.execute(task);
+        } else {
+            // 1.13 and below: scheduled tasks run at the start of the tick, before the packets queued for that tick
+            GrimAPI.INSTANCE.getScheduler().getEntityScheduler().execute(player, GrimAPI.INSTANCE.getGrimPlugin(), task, null, 0);
+        }
+    }
+
     static {
         final ServerVersion version = PacketEvents.getAPI().getServerManager().getVersion();
 
         final boolean legacy = version.isOlderThanOrEquals(ServerVersion.V_1_8_8);
+
+        Executor executor = null;
+        if (GrimAPI.INSTANCE.getPlatform() != Platform.FOLIA) {
+            try {
+                if (SpigotReflectionUtil.getMinecraftServerInstance(Bukkit.getServer()) instanceof Executor e) executor = e;
+            } catch (Throwable ignored) {
+            }
+        }
+        serverExecutor = executor;
+
+        Predicate<Player> isUsingItemImpl = null;
+        Function<Player, InteractionHand> getItemUsageHandImpl = null;
+        Consumer<Player> resetItemUsageImpl = null;
 
         try {
             final Method getHandle;
@@ -63,7 +112,7 @@ public class BukkitItemResetHandler implements ItemResetHandler {
             final Class<?> clazz = getHandle.getReturnType();
 
             if (version.isNewerThanOrEquals(ServerVersion.V_1_10)) {
-                isUsingItem = Player::isHandRaised;
+                isUsingItemImpl = Player::isHandRaised;
             } else {
                 Method method = clazz.getMethod(switch (Objects.requireNonNull(nmsPackage, "nmsPackage")) {
                     case "v1_8_R3" -> "bS";
@@ -71,7 +120,7 @@ public class BukkitItemResetHandler implements ItemResetHandler {
                     case "v1_9_R2" -> "ct";
                     default -> throw new IllegalStateException("You are using an unsupported server version: " + nmsPackage + "/" + version.getReleaseName());
                 });
-                isUsingItem = player -> {
+                isUsingItemImpl = player -> {
                     try {
                         return (boolean) method.invoke(getHandle.invoke(player));
                     } catch (IllegalAccessException | InvocationTargetException e) {
@@ -81,9 +130,10 @@ public class BukkitItemResetHandler implements ItemResetHandler {
             }
 
             if (legacy) {
-                getItemUsageHand = player -> isUsingItem.test(player) ? InteractionHand.MAIN_HAND : null;
+                final Predicate<Player> usingItem = isUsingItemImpl;
+                getItemUsageHandImpl = player -> usingItem.test(player) ? InteractionHand.MAIN_HAND : null;
             } else if (PaperUtils.PAPER && version.isNewerThanOrEquals(ServerVersion.V_1_16_5)) {
-                getItemUsageHand = player -> player.isHandRaised()
+                getItemUsageHandImpl = player -> player.isHandRaised()
                         ? player.getHandRaised() == EquipmentSlot.OFF_HAND
                           ? InteractionHand.OFF_HAND
                           : InteractionHand.MAIN_HAND
@@ -114,9 +164,10 @@ public class BukkitItemResetHandler implements ItemResetHandler {
                     default -> throw new IllegalStateException("You are using an unsupported server version: " + nmsPackage + "/" + version.getReleaseName());
                 } : "getUsedItemHand");
 
-                getItemUsageHand = player -> {
+                final Predicate<Player> usingItem = isUsingItemImpl;
+                getItemUsageHandImpl = player -> {
                     try {
-                        return isUsingItem.test(player)
+                        return usingItem.test(player)
                                 ? ((Enum<?>) method.invoke(getHandle.invoke(player))).ordinal() == 0
                                   ? InteractionHand.MAIN_HAND
                                   : InteractionHand.OFF_HAND
@@ -138,7 +189,7 @@ public class BukkitItemResetHandler implements ItemResetHandler {
             }
 
             if (PaperUtils.PAPER && version.isNewerThan(ServerVersion.V_1_17)) {
-                resetItemUsage = setLivingEntityFlag == null ? LivingEntity::clearActiveItem : player -> {
+                resetItemUsageImpl = setLivingEntityFlag == null ? LivingEntity::clearActiveItem : player -> {
                     try {
                         setLivingEntityFlag.invoke(getHandle.invoke(player), 1, false);
                     } catch (IllegalAccessException | InvocationTargetException e) {
@@ -176,19 +227,20 @@ public class BukkitItemResetHandler implements ItemResetHandler {
                 } : "stopUsingItem");
 
                 if (legacy) { // 1.8.8
-                    resetItemUsage = player -> {
+                    final Predicate<Player> usingItem = isUsingItemImpl;
+                    resetItemUsageImpl = player -> {
                         try {
                             method.invoke(getHandle.invoke(player));
 
                             // in 1.8 we need to resync item usage manually,
                             // only do so if the player is using an item
-                            if (isUsingItem.test(player)) player.updateInventory();
+                            if (usingItem.test(player)) player.updateInventory();
                         } catch (IllegalAccessException | InvocationTargetException e) {
                             throw new RuntimeException(e);
                         }
                     };
                 } else if (setLivingEntityFlag == null) { // 1.9-1.18.2
-                    resetItemUsage = player -> {
+                    resetItemUsageImpl = player -> {
                         try {
                             method.invoke(getHandle.invoke(player));
                         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -196,7 +248,7 @@ public class BukkitItemResetHandler implements ItemResetHandler {
                         }
                     };
                 } else { // 1.19+
-                    resetItemUsage = player -> {
+                    resetItemUsageImpl = player -> {
                         try {
                             Object handle = getHandle.invoke(player);
                             setLivingEntityFlag.invoke(handle, 1, false);
@@ -208,7 +260,22 @@ public class BukkitItemResetHandler implements ItemResetHandler {
                 }
             }
         } catch (Throwable t) {
-            throw t instanceof RuntimeException e ? e : new RuntimeException(t);
+            // e.g. a new NMS revision we don't know the obfuscated names for yet, item usage resets are not essential
+            LogUtil.warn("Failed to set up item usage resets for " + version.getReleaseName() + ", some item usage resets will be disabled", t);
         }
+
+        if (isUsingItemImpl == null) {
+            isUsingItemImpl = version.isNewerThanOrEquals(ServerVersion.V_1_10) ? Player::isHandRaised : player -> false;
+        }
+        if (getItemUsageHandImpl == null) {
+            getItemUsageHandImpl = player -> null;
+        }
+        if (resetItemUsageImpl == null) {
+            resetItemUsageImpl = ReflectionUtils.hasMethod(LivingEntity.class, "clearActiveItem") ? LivingEntity::clearActiveItem : player -> {};
+        }
+
+        isUsingItem = isUsingItemImpl;
+        getItemUsageHand = getItemUsageHandImpl;
+        resetItemUsage = resetItemUsageImpl;
     }
 }
