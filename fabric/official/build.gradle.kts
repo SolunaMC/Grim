@@ -40,7 +40,7 @@ dependencies {
     implementation(project(":common"))
     implementation(project(":fabric:shared"))
     compileOnly(libs.packetevents.api)
-    compileOnly("org.slf4j:slf4j-api:2.0.17")
+    compileOnly("org.slf4j:slf4j-api:2.0.20")
     compileOnly("org.apache.logging.log4j:log4j-api:2.24.3")
 }
 
