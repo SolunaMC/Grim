@@ -87,12 +87,15 @@ public class OffsetCollisionBox extends SimpleCollisionBox {
     }
 
     public void resetBlockStateOffSet() {
-        this.minX += offsetX;
-        this.minY += offsetY;
-        this.minZ += offsetZ;
-        this.maxX += offsetX;
-        this.maxY += offsetY;
-        this.maxZ += offsetZ;
+        this.minX -= offsetX;
+        this.minY -= offsetY;
+        this.minZ -= offsetZ;
+        this.maxX -= offsetX;
+        this.maxY -= offsetY;
+        this.maxZ -= offsetZ;
+        this.offsetX = 0;
+        this.offsetY = 0;
+        this.offsetZ = 0;
     }
 
     public enum OffsetType {
