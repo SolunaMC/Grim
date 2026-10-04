@@ -50,6 +50,7 @@ import ac.grim.grimac.utils.nmsutil.GetBoundingBox;
 import ac.grim.grimac.utils.nmsutil.Materials;
 import ac.grim.grimac.utils.nmsutil.StuckSpeed;
 import ac.grim.grimac.utils.viaversion.ViaVersionUtil;
+import ac.grim.grimac.utils.reflection.GeyserUtil;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.manager.server.ServerVersion;
@@ -278,6 +279,10 @@ public class GrimPlayer implements GrimUser {
     // This variable is for support with test servers that want to be able to disable grim
     // Grim disabler 2022 still working!
     public boolean disableGrim;
+    // Bedrock players (only tracked with the experimental bedrock support) run in disabled mode;
+    // only checks listed in bedrock.checks may flag them, unless they also have grim.disabled
+    public final boolean bedrockPlayer;
+    public boolean disabledByPermission;
     public final @NotNull ArrayDeque<@NotNull Movement> movementThisTick = new ArrayDeque<>(8);
     public final @NotNull List<@NotNull Movement> finalMovementsThisTick = new ObjectArrayList<>();
     public final @NotNull LongSet visitedBlocks = new LongOpenHashSet();
@@ -291,6 +296,8 @@ public class GrimPlayer implements GrimUser {
     public GrimPlayer(@NotNull User user) {
         this.user = Objects.requireNonNull(user, "user");
         this.uuid = Objects.requireNonNull(user.getUUID(), "uuid");
+        this.bedrockPlayer = GeyserUtil.isBedrock(uuid);
+        this.disableGrim = bedrockPlayer;
         this.fireworks = new CompensatedFireworks(this); // Must be before checkmanager
         this.inventory = new CompensatedInventory(this);
 
@@ -644,7 +651,8 @@ public class GrimPlayer implements GrimUser {
 
                 this.noModifyPacketPermission = noModifyPacketPermission;
                 this.noSetbackPermission = noSetbackPermission;
-                this.disableGrim = disabledPermission;
+                this.disabledByPermission = disabledPermission;
+                this.disableGrim = disabledPermission || bedrockPlayer;
                 if (exemptPermission) {
                     GrimAPI.INSTANCE.getPlayerDataManager().exemptUser(user);
                 }

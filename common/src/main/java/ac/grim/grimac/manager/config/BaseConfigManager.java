@@ -21,6 +21,9 @@ public class BaseConfigManager {
     private ConfigManager config = null;
     @Getter
     private boolean printAlertsToConsole = false;
+    // Experimental: track Bedrock (Geyser/Floodgate) players instead of exempting them, see BEDROCK.md
+    @Getter
+    private volatile boolean bedrockEnabled = false;
     @Getter
     private String prefix = "&bGrim &8»";
     @Getter
@@ -69,6 +72,7 @@ public class BaseConfigManager {
         ignoredClientPatterns = List.copyOf(patterns);
 
         printAlertsToConsole = config.getBooleanElse("alerts.print-to-console", true);
+        bedrockEnabled = config.getBooleanElse("bedrock.enabled", false);
         prefix = config.getStringElse("prefix", "&bGrim &8»");
 
         webhookNotEnabled = config.getStringElse("webhook-not-enabled", "Discord webhooks are not enabled!");

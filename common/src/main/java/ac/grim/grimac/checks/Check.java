@@ -15,12 +15,17 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Supplier;
 
 // Class from https://github.com/Tecnio/AntiCheatBase/blob/master/src/main/java/me/tecnio/anticheat/check/Check.java
 @Getter
 public class Check extends GrimProcessor implements AbstractCheck {
+    // Packet-level checks that don't depend on Java movement physics
+    private static final List<String> DEFAULT_BEDROCK_CHECKS = List.of("Crash", "Exploit");
+
     private static final FlagEvent.Channel FLAG_CHANNEL = GrimAPI.INSTANCE.getEventBus().get(FlagEvent.class);
     private static final ThreadLocal<VerboseBuf> VERBOSE = ThreadLocal.withInitial(VerboseBuf::new);
 
@@ -49,6 +54,7 @@ public class Check extends GrimProcessor implements AbstractCheck {
 
     // permissions
     private boolean exemptPermission;
+    private boolean bedrockAllowed;
     private boolean noSetbackPermission;
     private boolean noModifyPacketPermission;
 
@@ -84,7 +90,7 @@ public class Check extends GrimProcessor implements AbstractCheck {
 
     public boolean shouldModifyPackets() {
         return isEnabled
-                && !player.disableGrim
+                && !disabledForPlayer()
                 && !player.noModifyPacketPermission
                 && !noModifyPacketPermission
                 && !exemptPermission;
@@ -96,6 +102,11 @@ public class Check extends GrimProcessor implements AbstractCheck {
      */
     public boolean isApplicable() {
         return true;
+    }
+
+    // Bedrock players run in disabled mode, except for the checks allowed by bedrock.checks
+    private boolean disabledForPlayer() {
+        return player.disableGrim && !(bedrockAllowed && player.bedrockPlayer && !player.disabledByPermission);
     }
 
     public final void updatePermissions() {
@@ -138,7 +149,7 @@ public class Check extends GrimProcessor implements AbstractCheck {
     }
 
     private boolean recordFlag(@NotNull Supplier<String> verbose) {
-        if (player.disableGrim || (experimental && !player.isExperimentalChecks()) || exemptPermission)
+        if (disabledForPlayer() || (experimental && !player.isExperimentalChecks()) || exemptPermission)
             return false; // Avoid calling event if disabled
 
         if (FLAG_CHANNEL.fire(player, this, verbose)) return false;
@@ -154,7 +165,7 @@ public class Check extends GrimProcessor implements AbstractCheck {
         Supplier<String> rendered = verbose.rendered();
         byte[] verboseData = verbose.data();
 
-        if (player.disableGrim || (experimental && !player.isExperimentalChecks()) || exemptPermission)
+        if (disabledForPlayer() || (experimental && !player.isExperimentalChecks()) || exemptPermission)
             return false; // Avoid calling event if disabled
 
         if (FLAG_CHANNEL.fire(player, this, rendered)) return false;
@@ -218,6 +229,16 @@ public class Check extends GrimProcessor implements AbstractCheck {
         return false;
     }
 
+    private boolean isAllowedForBedrock(@NotNull ConfigManager configuration) {
+        if (checkName == null || !configuration.getBooleanElse("bedrock.enabled", false)) return false;
+        String name = checkName.toLowerCase(Locale.ROOT);
+        for (String allowed : configuration.getStringListElse("bedrock.checks", DEFAULT_BEDROCK_CHECKS)) {
+            // Same matching as punishments.yml: "Exploit" matches ExploitA, ExploitB, ...
+            if (!allowed.isEmpty() && name.contains(allowed.toLowerCase(Locale.ROOT))) return true;
+        }
+        return false;
+    }
+
     public final void reward() {
         violations = Math.max(0, violations - decay);
     }
@@ -232,6 +253,7 @@ public class Check extends GrimProcessor implements AbstractCheck {
 
             if (setbackVL == -1) setbackVL = Double.MAX_VALUE;
         }
+        bedrockAllowed = isAllowedForBedrock(configuration);
         super.reload(configuration);
     }
 

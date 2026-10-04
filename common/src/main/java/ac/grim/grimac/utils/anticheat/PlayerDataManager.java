@@ -68,8 +68,10 @@ public class PlayerDataManager {
         if (!ChannelHelper.isOpen(user.getChannel())) return false;
 
         if (user.getUUID() != null) {
-            // Bedrock players don't have Java movement
-            if (GeyserUtil.isBedrockPlayer(user.getUUID())) {
+            // Bedrock players don't have Java movement. With the experimental bedrock support they are
+            // tracked like grim.disabled players and only the checks listed in bedrock.checks can flag.
+            boolean bedrockSupport = GrimAPI.INSTANCE.getConfigManager().isBedrockEnabled();
+            if (!bedrockSupport && GeyserUtil.isBedrock(user.getUUID())) {
                 exemptUser(user);
                 return false;
             }
@@ -77,13 +79,6 @@ public class PlayerDataManager {
             // Has exempt permission
             GrimPlayer grimPlayer = GrimAPI.INSTANCE.getPlayerDataManager().getPlayer(user);
             if (grimPlayer != null && grimPlayer.hasPermission("grim.exempt")) {
-                exemptUser(user);
-                return false;
-            }
-
-            // Geyser formatted player string
-            // This will never happen for Java players, as the first character in the 3rd group is always 4 (xxxxxxxx-xxxx-4xxx-xxxx-xxxxxxxxxxxx)
-            if (user.getUUID().toString().startsWith("00000000-0000-0000-0009")) {
                 exemptUser(user);
                 return false;
             }

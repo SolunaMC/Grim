@@ -16,4 +16,14 @@ public class GeyserUtil {
         return floodgate && FloodgateApi.getInstance().isFloodgatePlayer(uuid)
                 || geyser && Geyser.api().isBedrockPlayer(uuid);
     }
+
+    // Geyser formatted player string
+    // This will never happen for Java players, as the first character in the 3rd group is always 4 (xxxxxxxx-xxxx-4xxx-xxxx-xxxxxxxxxxxx)
+    public static boolean hasGeyserUuid(UUID uuid) {
+        return uuid.toString().startsWith("00000000-0000-0000-0009");
+    }
+
+    public static boolean isBedrock(UUID uuid) {
+        return isBedrockPlayer(uuid) || hasGeyserUuid(uuid);
+    }
 }
