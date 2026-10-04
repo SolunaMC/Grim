@@ -6,8 +6,8 @@ plugins {
     `maven-publish`
     grim.`base-conventions`
     grim.`shadow-conventions`
-    id("de.eldoria.plugin-yml.bukkit") version "0.9.0"
-    id("xyz.jpenilla.run-paper") version "3.1.0"
+    alias(libs.plugins.plugin.yml.bukkit)
+    alias(libs.plugins.run.paper)
 }
 
 repositories {
@@ -113,6 +113,12 @@ fun liteSharedProviderClassEntries(): Set<String> {
     return entries
 }
 
+
+// paper-api 26.x ships Java 25 class files, so javac must be 25 to read them.
+// The bytecode target stays at release 17 (set in base-conventions).
+java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(25))
+}
 
 dependencies {
     compileOnly(libs.paper.api)

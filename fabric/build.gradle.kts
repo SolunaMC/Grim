@@ -16,12 +16,9 @@ repositories {
         includeGroup("net.fabricmc")
         includeGroup("net.fabricmc.fabric-api")
     }
-    // PE snapshots live here; the aggregator-level include(libs.packetevents.fabric)
+    // PE releases/snapshots live here; the aggregator-level include(libs.packetevents.fabric)
     // needs this resolvable even when mavenLocalOverride is off (CI / fresh checkouts).
-    exclusive("https://repo.grim.ac/snapshots") {
-        includeGroup("ac.grim.grimac")
-        includeGroup("com.github.retrooper")
-    }
+    grimMaven()
     mavenCentral()
 }
 

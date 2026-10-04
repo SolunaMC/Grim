@@ -12,10 +12,7 @@ repositories {
         includeGroup("net.fabricmc")
         includeGroup("net.fabricmc.fabric-api")
     }
-    exclusive("https://repo.grim.ac/snapshots") {
-        includeGroup("ac.grim.grimac")
-        includeGroup("com.github.retrooper")
-    }
+    grimMaven()
     exclusive("https://jitpack.io", { mavenContent { releasesOnly() } }) {
         includeGroup("com.github.Fallen-Breath.conditional-mixin")
     }
@@ -38,8 +35,8 @@ dependencies {
     compileOnly(libs.cloud.fabric)
     compileOnly(libs.luckperms)
 
-    compileOnly("org.yaml:snakeyaml:2.7")
-    compileOnly("org.slf4j:slf4j-api:2.0.20")
-    compileOnly("org.apache.logging.log4j:log4j-api:2.26.1")
+    compileOnly(libs.snakeyaml)
+    compileOnly(libs.slf4j.api)
+    compileOnly(libs.log4j.api)
     compileOnly(libs.jetbrains.annotations)
 }

@@ -1,19 +1,18 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
+    "config:recommended",
+    "group:allNonMajor",
+    "schedule:weekly"
   ],
+  "timezone": "Europe/Berlin",
   "forkProcessing": "enabled",
-
+  "prConcurrentLimit": 3,
+  "prHourlyLimit": 2,
+  "major": {
+    "dependencyDashboardApproval": true
+  },
   "packageRules": [
-    {
-      "matchPackageNames": [
-        "io.papermc.paper:paper-api"
-      ],
-      "registryUrls": [
-        "https://repo.papermc.io/repository/maven-public/"
-      ]
-    },
     {
       "matchPackageNames": [
         "me.clip:placeholderapi"
@@ -94,6 +93,35 @@
     {
       "matchPackageNames": [
         "com.mojang:minecraft"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "GitHub Actions in einem eigenen PR bündeln (auch Majors)",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "groupName": "GitHub Actions",
+      "dependencyDashboardApproval": false
+    },
+    {
+      "description": "Keine SNAPSHOT-Versionen vorschlagen (PacketEvents, Grim, ...)",
+      "matchDatasources": [
+        "maven"
+      ],
+      "allowedVersions": "!/SNAPSHOT$/"
+    },
+    {
+      "description": "Fabric API muss zur Minecraft-Version passen (official = 26.2)",
+      "matchPackageNames": [
+        "net.fabricmc.fabric-api:fabric-api"
+      ],
+      "allowedVersions": "/\\+26\\.2$/"
+    },
+    {
+      "description": "paper-api nutzt eine dynamische Version (26.2.build.+); MC-Updates macht man von Hand",
+      "matchPackageNames": [
+        "io.papermc.paper:paper-api"
       ],
       "enabled": false
     }

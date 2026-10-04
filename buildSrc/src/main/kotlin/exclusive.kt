@@ -40,3 +40,26 @@ fun RepositoryHandler.exclusive(
         filter(filterConfig)
     }
 }
+
+/**
+ * Grim's Maven repositories (releases + snapshots), exclusive for Grim and PacketEvents.
+ * Releases are needed for stable PacketEvents builds, snapshots for dev builds.
+ */
+fun RepositoryHandler.grimMaven() {
+    val local = if (BuildConfig.mavenLocalOverride) mavenLocal() else null
+    val releases = maven("https://maven.grim.ac/public/releases") {
+        mavenContent { releasesOnly() }
+    }
+    val snapshots = maven("https://maven.grim.ac/public/snapshots") {
+        mavenContent { snapshotsOnly() }
+    }
+    val legacySnapshots = maven("https://repo.grim.ac/snapshots")
+
+    exclusiveContent {
+        forRepositories(*listOfNotNull(local, releases, snapshots, legacySnapshots).toTypedArray())
+        filter {
+            includeGroup("ac.grim.grimac")
+            includeGroup("com.github.retrooper")
+        }
+    }
+}
