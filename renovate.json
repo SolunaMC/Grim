@@ -145,6 +145,13 @@
         "me.lucko:fabric-permissions-api"
       ],
       "enabled": false
+    },
+    {
+      "description": "Netty nur innerhalb 4.1.x (die meisten unterstützten Server laufen mit 4.1)",
+      "matchPackageNames": [
+        "io.netty:**"
+      ],
+      "allowedVersions": "/^4\\.1\\./"
     }
   ]
 }
