@@ -49,6 +49,24 @@ database:
     # UPSERT 約 1 回。0 で無効。
     heartbeat-interval-ms: 30000
 
+  ownership:
+    # 同じ永続ストレージ UUID を持つ 2 台の稼働中サーバーが同じ DB に
+    # 書き込むのを防ぎます。重複した書き込み元を意図的に許容する場合にのみ
+    # 無効にしてください。
+    enforce-persistent-uuid-ownership: true
+    # 選択肢:
+    # - disable-storage: チェックは継続しますが、この起動中は DB への書き込みを無効にします。
+    # - fail-startup: 稼働中の重複 UUID があれば Grim ストレージの起動を失敗させます。
+    # - allow-unsafe: 上級者向け。所有権の強制をバイパスします。
+    duplicate-persistent-uuid-action: disable-storage
+    renew-interval-ms: 10000
+    lease-ttl-ms: 20000
+    startup-wait-ms: 20000
+    safety-margin-ms: 5000
+    stale-startup-ttl-ms: 30000
+    recovery-sweep-interval-ms: 60000
+    cleanup-other-servers: true
+
   write-path:
     # queue-capacity は正の 2 のべき乗である必要があります（リングバッファの
     # 要件）。代表値: 4096, 8192, 16384, 32768, 65536。

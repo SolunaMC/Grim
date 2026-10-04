@@ -51,6 +51,24 @@ database:
     # dışı bırakır.
     heartbeat-interval-ms: 30000
 
+  ownership:
+    # Aynı kalıcı depolama UUID'sine sahip iki çalışan sunucunun aynı DB'ye
+    # yazmasını engeller. Bunu yalnızca yinelenen yazıcıları bilerek kabul
+    # ediyorsan kapat.
+    enforce-persistent-uuid-ownership: true
+    # Seçenekler:
+    # - disable-storage: check'ler çalışmaya devam eder ama bu açılışta DB yazımları kapatılır.
+    # - fail-startup: aktif bir yinelenen UUID varsa Grim depolama açılışını başarısız kılar.
+    # - allow-unsafe: yalnızca uzmanlar için; sahiplik denetimini atlar.
+    duplicate-persistent-uuid-action: disable-storage
+    renew-interval-ms: 10000
+    lease-ttl-ms: 20000
+    startup-wait-ms: 20000
+    safety-margin-ms: 5000
+    stale-startup-ttl-ms: 30000
+    recovery-sweep-interval-ms: 60000
+    cleanup-other-servers: true
+
   write-path:
     # queue-capacity pozitif bir 2'nin kuvveti olmalıdır (ring buffer şartı).
     # Tipik değerler: 4096, 8192, 16384, 32768, 65536.

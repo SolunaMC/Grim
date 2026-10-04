@@ -51,6 +51,24 @@ database:
     # 0 deaktiviert.
     heartbeat-interval-ms: 30000
 
+  ownership:
+    # Verhindert, dass zwei laufende Server mit derselben persistenten
+    # Storage-UUID in dieselbe DB schreiben. Nur abschalten, wenn doppelte
+    # Schreiber bewusst in Kauf genommen werden.
+    enforce-persistent-uuid-ownership: true
+    # Optionen:
+    # - disable-storage: Checks laufen weiter, DB-Schreibzugriffe sind für diesen Start deaktiviert.
+    # - fail-startup: Grim-Storage-Start schlägt bei einer aktiven doppelten UUID fehl.
+    # - allow-unsafe: nur für Experten; umgeht die Ownership-Durchsetzung.
+    duplicate-persistent-uuid-action: disable-storage
+    renew-interval-ms: 10000
+    lease-ttl-ms: 20000
+    startup-wait-ms: 20000
+    safety-margin-ms: 5000
+    stale-startup-ttl-ms: 30000
+    recovery-sweep-interval-ms: 60000
+    cleanup-other-servers: true
+
   write-path:
     # queue-capacity muss eine positive Zweierpotenz sein (Ringbuffer-Anforderung).
     # Übliche Werte: 4096, 8192, 16384, 32768, 65536.

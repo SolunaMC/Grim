@@ -51,6 +51,24 @@ database:
     # 0 schakelt het uit.
     heartbeat-interval-ms: 30000
 
+  ownership:
+    # Voorkomt dat twee actieve servers met dezelfde persistente opslag-UUID
+    # naar dezelfde DB schrijven. Zet dit alleen uit als je dubbele
+    # schrijvers bewust accepteert.
+    enforce-persistent-uuid-ownership: true
+    # Opties:
+    # - disable-storage: checks blijven draaien maar DB-writes zijn uitgeschakeld voor deze start.
+    # - fail-startup: laat het opstarten van Grim-opslag mislukken bij een actieve dubbele UUID.
+    # - allow-unsafe: alleen voor experts; omzeilt de eigendomsbewaking.
+    duplicate-persistent-uuid-action: disable-storage
+    renew-interval-ms: 10000
+    lease-ttl-ms: 20000
+    startup-wait-ms: 20000
+    safety-margin-ms: 5000
+    stale-startup-ttl-ms: 30000
+    recovery-sweep-interval-ms: 60000
+    cleanup-other-servers: true
+
   write-path:
     # queue-capacity moet een positieve macht van twee zijn (vereiste van
     # de ring buffer). Typische waarden: 4096, 8192, 16384, 32768, 65536.
