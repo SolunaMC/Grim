@@ -58,6 +58,7 @@ help:
     - "&7======================"
     - "/grim alerts &f- &7Alterna noificações."
     - "/grim brands &f- &7Toggle brands"
+    - "/grim brands stats &f- &7Mostra clientes, mods e versões dos jogadores online."
     - "/grim profile <player> &f- &7Mosta as informações do jogador."
     - "/grim help &f- &7Mostra essa mensagem de ajuda."
     - "/grim debug <player> &f- &7Depura a simulação."
@@ -128,6 +129,33 @@ grim-history-detail-entry-hover: "&b%check%%description%<newline>&8@ %offset% �
 grim-history-detail-entry-hover-verbose: "<newline>&7%verbose%"
 # Formato interno por check em %checks_list% — placeholders válidos: %check_name% %count%
 grim-history-check-count: "&f%check_name%&7 x&c%count%"
+
+# === Detecção de clientes e mods ===
+client-brand:
+    # Adicionado ao client-brand-format quando mods foram detectados e o formato não contém %mods%
+    mods-suffix: " &7(mods: &f%mods%&7)"
+    # Adicionado ao perfil antes da última linha quando mods foram detectados
+    profile-mods-line: "&bMods: &f%mods%"
+    # /grim profile para jogadores Bedrock. %bedrock_device%, %bedrock_input%
+    bedrock-profile:
+        - "&7======================"
+        - "%prefix% &bPerfil de &f%player%"
+        - "&bJogador Bedrock &7(isento das verificações)"
+        - "&bDispositivo: &f%bedrock_device%"
+        - "&bEntrada: &f%bedrock_input%"
+        - "&7======================"
+    # Regras de cliente do config.yml. %match% é a marca, mod ou canal encontrado, %rule% o regex
+    rule-alert-format: "%prefix% &f%player% &bcorrespondeu à regra de cliente &f%rule% &7(%match%)"
+    rule-kick-message: "<red>Seu cliente ou um dos seus mods não é permitido neste servidor."
+    # /grim brands stats
+    stats:
+        header: "%prefix% &bClientes de &f%players% &bjogadores online &7(apenas jogadores online)"
+        brands: "&bNomes de cliente:"
+        mods: "&bMods detectados:"
+        versions: "&bVersões do cliente:"
+        entry: " &7- &f%name%&7: &f%count% &7(%percent%%)"
+        more: " &7... e mais &f%count%"
+        none: " &7- nenhum"
 
 # Marcadores de esquema — ver o comentário do cabeçalho em config.yml.
 config-flavor: V2

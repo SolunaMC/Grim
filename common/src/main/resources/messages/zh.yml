@@ -60,6 +60,7 @@ help:
     - "&7======================"
     - "/grim alerts &f- &7显示/隐藏 警报"
     - "/grim brands &f- &7显示/隐藏 客户端名牌"
+    - "/grim brands stats &f- &7查看在线玩家的客户端型号、模组和版本"
     - "/grim profile <player> &f- &7查看玩家信息"
     - "/grim help &f- &7查看此帮助消息"
     - "/grim debug <player> &f- &7开发者预测输出"
@@ -125,6 +126,33 @@ grim-history-detail-entry-hover: "&b%check%%description%<newline>&8@ %offset% �
 grim-history-detail-entry-hover-verbose: "<newline>&7%verbose%"
 # %checks_list% 中每个检查项的内部格式 — 可用占位符: %check_name% %count%
 grim-history-check-count: "&f%check_name%&7 x&c%count%"
+
+# === 客户端和模组检测 ===
+client-brand:
+    # 检测到模组且 client-brand-format 中没有 %mods% 时，追加到其末尾
+    mods-suffix: " &7(模组: &f%mods%&7)"
+    # 检测到模组时，添加到玩家信息的最后一行之前
+    profile-mods-line: "&b模组: &f%mods%"
+    # 基岩版玩家的 /grim profile。%bedrock_device%, %bedrock_input%
+    bedrock-profile:
+        - "&7======================"
+        - "%prefix% &f%player% &b 的信息"
+        - "&b基岩版玩家 &7(不受检查)"
+        - "&b设备: &f%bedrock_device%"
+        - "&b输入方式: &f%bedrock_input%"
+        - "&7======================"
+    # 来自 config.yml 的客户端规则。%match% 为匹配到的客户端型号、模组或频道，%rule% 为正则表达式
+    rule-alert-format: "%prefix% &f%player% &b匹配了客户端规则 &f%rule% &7(%match%)"
+    rule-kick-message: "<red>你的客户端或你的某个模组不允许在本服务器使用。"
+    # /grim brands stats
+    stats:
+        header: "%prefix% &f%players% &b名在线玩家的客户端 &7(仅统计在线玩家)"
+        brands: "&b客户端型号:"
+        mods: "&b检测到的模组:"
+        versions: "&b客户端版本:"
+        entry: " &7- &f%name%&7: &f%count% &7(%percent%%)"
+        more: " &7... 以及另外 &f%count% &7个"
+        none: " &7- 无"
 
 # 模式标记 — 参见 config.yml 顶部的注释。
 config-flavor: V2

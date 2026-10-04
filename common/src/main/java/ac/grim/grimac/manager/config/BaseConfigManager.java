@@ -2,6 +2,7 @@ package ac.grim.grimac.manager.config;
 
 import ac.grim.grimac.api.config.ConfigManager;
 import ac.grim.grimac.utils.anticheat.LogUtil;
+import ac.grim.grimac.utils.clientdetection.ClientDetectionSettings;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -17,6 +18,9 @@ public class BaseConfigManager {
 
     // Replaced as a whole on reload: netty threads iterate it in isIgnoredClient
     private volatile List<Pattern> ignoredClientPatterns = List.of();
+    // Replaced as a whole on reload: netty threads read it while handling plugin messages
+    @Getter
+    private volatile ClientDetectionSettings clientDetection = ClientDetectionSettings.DEFAULT;
     @Getter
     private ConfigManager config = null;
     @Getter
@@ -70,6 +74,7 @@ public class BaseConfigManager {
             }
         }
         ignoredClientPatterns = List.copyOf(patterns);
+        clientDetection = ClientDetectionSettings.load(config);
 
         printAlertsToConsole = config.getBooleanElse("alerts.print-to-console", true);
         bedrockEnabled = config.getBooleanElse("bedrock.enabled", false);

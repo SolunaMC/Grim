@@ -32,6 +32,38 @@ client-brand:
     # Grim will blacklist specific Forge versions which include built-in Reach hacks (Forge 1.18.2 to 1.19.3).
     # Setting this option to false will allow said clients to connect to the server. Disable this at your own risk.
     disconnect-blacklisted-forge-versions: true
+    # Моды определяются по каналам плагинов, которые регистрирует клиент. Чисто клиентские моды (Freecam,
+    # Sodium, большинство читов) ничего не регистрируют и не могут быть обнаружены. Считайте обнаружения подсказками, а не доказательствами.
+    # Подробности и встроенные сигнатуры: docs/CLIENT-DETECTION.md на GitHub
+    # Собственные сигнатуры, "regex -> название", проверяются в дополнение к встроенным
+    mod-signatures: []
+    #  - "^mymod: -> My Mod"
+    # Сколько миллисекунд уведомление о бренде ждёт после входа, чтобы можно было перечислить моды, зарегистрированные позже.
+    # 0 отправляет его сразу
+    notification-delay-ms: 1000
+    # Правила для брендов или модов. Каждое правило срабатывает один раз за сессию игрока.
+    #   regex:   регулярное выражение Java
+    #   type:    brand (бренд клиента) или mod (названия обнаруженных модов и исходные названия каналов)
+    #   action:  alert (сообщение персоналу) или kick
+    #   message: необязательно, заменяет rule-alert-format / rule-kick-message из messages.yml
+    rules: []
+    #  - regex: "(?i)^wurst"
+    #    type: brand
+    #    action: kick
+    #  - regex: "^Xaero's Minimap$"
+    #    type: mod
+    #    action: alert
+    # Проверка подделки бренда (BadPacketsT). Срабатывает только один раз за сессию, поэтому используйте для неё группу
+    # в punishments.yml с низким порогом, см. docs/CLIENT-DETECTION.md
+    spoof-check:
+        enabled: false
+        # Клиент называет себя "vanilla", но регистрирует каналы Fabric, Forge или NeoForge
+        vanilla-with-mod-loader: true
+        # Клиент позже в сессии отправляет другой бренд. Прокси и некоторые моды отправляют его повторно
+        brand-change: false
+    stats:
+        # Максимальное число записей в каждом разделе /grim brands stats
+        max-entries: 10
 
 spectators:
     # Скрыть всех зрителей с разрешением grim.spectator, независимо от того, являются ли они активными зрителями.

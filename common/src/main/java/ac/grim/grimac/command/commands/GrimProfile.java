@@ -1,6 +1,8 @@
 package ac.grim.grimac.command.commands;
 
 import ac.grim.grimac.GrimAPI;
+import ac.grim.grimac.api.config.ConfigManager;
+import ac.grim.grimac.checks.impl.misc.ClientBrand;
 import ac.grim.grimac.command.BuildableCommand;
 import ac.grim.grimac.platform.api.command.PlayerSelector;
 import ac.grim.grimac.platform.api.manager.cloud.CloudPlatformCommandArguments;
@@ -8,14 +10,27 @@ import ac.grim.grimac.platform.api.player.PlatformPlayer;
 import ac.grim.grimac.platform.api.sender.Sender;
 import ac.grim.grimac.player.GrimPlayer;
 import ac.grim.grimac.utils.anticheat.MessageUtil;
+import ac.grim.grimac.utils.clientdetection.ClientDetectionMessages;
+import ac.grim.grimac.utils.reflection.GeyserUtil;
 import net.kyori.adventure.text.Component;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.context.CommandContext;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class GrimProfile implements BuildableCommand {
+    private static final List<String> DEFAULT_BEDROCK_PROFILE = List.of(
+            "&7======================",
+            "%prefix% &bProfile for &f%player%",
+            "&bBedrock player &7(exempt from checks)",
+            "&bDevice: &f%bedrock_device%",
+            "&bInput: &f%bedrock_input%",
+            "&7======================");
+
     @Override
     public void register(CommandManager<Sender> commandManager, CloudPlatformCommandArguments arguments) {
         commandManager.command(
@@ -39,13 +54,39 @@ public class GrimProfile implements BuildableCommand {
 
         GrimPlayer grimPlayer = GrimAPI.INSTANCE.getPlayerDataManager().getPlayer(targetPlatformPlayer.getUniqueId());
         if (grimPlayer == null) {
+            // Bedrock players are exempt from Grim, but staff still want to know their device
+            GeyserUtil.BedrockDevice device = GeyserUtil.getBedrockDevice(targetPlatformPlayer.getUniqueId());
+            if (device != null) {
+                sendBedrockProfile(sender, targetPlatformPlayer, device);
+                return;
+            }
             sender.sendMessage(MessageUtil.getParsedComponent(sender, "player-not-found", "%prefix% &cPlayer is exempt or offline!"));
             return;
         }
 
-        for (String message : GrimAPI.INSTANCE.getConfigManager().getConfig().getStringList("profile")) {
+        ConfigManager config = GrimAPI.INSTANCE.getConfigManager().getConfig();
+        List<String> profile = new ArrayList<>(config.getStringList("profile"));
+        // Only shown when something was detected, and only if the configured profile doesn't place %mods% itself
+        if (!grimPlayer.checkManager.get(ClientBrand.class).getMods().isEmpty()
+                && profile.stream().noneMatch(line -> line.contains("%mods%"))) {
+            // Before the closing separator line of the default profile
+            profile.add(Math.max(0, profile.size() - 1), config.getStringElse("client-brand.profile-mods-line", "&bMods: &f%mods%"));
+        }
+
+        for (String message : profile) {
             final Component component = MessageUtil.miniMessage(message);
             sender.sendMessage(MessageUtil.replacePlaceholders(grimPlayer, component));
+        }
+    }
+
+    private void sendBedrockProfile(Sender sender, PlatformPlayer target, GeyserUtil.BedrockDevice device) {
+        List<String> lines = GrimAPI.INSTANCE.getConfigManager().getConfig().getStringListElse("client-brand.bedrock-profile", DEFAULT_BEDROCK_PROFILE);
+        Map<String, String> values = Map.of(
+                "%player%", target.getName(),
+                "%bedrock_device%", device.os(),
+                "%bedrock_input%", device.inputMode());
+        for (String line : lines) {
+            sender.sendMessage(ClientDetectionMessages.render(null, line, values));
         }
     }
 }

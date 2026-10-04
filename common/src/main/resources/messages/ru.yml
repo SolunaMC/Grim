@@ -60,6 +60,7 @@ help:
     - "&7======================"
     - "/grim alerts &f- &7Включить/выключить оповещения"
     - "/grim brands &f- &7Toggle brands"
+    - "/grim brands stats &f- &7Бренды, моды и версии игроков онлайн"
     - "/grim profile <игрок> &f- &7Просмотреть информацию об игроке"
     - "/grim help &f- &7Просмотреть это сообщение помощи"
     - "/grim debug <игрок> &f- &7Вывод прогноза разработчика"
@@ -130,6 +131,33 @@ grim-history-detail-entry-hover: "&b%check%%description%<newline>&8@ %offset% �
 grim-history-detail-entry-hover-verbose: "<newline>&7%verbose%"
 # Внутренний формат каждой записи в %checks_list% — допустимые плейсхолдеры: %check_name% %count%
 grim-history-check-count: "&f%check_name%&7 x&c%count%"
+
+# === Обнаружение клиентов и модов ===
+client-brand:
+    # Добавляется к client-brand-format, если обнаружены моды и в формате нет %mods%
+    mods-suffix: " &7(моды: &f%mods%&7)"
+    # Добавляется в профиль перед последней строкой, если обнаружены моды
+    profile-mods-line: "&bМоды: &f%mods%"
+    # /grim profile для игроков Bedrock. %bedrock_device%, %bedrock_input%
+    bedrock-profile:
+        - "&7======================"
+        - "%prefix% &bПрофиль для &f%player%"
+        - "&bИгрок Bedrock &7(освобождён от проверок)"
+        - "&bУстройство: &f%bedrock_device%"
+        - "&bСпособ ввода: &f%bedrock_input%"
+        - "&7======================"
+    # Правила клиентов из config.yml. %match% — совпавший бренд, мод или канал, %rule% — регулярное выражение
+    rule-alert-format: "%prefix% &f%player% &bсовпал с правилом клиента &f%rule% &7(%match%)"
+    rule-kick-message: "<red>Ваш клиент или один из ваших модов запрещён на этом сервере."
+    # /grim brands stats
+    stats:
+        header: "%prefix% &bКлиенты &f%players% &bигроков онлайн &7(только игроки онлайн)"
+        brands: "&bБренды:"
+        mods: "&bОбнаруженные моды:"
+        versions: "&bВерсии клиентов:"
+        entry: " &7- &f%name%&7: &f%count% &7(%percent%%)"
+        more: " &7... и ещё &f%count%"
+        none: " &7- нет"
 
 # Маркеры схемы — см. шапку config.yml.
 config-flavor: V2
