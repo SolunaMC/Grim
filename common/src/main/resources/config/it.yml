@@ -170,6 +170,24 @@ exploit:
     allow-building-on-ghostblocks: true
     # Distanza per controllare i ghost blocks
     distance-to-check-if-ghostblocks: 2
+    # Limiti contro exploit di crash e lag, vedi docs/EXPLOIT-CHECKS.md. -1 disattiva un limite.
+    # Richieste di completamento automatico al secondo (CrashH)
+    tab-completes-per-second: 100
+    # Pacchetto creativo/clic d'inventario più grande in byte e annidamento massimo degli oggetti (CrashB, ExploitE)
+    max-item-packet-bytes: 2097152
+    max-item-nbt-depth: 128
+    # Cartelli (ExploitC): caratteri per riga, caratteri totali, rifiuta caratteri di controllo, rifiuta codici §
+    max-sign-line-length: 100
+    max-sign-length: 256
+    sign-block-control-characters: true
+    sign-block-format-codes: false
+    # Messaggi dei plugin (ExploitD): al secondo, dimensione massima in byte, canali bloccati ("nome" o "prefisso*")
+    payloads-per-second: 500
+    max-payload-bytes: 1048576
+    blocked-payload-channels: []
+    # Comandi (ChatE): al secondo e comando più lungo in caratteri
+    commands-per-second: 20
+    max-command-length: 2048
 
 # Enable logging plugins who have injected into netty on join to debug compatibility issues
 debug-pipeline-on-join: false
@@ -218,4 +236,4 @@ max-ping-firework-boost: 1000
 update-permission-ticks: -1
 
 config-flavor: V2
-config-version: 11
+config-version: 12

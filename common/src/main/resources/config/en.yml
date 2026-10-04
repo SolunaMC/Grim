@@ -192,6 +192,24 @@ exploit:
     # This setting, influenced by the boolean above defines the distance to check for ghost blocks
     # Its valid range is limited from 2 to 4
     distance-to-check-if-ghostblocks: 2
+    # Limits against crash and lag exploits, see docs/EXPLOIT-CHECKS.md. -1 turns a limit off.
+    # Tab-complete requests per second (CrashH)
+    tab-completes-per-second: 100
+    # Largest creative/inventory click packet in bytes and deepest item nesting (CrashB, ExploitE)
+    max-item-packet-bytes: 2097152
+    max-item-nbt-depth: 128
+    # Sign edits (ExploitC): characters per line, characters in total, reject control characters, reject § codes
+    max-sign-line-length: 100
+    max-sign-length: 256
+    sign-block-control-characters: true
+    sign-block-format-codes: false
+    # Plugin messages (ExploitD): per second, largest size in bytes, blocked channels ("name" or "prefix*")
+    payloads-per-second: 500
+    max-payload-bytes: 1048576
+    blocked-payload-channels: []
+    # Commands (ChatE): per second and longest command in characters
+    commands-per-second: 20
+    max-command-length: 2048
 
 # Enable logging plugins who have injected into netty on join to debug compatibility issues
 debug-pipeline-on-join: false
@@ -236,4 +254,4 @@ update-permission-ticks: -1
 #   config-version: bumped on every breaking shape change. Old configs
 #                   auto-migrate up via the bundled updater on next start.
 config-flavor: V2
-config-version: 11
+config-version: 12

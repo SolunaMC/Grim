@@ -192,6 +192,24 @@ exploit:
     # To ustawienie, zależne od powyższej wartości logicznej, określa dystans do sprawdzania ghostblocków.
     # Jego prawidłowy zakres jest ograniczony od 2 do 4.
     distance-to-check-if-ghostblocks: 2
+    # Limity przeciw exploitom powodującym crash i lag, zobacz docs/EXPLOIT-CHECKS.md. -1 wyłącza limit.
+    # Zapytania o autouzupełnianie na sekundę (CrashH)
+    tab-completes-per-second: 100
+    # Największy pakiet trybu kreatywnego/kliknięcia w ekwipunku w bajtach i najgłębsze zagnieżdżenie przedmiotu (CrashB, ExploitE)
+    max-item-packet-bytes: 2097152
+    max-item-nbt-depth: 128
+    # Tabliczki (ExploitC): znaki w linii, znaki łącznie, odrzucaj znaki sterujące, odrzucaj kody §
+    max-sign-line-length: 100
+    max-sign-length: 256
+    sign-block-control-characters: true
+    sign-block-format-codes: false
+    # Wiadomości pluginów (ExploitD): na sekundę, największy rozmiar w bajtach, zablokowane kanały ("nazwa" lub "prefiks*")
+    payloads-per-second: 500
+    max-payload-bytes: 1048576
+    blocked-payload-channels: []
+    # Komendy (ChatE): na sekundę i najdłuższa komenda w znakach
+    commands-per-second: 20
+    max-command-length: 2048
 
 # Włącz logowanie pluginów, które wstrzyknęły się do netty podczas dołączania gracza, w celu debugowania problemów z kompatybilnością.
 debug-pipeline-on-join: false
@@ -240,4 +258,4 @@ max-ping-firework-boost: 1000
 update-permission-ticks: -1
 
 config-flavor: V2
-config-version: 11
+config-version: 12

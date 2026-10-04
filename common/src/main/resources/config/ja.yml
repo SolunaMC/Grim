@@ -201,6 +201,24 @@ exploit:
     # 上記の設定に基づき、ゴーストブロックのチェック距離を定義します
     # 設定可能な範囲は2から4です
     distance-to-check-if-ghostblocks: 2
+    # クラッシュやラグを狙うエクスプロイトへの制限です。docs/EXPLOIT-CHECKS.md を参照してください。-1 で制限を無効にします。
+    # 1 秒あたりのタブ補完リクエスト数 (CrashH)
+    tab-completes-per-second: 100
+    # クリエイティブ/インベントリクリックパケットの最大バイト数とアイテムの最大入れ子の深さ (CrashB, ExploitE)
+    max-item-packet-bytes: 2097152
+    max-item-nbt-depth: 128
+    # 看板 (ExploitC): 1 行あたりの文字数、合計文字数、制御文字の拒否、§ コードの拒否
+    max-sign-line-length: 100
+    max-sign-length: 256
+    sign-block-control-characters: true
+    sign-block-format-codes: false
+    # プラグインメッセージ (ExploitD): 1 秒あたりの数、最大バイト数、ブロックするチャンネル ("name" または "prefix*")
+    payloads-per-second: 500
+    max-payload-bytes: 1048576
+    blocked-payload-channels: []
+    # コマンド (ChatE): 1 秒あたりの数と最長コマンドの文字数
+    commands-per-second: 20
+    max-command-length: 2048
 
 # Nettyに参加時にプラグインが注入された場合の互換性問題をデバッグするためにログを有効にします
 debug-pipeline-on-join: false
@@ -247,4 +265,4 @@ max-ping-firework-boost: 1000
 update-permission-ticks: -1
 
 config-flavor: V2
-config-version: 11
+config-version: 12
