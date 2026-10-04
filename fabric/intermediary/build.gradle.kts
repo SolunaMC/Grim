@@ -3,8 +3,6 @@ import versioning.BuildConfig
 @Suppress("PropertyName")
 val minecraft_version: String by project
 @Suppress("PropertyName")
-val yarn_mappings: String by project
-@Suppress("PropertyName")
 val fabric_version: String by project
 
 plugins {
@@ -54,10 +52,6 @@ allprojects {
         }
 
         grimMaven()
-
-        exclusive("https://jitpack.io", { mavenContent { releasesOnly() } }) {
-            includeGroup("com.github.Fallen-Breath.conditional-mixin")
-        }
 
         exclusive("https://repo.viaversion.com", { mavenContent { releasesOnly() } }) {
             includeGroup("com.viaversion")

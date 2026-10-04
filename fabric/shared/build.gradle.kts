@@ -13,9 +13,6 @@ repositories {
         includeGroup("net.fabricmc.fabric-api")
     }
     grimMaven()
-    exclusive("https://jitpack.io", { mavenContent { releasesOnly() } }) {
-        includeGroup("com.github.Fallen-Breath.conditional-mixin")
-    }
     exclusive("https://nexus.scarsz.me/content/repositories/releases", { mavenContent { releasesOnly() } }) {
         includeGroup("github.scarsz")
     }

@@ -59,10 +59,6 @@ allprojects {
 
         grimMaven()
 
-        exclusive("https://jitpack.io", { mavenContent { releasesOnly() } }) {
-            includeGroup("com.github.Fallen-Breath.conditional-mixin")
-        }
-
         exclusive("https://repo.viaversion.com", { mavenContent { releasesOnly() } }) {
             includeGroup("com.viaversion")
         }

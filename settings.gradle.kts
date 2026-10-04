@@ -33,7 +33,6 @@ pluginManagement {
                 }
             }
             filter {
-                includeModule("fabric-loom", "fabric-loom.gradle.plugin")
                 includeGroupByRegex("net.fabricmc.*")
             }
         }
