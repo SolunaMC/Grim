@@ -3,7 +3,7 @@ dependencies {
     mappings(loom.officialMojangMappings())
 
     modImplementation(fabricApi.module("fabric-lifecycle-events-v1", "0.42.0+1.16"))
-    modCompileOnly(libs.fabric.permissions.api)
+    modCompileOnly("me.lucko:fabric-permissions-api:0.1-SNAPSHOT")
 }
 
 loom {

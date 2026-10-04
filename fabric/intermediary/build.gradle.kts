@@ -21,7 +21,7 @@ dependencies {
     mappings(loom.officialMojangMappings())
     modImplementation(fabricApi.module("fabric-lifecycle-events-v1", fabric_version))
 
-    modCompileOnly(libs.fabric.permissions.api)
+    modCompileOnly("me.lucko:fabric-permissions-api:0.3.1")
 
     modImplementation(libs.cloud.fabric)
     modImplementation(libs.fabric.loader)
@@ -78,8 +78,13 @@ allprojects {
             includeModule("org.geysermc", "geyser-parent")
         }
 
-        // fabric-permissions-api: enforce Central so we don't accidentally check other snapshot repos
-        exclusive(mavenCentral()) { includeGroup("me.lucko") }
+        // Special logic for LuckPerms
+        if (project.name == "mc1161") {
+            exclusive("https://repo.grim.ac/snapshots") { includeGroup("me.lucko") }
+        } else {
+            // Enforce Central for LuckPerms so we don't accidentally check other snapshot repos
+            exclusive(mavenCentral()) { includeGroup("me.lucko") }
+        }
 
         mavenCentral()
     }
