@@ -152,6 +152,13 @@
         "io.netty:**"
       ],
       "allowedVersions": "/^4\\.1\\./"
+    },
+    {
+      "description": "Adventure bleibt auf 4.x, solange PacketEvents und adventure-platform-bukkit gegen 4.x gebaut sind",
+      "matchPackageNames": [
+        "net.kyori:**"
+      ],
+      "allowedVersions": "<5"
     }
   ]
 }
