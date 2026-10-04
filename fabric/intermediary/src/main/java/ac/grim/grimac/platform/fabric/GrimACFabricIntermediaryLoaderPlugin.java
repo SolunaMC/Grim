@@ -54,6 +54,10 @@ public abstract class GrimACFabricIntermediaryLoaderPlugin extends AbstractGrimA
                 fabricMessageUtil,
                 fabricConversionUtil
         );
+    }
+
+    // Every version entrypoint gets constructed, so only the selected loader may set the global services
+    public void configurePlatformServices() {
         FabricPlatformServices.configure(
                 playerFactory::getPlatformInventory,
                 playerFactory::getPlatformEntity,
