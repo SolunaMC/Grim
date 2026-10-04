@@ -5,6 +5,7 @@ import ac.grim.grimac.api.AbstractCheck;
 import ac.grim.grimac.api.GrimUser;
 import ac.grim.grimac.api.PacketWorld;
 import ac.grim.grimac.api.config.ConfigManager;
+import ac.grim.grimac.api.event.events.GrimQuitEvent;
 import ac.grim.grimac.api.handler.ResyncHandler;
 import ac.grim.grimac.checks.Check;
 import ac.grim.grimac.checks.impl.aim.processor.AimProcessor;
@@ -490,7 +491,8 @@ public class GrimPlayer implements GrimUser {
         if (user.getEncoderState() != ConnectionState.PLAY) return;
 
         // Send a packet once every 15 seconds to avoid any memory leaks
-        if (disableGrim && (System.nanoTime() - getPlayerClockAtLeast()) > 15e9) {
+        // (once the client stops answering; still send one so the clock can recover after it catches up)
+        if (disableGrim && (System.nanoTime() - getPlayerClockAtLeast()) > 15e9 && System.currentTimeMillis() - lastTransSent < 15000) {
             return;
         }
 
@@ -573,7 +575,11 @@ public class GrimPlayer implements GrimUser {
         }
 
         if (!GrimAPI.INSTANCE.getPlayerDataManager().shouldCheck(user)) {
-            GrimAPI.INSTANCE.getPlayerDataManager().remove(user);
+            // Pair the join event fired when this player was added; the player is still online, so the
+            // disconnect-only cleanup (datastore session, exemptions, alerts, spectate) is left to onDisconnect
+            if (GrimAPI.INSTANCE.getPlayerDataManager().remove(user) != null) {
+                GrimAPI.INSTANCE.getEventBus().get(GrimQuitEvent.class).fire(this);
+            }
         }
 
         if (viaPacketTracker == null && ViaVersionUtil.isAvailable) {
