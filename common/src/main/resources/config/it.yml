@@ -202,23 +202,41 @@ exploit:
     allow-building-on-ghostblocks: true
     # Distanza per controllare i ghost blocks
     distance-to-check-if-ghostblocks: 2
-    # Limiti contro exploit di crash e lag, vedi docs/EXPLOIT-CHECKS.md. -1 disattiva un limite.
-    # Richieste di completamento automatico al secondo (CrashH)
+    # Il numero massimo di richieste di completamento automatico che un giocatore può inviare al secondo
+    # I client moderni ne inviano una a ogni tasto premuto mentre si scrivono alcuni comandi
+    # Per disattivare, usa -1
     tab-completes-per-second: 100
-    # Pacchetto creativo/clic d'inventario più grande in byte e annidamento massimo degli oggetti (CrashB, ExploitE)
+    # La dimensione massima in byte di un pacchetto di clic nell'inventario o nell'inventario creativo
+    # Per disattivare, usa -1
     max-item-packet-bytes: 2097152
+    # Quanto possono essere annidati i dati di un oggetto, contando gli oggetti dentro altri oggetti come le shulker box
+    # Per disattivare, usa -1
     max-item-nbt-depth: 128
-    # Cartelli (ExploitC): caratteri per riga, caratteri totali, rifiuta caratteri di controllo, rifiuta codici §
+    # La lunghezza massima di una singola riga di un cartello e di tutte le righe insieme
+    # I client 1.8 non vengono controllati, poiché inviano le righe dei cartelli come testo JSON
+    # Per disattivare, usa -1
     max-sign-line-length: 100
     max-sign-length: 256
+    # Annullare le modifiche ai cartelli con caratteri di controllo? I client vanilla non possono digitarli
     sign-block-control-characters: true
+    # Annullare le modifiche ai cartelli con codici di formattazione §?
+    # Disattivato di default, perché i plugin che usano i cartelli per l'inserimento di testo possono precompilare righe con codici §
     sign-block-format-codes: false
-    # Messaggi dei plugin (ExploitD): al secondo, dimensione massima in byte, canali bloccati ("nome" o "prefisso*")
+    # Il numero massimo di messaggi dei plugin che un giocatore può inviare al secondo
+    # Anche i proxy come BungeeCord e Velocity inviano messaggi dei plugin tramite la connessione del giocatore
+    # Per disattivare, usa -1
     payloads-per-second: 500
+    # La dimensione massima di un messaggio dei plugin in byte
+    # Per disattivare, usa -1
     max-payload-bytes: 1048576
+    # Canali dei messaggi dei plugin che i giocatori non possono usare, ad es. "examplemod:main"
+    # Una voce che termina con * blocca tutti i canali che iniziano così, ad es. "examplemod:*"
     blocked-payload-channels: []
-    # Comandi (ChatE): al secondo e comando più lungo in caratteri
+    # Il numero massimo di comandi che un giocatore può inviare al secondo
+    # Per disattivare, usa -1
     commands-per-second: 20
+    # La lunghezza massima di un comando in caratteri
+    # Per disattivare, usa -1
     max-command-length: 2048
 
 # Enable logging plugins who have injected into netty on join to debug compatibility issues

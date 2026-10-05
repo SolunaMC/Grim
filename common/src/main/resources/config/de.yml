@@ -221,23 +221,41 @@ exploit:
     # Diese Option, abhängig von der oben genannten Einstellung, definiert wie weit man nach Geisterblöcken suchen soll
     # Ihr gültiger Bereich ist von 2 bis 4 begrenzt
     distance-to-check-if-ghostblocks: 2
-    # Grenzen gegen Crash- und Lag-Exploits, siehe docs/EXPLOIT-CHECKS.md. -1 schaltet eine Grenze ab.
-    # Tab-Complete-Anfragen pro Sekunde (CrashH)
+    # Die maximale Anzahl an Tab-Complete-Anfragen, die ein Spieler pro Sekunde senden darf
+    # Moderne Clients senden bei manchen Befehlen bei jedem Tastendruck eine Anfrage
+    # Zum Deaktivieren -1 verwenden
     tab-completes-per-second: 100
-    # Größtes Creative-/Inventarklick-Paket in Bytes und tiefste Item-Verschachtelung (CrashB, ExploitE)
+    # Die maximale Größe eines Inventarklick- oder Creative-Inventar-Pakets in Bytes
+    # Zum Deaktivieren -1 verwenden
     max-item-packet-bytes: 2097152
+    # Wie tief die Daten eines Items verschachtelt sein dürfen, Items in anderen Items wie Shulkerkisten mitgezählt
+    # Zum Deaktivieren -1 verwenden
     max-item-nbt-depth: 128
-    # Schilder (ExploitC): Zeichen pro Zeile, Zeichen insgesamt, Steuerzeichen ablehnen, §-Codes ablehnen
+    # Die maximale Länge einer einzelnen Schildzeile und aller Zeilen zusammen
+    # 1.8-Clients werden nicht geprüft, da sie Schildzeilen als JSON-Text senden
+    # Zum Deaktivieren -1 verwenden
     max-sign-line-length: 100
     max-sign-length: 256
+    # Sollen Schildänderungen mit Steuerzeichen abgebrochen werden? Vanilla-Clients können diese nicht eingeben
     sign-block-control-characters: true
+    # Sollen Schildänderungen mit §-Formatierungscodes abgebrochen werden?
+    # Standardmäßig aus, da Plugins, die Schilder zur Texteingabe nutzen, Zeilen mit §-Codes vorausfüllen können
     sign-block-format-codes: false
-    # Plugin-Nachrichten (ExploitD): pro Sekunde, größte Größe in Bytes, gesperrte Channels ("name" oder "präfix*")
+    # Die maximale Anzahl an Plugin-Nachrichten, die ein Spieler pro Sekunde senden darf
+    # Proxys wie BungeeCord und Velocity senden ebenfalls Plugin-Nachrichten über die Verbindung des Spielers
+    # Zum Deaktivieren -1 verwenden
     payloads-per-second: 500
+    # Die maximale Größe einer Plugin-Nachricht in Bytes
+    # Zum Deaktivieren -1 verwenden
     max-payload-bytes: 1048576
+    # Plugin-Channels, die Spieler nicht verwenden dürfen, z. B. "examplemod:main"
+    # Ein Eintrag, der auf * endet, sperrt alle Channels, die damit beginnen, z. B. "examplemod:*"
     blocked-payload-channels: []
-    # Befehle (ChatE): pro Sekunde und längster Befehl in Zeichen
+    # Die maximale Anzahl an Befehlen, die ein Spieler pro Sekunde senden darf
+    # Zum Deaktivieren -1 verwenden
     commands-per-second: 20
+    # Die maximale Länge eines Befehls in Zeichen
+    # Zum Deaktivieren -1 verwenden
     max-command-length: 2048
 
 # Aktivieren Sie die Protokollierung von Plugins, die in netty on join injiziert wurden, um Kompatibilitätsprobleme zu beheben.

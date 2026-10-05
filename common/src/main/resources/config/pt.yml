@@ -229,23 +229,41 @@ exploit:
     # Esse ajuste, influído pela opção acima, define a distância para verificar blocos fantasmas.
     # O valor válido é limitado de 2 a 4.
     distance-to-check-if-ghostblocks: 2
-    # Limites contra exploits de crash e lag, veja docs/EXPLOIT-CHECKS.md. -1 desativa um limite.
-    # Pedidos de autocompletar por segundo (CrashH)
+    # A quantidade máxima de pedidos de autocompletar que um jogador pode enviar por segundo.
+    # Clientes modernos enviam um a cada tecla pressionada ao digitar alguns comandos.
+    # -1 desabilitará.
     tab-completes-per-second: 100
-    # Maior pacote de criativo/clique de inventário em bytes e aninhamento máximo de itens (CrashB, ExploitE)
+    # O tamanho máximo em bytes de um pacote de clique de inventário ou de inventário criativo.
+    # -1 desabilitará.
     max-item-packet-bytes: 2097152
+    # O quão profundamente os dados de um item podem ser aninhados, contando itens dentro de outros itens, como caixas de shulker.
+    # -1 desabilitará.
     max-item-nbt-depth: 128
-    # Placas (ExploitC): caracteres por linha, caracteres no total, rejeitar caracteres de controle, rejeitar códigos §
+    # O comprimento máximo de uma única linha de placa e de todas as linhas juntas.
+    # Clientes 1.8 não são verificados, pois enviam as linhas das placas como texto JSON.
+    # -1 desabilitará.
     max-sign-line-length: 100
     max-sign-length: 256
+    # Edições de placas com caracteres de controle devem ser canceladas? Clientes vanilla não conseguem digitá-los.
     sign-block-control-characters: true
+    # Edições de placas com códigos de formatação § devem ser canceladas?
+    # Desativado por padrão, pois plugins que usam placas para entrada de texto podem preencher linhas com códigos §.
     sign-block-format-codes: false
-    # Mensagens de plugin (ExploitD): por segundo, tamanho máximo em bytes, canais bloqueados ("nome" ou "prefixo*")
+    # A quantidade máxima de mensagens de plugin que um jogador pode enviar por segundo.
+    # Proxies como BungeeCord e Velocity também enviam mensagens de plugin pela conexão do jogador.
+    # -1 desabilitará.
     payloads-per-second: 500
+    # O tamanho máximo de uma mensagem de plugin em bytes.
+    # -1 desabilitará.
     max-payload-bytes: 1048576
+    # Canais de mensagens de plugin que os jogadores não podem usar, ex.: "examplemod:main".
+    # Uma entrada terminada em * bloqueia todos os canais que começam com ela, ex.: "examplemod:*".
     blocked-payload-channels: []
-    # Comandos (ChatE): por segundo e comando mais longo em caracteres
+    # A quantidade máxima de comandos que um jogador pode enviar por segundo.
+    # -1 desabilitará.
     commands-per-second: 20
+    # O comprimento máximo de um comando em caracteres.
+    # -1 desabilitará.
     max-command-length: 2048
 
 # Registra plugins que são injetados na netty ao entrar para depurar erros de compatibilidade.

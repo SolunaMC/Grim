@@ -242,23 +242,41 @@ exploit:
     allow-building-on-ghostblocks: true
     # 该选项可在发生假方块时重新同步玩家方块，并允许玩家在假方块上继续放置方块
     distance-to-check-if-ghostblocks: 2
-    # 针对崩溃和卡顿漏洞的限制，参见 docs/EXPLOIT-CHECKS.md。-1 表示关闭该限制。
-    # 每秒 Tab 补全请求数 (CrashH)
+    # 玩家每秒最多可以发送多少个 Tab 补全请求
+    # 输入某些命令时，较新的客户端每按一次键就会发送一个请求
+    # 填写-1则关闭
     tab-completes-per-second: 100
-    # 创造模式/物品栏点击数据包的最大字节数和物品最大嵌套深度 (CrashB, ExploitE)
+    # 物品栏点击或创造模式物品栏数据包的最大字节数
+    # 填写-1则关闭
     max-item-packet-bytes: 2097152
+    # 物品数据的最大嵌套深度，放在其他物品（如潜影盒）中的物品也计算在内
+    # 填写-1则关闭
     max-item-nbt-depth: 128
-    # 告示牌 (ExploitC)：每行字符数、总字符数、拒绝控制字符、拒绝 § 代码
+    # 告示牌单行的最大长度，以及所有行加起来的最大长度
+    # 1.8 客户端会以 JSON 文本发送告示牌内容，因此不会被检查
+    # 填写-1则关闭
     max-sign-line-length: 100
     max-sign-length: 256
+    # 是否取消包含控制字符的告示牌编辑？原版客户端无法输入这些字符
     sign-block-control-characters: true
+    # 是否取消包含 § 格式代码的告示牌编辑？
+    # 默认关闭，因为使用告示牌输入文本的插件可能会用 § 代码预先填写某些行
     sign-block-format-codes: false
-    # 插件消息 (ExploitD)：每秒数量、最大字节数、屏蔽的频道 ("名称" 或 "前缀*")
+    # 玩家每秒最多可以发送多少条插件消息
+    # BungeeCord 和 Velocity 等代理也会通过玩家的连接发送插件消息
+    # 填写-1则关闭
     payloads-per-second: 500
+    # 插件消息的最大字节数
+    # 填写-1则关闭
     max-payload-bytes: 1048576
+    # 禁止玩家使用的插件消息频道，例如 "examplemod:main"
+    # 以 * 结尾的条目会屏蔽所有以其开头的频道，例如 "examplemod:*"
     blocked-payload-channels: []
-    # 命令 (ChatE)：每秒数量和最长命令的字符数
+    # 玩家每秒最多可以发送多少条命令
+    # 填写-1则关闭
     commands-per-second: 20
+    # 命令的最大字符数
+    # 填写-1则关闭
     max-command-length: 2048
     # 检查假方块的距离。
     # 范围限制为 2 到 4

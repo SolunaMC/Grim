@@ -224,23 +224,41 @@ exploit:
     # To ustawienie, zależne od powyższej wartości logicznej, określa dystans do sprawdzania ghostblocków.
     # Jego prawidłowy zakres jest ograniczony od 2 do 4.
     distance-to-check-if-ghostblocks: 2
-    # Limity przeciw exploitom powodującym crash i lag, zobacz docs/EXPLOIT-CHECKS.md. -1 wyłącza limit.
-    # Zapytania o autouzupełnianie na sekundę (CrashH)
+    # Maksymalna liczba zapytań o autouzupełnianie, które gracz może wysłać na sekundę.
+    # Nowoczesni klienci wysyłają je przy każdym naciśnięciu klawisza podczas wpisywania niektórych komend.
+    # Aby wyłączyć, użyj -1.
     tab-completes-per-second: 100
-    # Największy pakiet trybu kreatywnego/kliknięcia w ekwipunku w bajtach i najgłębsze zagnieżdżenie przedmiotu (CrashB, ExploitE)
+    # Maksymalny rozmiar w bajtach pakietu kliknięcia w ekwipunku lub w ekwipunku trybu kreatywnego.
+    # Aby wyłączyć, użyj -1.
     max-item-packet-bytes: 2097152
+    # Jak głęboko mogą być zagnieżdżone dane przedmiotu, wliczając przedmioty w innych przedmiotach, np. w shulkerach.
+    # Aby wyłączyć, użyj -1.
     max-item-nbt-depth: 128
-    # Tabliczki (ExploitC): znaki w linii, znaki łącznie, odrzucaj znaki sterujące, odrzucaj kody §
+    # Maksymalna długość pojedynczej linii tabliczki oraz wszystkich linii łącznie.
+    # Klienci 1.8 nie są sprawdzani, ponieważ wysyłają linie tabliczek jako tekst JSON.
+    # Aby wyłączyć, użyj -1.
     max-sign-line-length: 100
     max-sign-length: 256
+    # Czy anulować edycje tabliczek ze znakami sterującymi? Klienci vanilla nie mogą ich wpisać.
     sign-block-control-characters: true
+    # Czy anulować edycje tabliczek z kodami formatowania §?
+    # Domyślnie wyłączone, ponieważ pluginy używające tabliczek do wpisywania tekstu mogą wstępnie wypełniać linie kodami §.
     sign-block-format-codes: false
-    # Wiadomości pluginów (ExploitD): na sekundę, największy rozmiar w bajtach, zablokowane kanały ("nazwa" lub "prefiks*")
+    # Maksymalna liczba wiadomości pluginów, które gracz może wysłać na sekundę.
+    # Proxy takie jak BungeeCord i Velocity również wysyłają wiadomości pluginów przez połączenie gracza.
+    # Aby wyłączyć, użyj -1.
     payloads-per-second: 500
+    # Maksymalny rozmiar wiadomości pluginu w bajtach.
+    # Aby wyłączyć, użyj -1.
     max-payload-bytes: 1048576
+    # Kanały wiadomości pluginów, których gracze nie mogą używać, np. "examplemod:main".
+    # Wpis zakończony * blokuje wszystkie kanały, które się nim zaczynają, np. "examplemod:*".
     blocked-payload-channels: []
-    # Komendy (ChatE): na sekundę i najdłuższa komenda w znakach
+    # Maksymalna liczba komend, które gracz może wysłać na sekundę.
+    # Aby wyłączyć, użyj -1.
     commands-per-second: 20
+    # Maksymalna długość komendy w znakach.
+    # Aby wyłączyć, użyj -1.
     max-command-length: 2048
 
 # Włącz logowanie pluginów, które wstrzyknęły się do netty podczas dołączania gracza, w celu debugowania problemów z kompatybilnością.

@@ -220,23 +220,41 @@ exploit:
     # Cette option atténue le placement du joueur sur les ghostblocks en resynchronisant le joueur lorsque cela se produit.
     allow-building-on-ghostblocks: true
     distance-to-check-if-ghostblocks: 2
-    # Limites contre les exploits de crash et de lag, voir docs/EXPLOIT-CHECKS.md. -1 désactive une limite.
-    # Requêtes d'autocomplétion par seconde (CrashH)
+    # Le nombre maximal de requêtes d'autocomplétion qu'un joueur peut envoyer par seconde
+    # Les clients récents en envoient une à chaque touche pressée en tapant certaines commandes
+    # Pour désactiver, utilisez -1
     tab-completes-per-second: 100
-    # Plus grand paquet créatif/clic d'inventaire en octets et imbrication maximale d'objets (CrashB, ExploitE)
+    # La taille maximale en octets d'un paquet de clic d'inventaire ou d'inventaire créatif
+    # Pour désactiver, utilisez -1
     max-item-packet-bytes: 2097152
+    # La profondeur maximale d'imbrication des données d'un objet, en comptant les objets placés dans d'autres objets comme les boîtes de Shulker
+    # Pour désactiver, utilisez -1
     max-item-nbt-depth: 128
-    # Panneaux (ExploitC) : caractères par ligne, caractères au total, refuser les caractères de contrôle, refuser les codes §
+    # La longueur maximale d'une ligne de panneau et de toutes les lignes ensemble
+    # Les clients 1.8 ne sont pas vérifiés, car ils envoient les lignes des panneaux en texte JSON
+    # Pour désactiver, utilisez -1
     max-sign-line-length: 100
     max-sign-length: 256
+    # Faut-il annuler les modifications de panneaux contenant des caractères de contrôle ? Les clients vanilla ne peuvent pas les taper
     sign-block-control-characters: true
+    # Faut-il annuler les modifications de panneaux contenant des codes de formatage § ?
+    # Désactivé par défaut, car les plugins qui utilisent des panneaux pour la saisie de texte peuvent préremplir des lignes avec des codes §
     sign-block-format-codes: false
-    # Messages de plugin (ExploitD) : par seconde, taille maximale en octets, canaux bloqués ("nom" ou "préfixe*")
+    # Le nombre maximal de messages de plugin qu'un joueur peut envoyer par seconde
+    # Les proxys comme BungeeCord et Velocity envoient aussi des messages de plugin via la connexion du joueur
+    # Pour désactiver, utilisez -1
     payloads-per-second: 500
+    # La taille maximale d'un message de plugin en octets
+    # Pour désactiver, utilisez -1
     max-payload-bytes: 1048576
+    # Canaux de messages de plugin que les joueurs ne peuvent pas utiliser, par ex. "examplemod:main"
+    # Une entrée finissant par * bloque tous les canaux qui commencent ainsi, par ex. "examplemod:*"
     blocked-payload-channels: []
-    # Commandes (ChatE) : par seconde et commande la plus longue en caractères
+    # Le nombre maximal de commandes qu'un joueur peut envoyer par seconde
+    # Pour désactiver, utilisez -1
     commands-per-second: 20
+    # La longueur maximale d'une commande en caractères
+    # Pour désactiver, utilisez -1
     max-command-length: 2048
 
 # Activer l'enregistrement des plugins ayant injecté dans Netty lors de la connexion pour déboguer les problèmes de compatibilité

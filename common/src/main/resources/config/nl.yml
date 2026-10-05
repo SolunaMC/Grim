@@ -224,23 +224,41 @@ exploit:
     # Deze instelling, beïnvloed door de boolean hierboven, bepaalt de afstand om te controleren op ghostblocks
     # Het geldige bereik is beperkt van 2 tot 4
     distance-to-check-if-ghostblocks: 2
-    # Limieten tegen crash- en lag-exploits, zie docs/EXPLOIT-CHECKS.md. -1 schakelt een limiet uit.
-    # Tab-aanvullingsverzoeken per seconde (CrashH)
+    # Het maximale aantal tab-aanvullingsverzoeken dat een speler per seconde mag sturen
+    # Moderne clients sturen er bij sommige commando's een bij elke toetsaanslag
+    # Om uit te schakelen, gebruik -1
     tab-completes-per-second: 100
-    # Grootste creatief-/inventarisklikpakket in bytes en diepste item-nesting (CrashB, ExploitE)
+    # De maximale grootte in bytes van een inventarisklik- of creatief-inventarispakket
+    # Om uit te schakelen, gebruik -1
     max-item-packet-bytes: 2097152
+    # Hoe diep de gegevens van een item genest mogen zijn, inclusief items in andere items zoals shulkerdozen
+    # Om uit te schakelen, gebruik -1
     max-item-nbt-depth: 128
-    # Borden (ExploitC): tekens per regel, tekens in totaal, stuurtekens weigeren, §-codes weigeren
+    # De maximale lengte van één bordregel en van alle regels samen
+    # 1.8 clients worden niet gecontroleerd, omdat zij bordregels als JSON-tekst sturen
+    # Om uit te schakelen, gebruik -1
     max-sign-line-length: 100
     max-sign-length: 256
+    # Moeten bordbewerkingen met stuurtekens geannuleerd worden? Vanilla clients kunnen deze niet typen
     sign-block-control-characters: true
+    # Moeten bordbewerkingen met §-opmaakcodes geannuleerd worden?
+    # Standaard uit, omdat plugins die borden gebruiken voor tekstinvoer regels vooraf met §-codes kunnen invullen
     sign-block-format-codes: false
-    # Pluginberichten (ExploitD): per seconde, grootste grootte in bytes, geblokkeerde kanalen ("naam" of "prefix*")
+    # Het maximale aantal pluginberichten dat een speler per seconde mag sturen
+    # Proxy's zoals BungeeCord en Velocity sturen ook pluginberichten via de verbinding van de speler
+    # Om uit te schakelen, gebruik -1
     payloads-per-second: 500
+    # De maximale grootte van een pluginbericht in bytes
+    # Om uit te schakelen, gebruik -1
     max-payload-bytes: 1048576
+    # Pluginberichtkanalen die spelers niet mogen gebruiken, bijv. "examplemod:main"
+    # Een vermelding die eindigt op * blokkeert alle kanalen die daarmee beginnen, bijv. "examplemod:*"
     blocked-payload-channels: []
-    # Commando's (ChatE): per seconde en langste commando in tekens
+    # Het maximale aantal commando's dat een speler per seconde mag sturen
+    # Om uit te schakelen, gebruik -1
     commands-per-second: 20
+    # De maximale lengte van een commando in tekens
+    # Om uit te schakelen, gebruik -1
     max-command-length: 2048
 
 # Logging plugins inschakelen die geïnjecteerd zijn in netty on join om compatibiliteitsproblemen te debuggen
