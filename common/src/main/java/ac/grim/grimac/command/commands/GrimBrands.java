@@ -10,7 +10,7 @@ import ac.grim.grimac.platform.api.manager.cloud.CloudPlatformCommandArguments;
 import ac.grim.grimac.platform.api.player.PlatformPlayer;
 import ac.grim.grimac.platform.api.sender.Sender;
 import ac.grim.grimac.player.GrimPlayer;
-import ac.grim.grimac.utils.clientdetection.ClientDetectionMessages;
+import ac.grim.grimac.utils.anticheat.MessageUtil;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.context.CommandContext;
 import org.incendo.cloud.description.Description;
@@ -55,7 +55,7 @@ public class GrimBrands implements BuildableCommand {
         }
     }
 
-    // Online players only: the datastore has no aggregate query over session brands
+    // Online players only, the datastore can't aggregate the brands of past sessions
     private void handleStats(@NotNull CommandContext<Sender> context) {
         Sender sender = context.sender();
         Map<String, Integer> brands = new HashMap<>();
@@ -107,6 +107,6 @@ public class GrimBrands implements BuildableCommand {
     }
 
     private void send(Sender sender, String template, Map<String, String> values) {
-        sender.sendMessage(ClientDetectionMessages.render(null, template, values));
+        sender.sendMessage(MessageUtil.replacePlaceholders(null, MessageUtil.miniMessage(template), values));
     }
 }

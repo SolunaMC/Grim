@@ -32,20 +32,18 @@ client-brand:
     # Grim will blacklist specific Forge versions which include built-in Reach hacks (Forge 1.18.2 to 1.19.3).
     # Setting this option to false will allow said clients to connect to the server. Disable this at your own risk.
     disconnect-blacklisted-forge-versions: true
-    # Mods are detected from the plugin channels a client registers. Purely client side mods (Freecam,
-    # Sodium, most cheats) register nothing and can't be detected. Treat detections as hints, not proof.
-    # Details and the built-in signatures: docs/CLIENT-DETECTION.md on GitHub
-    # Your own signatures, "regex -> name", checked in addition to the built-in ones
+    # Mods are detected by the plugin channels a client registers. Mods that register none (Freecam, Sodium, most cheats) can't be detected.
+    # A client can also hide or fake its channels, so treat detected mods as a hint and not as proof.
+    # Your own signatures in the format "regex -> name", they are checked in addition to the built-in ones.
     mod-signatures: []
     #  - "^mymod: -> My Mod"
-    # Milliseconds the brand notification waits after joining, so mods registered later can be listed.
-    # 0 sends it right away
+    # How many milliseconds the brand notification waits after joining, so mods that register later are listed too. 0 sends it right away.
     notification-delay-ms: 1000
-    # Rules for brands or mods. Each rule acts once per player session.
-    #   regex:   Java regular expression
-    #   type:    brand (client brand) or mod (detected mod names and raw channel names)
-    #   action:  alert (message to staff) or kick
-    #   message: optional, replaces rule-alert-format / rule-kick-message from messages.yml
+    # Rules that alert staff or kick the player when their brand or a mod matches. Each rule acts once per session.
+    #   regex: a Java regular expression
+    #   type: brand to match the client brand, mod to match detected mod names and channel names
+    #   action: alert or kick
+    #   message: optional, replaces rule-alert-format or rule-kick-message from messages.yml
     rules: []
     #  - regex: "(?i)^wurst"
     #    type: brand
@@ -53,16 +51,16 @@ client-brand:
     #  - regex: "^Xaero's Minimap$"
     #    type: mod
     #    action: alert
-    # Brand spoof check (BadPacketsT). Flags once per session, so use a punishments.yml group with a
-    # low threshold for it, see docs/CLIENT-DETECTION.md
+    # Flags clients that lie about their brand as BadPacketsT. It flags at most once per session, so give it a low threshold in punishments.yml.
     spoof-check:
+        # Should the brand spoof check be enabled?
         enabled: false
-        # The client calls itself "vanilla" but registers Fabric, Forge or NeoForge channels
+        # Flag clients that call themselves "vanilla" but register Fabric, Forge or NeoForge channels
         vanilla-with-mod-loader: true
-        # The client sends a different brand later in the session. Proxies and some mods resend it
+        # Flag clients that send a different brand later in the session. Some proxies and mods resend the brand, so this is off by default.
         brand-change: false
     stats:
-        # Most entries per section in /grim brands stats
+        # The maximum amount of entries per section in /grim brands stats
         max-entries: 10
 
 spectators:
@@ -224,23 +222,41 @@ exploit:
     # This setting, influenced by the boolean above defines the distance to check for ghost blocks
     # Its valid range is limited from 2 to 4
     distance-to-check-if-ghostblocks: 2
-    # Limits against crash and lag exploits, see docs/EXPLOIT-CHECKS.md. -1 turns a limit off.
-    # Tab-complete requests per second (CrashH)
+    # The maximum amount of tab complete requests a player can send per second
+    # Modern clients send one on every key press while typing some commands
+    # To disable, use -1
     tab-completes-per-second: 100
-    # Largest creative/inventory click packet in bytes and deepest item nesting (CrashB, ExploitE)
+    # The maximum size in bytes of an inventory click or creative inventory packet
+    # To disable, use -1
     max-item-packet-bytes: 2097152
+    # How deeply the data of an item can be nested, counting items inside other items such as shulker boxes
+    # To disable, use -1
     max-item-nbt-depth: 128
-    # Sign edits (ExploitC): characters per line, characters in total, reject control characters, reject § codes
+    # The maximum length of a single sign line and of all lines together
+    # 1.8 clients are not checked, as they send sign lines as JSON text
+    # To disable, use -1
     max-sign-line-length: 100
     max-sign-length: 256
+    # Should sign edits with control characters be cancelled? Vanilla clients can't type them
     sign-block-control-characters: true
+    # Should sign edits with § formatting codes be cancelled?
+    # Off by default, as plugins that use signs for text input may prefill lines with § codes
     sign-block-format-codes: false
-    # Plugin messages (ExploitD): per second, largest size in bytes, blocked channels ("name" or "prefix*")
+    # The maximum amount of plugin messages a player can send per second
+    # Proxies such as BungeeCord and Velocity also send plugin messages through the player's connection
+    # To disable, use -1
     payloads-per-second: 500
+    # The maximum size of a plugin message in bytes
+    # To disable, use -1
     max-payload-bytes: 1048576
+    # Plugin message channels players aren't allowed to use, e.g. "examplemod:main"
+    # An entry ending in * blocks every channel starting with it, e.g. "examplemod:*"
     blocked-payload-channels: []
-    # Commands (ChatE): per second and longest command in characters
+    # The maximum amount of commands a player can send per second
+    # To disable, use -1
     commands-per-second: 20
+    # The maximum length of a command in characters
+    # To disable, use -1
     max-command-length: 2048
 
 # Enable logging plugins who have injected into netty on join to debug compatibility issues

@@ -32,20 +32,18 @@ client-brand:
     # Grim will blacklist specific Forge versions which include built-in Reach hacks (Forge 1.18.2 to 1.19.3).
     # Setting this option to false will allow said clients to connect to the server. Disable this at your own risk.
     disconnect-blacklisted-forge-versions: true
-    # Les mods sont détectés à partir des canaux de plugin qu'un client enregistre. Les mods purement côté client (Freecam,
-    # Sodium, la plupart des cheats) n'enregistrent rien et ne peuvent pas être détectés. Considérez les détections comme des indices, pas des preuves.
-    # Détails et signatures intégrées : docs/CLIENT-DETECTION.md sur GitHub
-    # Vos propres signatures, "regex -> nom", vérifiées en plus de celles intégrées
+    # Les mods sont détectés à partir des canaux de plugin qu'un client enregistre. Les mods qui n'en enregistrent aucun (Freecam, Sodium, la plupart des cheats) ne peuvent pas être détectés.
+    # Un client peut aussi cacher ou falsifier ses canaux, considérez donc les mods détectés comme un indice et non comme une preuve.
+    # Vos propres signatures au format "regex -> nom", elles sont vérifiées en plus de celles intégrées.
     mod-signatures: []
     #  - "^mymod: -> My Mod"
-    # Millisecondes d'attente de la notification de nature du client après la connexion, afin de lister les mods enregistrés plus tard.
-    # 0 l'envoie immédiatement
+    # Combien de millisecondes la notification de nature du client attend après la connexion, afin de lister aussi les mods enregistrés plus tard. 0 l'envoie immédiatement.
     notification-delay-ms: 1000
-    # Règles pour les natures de client ou les mods. Chaque règle agit une fois par session de joueur.
-    #   regex:   expression régulière Java
-    #   type:    brand (nature du client) ou mod (noms des mods détectés et noms bruts des canaux)
-    #   action:  alert (message au staff) ou kick
-    #   message: optionnel, remplace rule-alert-format / rule-kick-message de messages.yml
+    # Règles qui alertent le staff ou expulsent le joueur quand sa nature du client ou un mod correspond. Chaque règle agit une fois par session.
+    #   regex: une expression régulière Java
+    #   type: brand pour la nature du client, mod pour les noms de mods détectés et les noms de canaux
+    #   action: alert ou kick
+    #   message: facultatif, remplace rule-alert-format ou rule-kick-message de messages.yml
     rules: []
     #  - regex: "(?i)^wurst"
     #    type: brand
@@ -53,13 +51,13 @@ client-brand:
     #  - regex: "^Xaero's Minimap$"
     #    type: mod
     #    action: alert
-    # Vérification de nature du client falsifiée (BadPacketsT). Ne signale qu'une fois par session, utilisez donc un groupe
-    # punishments.yml avec un seuil bas pour celle-ci, voir docs/CLIENT-DETECTION.md
+    # Signale comme BadPacketsT les clients qui mentent sur leur nature. Ne signale qu'une fois par session au maximum, donnez-lui donc un seuil bas dans punishments.yml.
     spoof-check:
+        # La vérification de nature du client falsifiée doit-elle être activée ?
         enabled: false
-        # Le client se présente comme "vanilla" mais enregistre des canaux Fabric, Forge ou NeoForge
+        # Signaler les clients qui se présentent comme "vanilla" mais enregistrent des canaux Fabric, Forge ou NeoForge
         vanilla-with-mod-loader: true
-        # Le client envoie une nature différente plus tard dans la session. Les proxys et certains mods la renvoient
+        # Signaler les clients qui envoient une nature différente plus tard dans la session. Certains proxys et mods la renvoient, c'est donc désactivé par défaut.
         brand-change: false
     stats:
         # Nombre maximal d'entrées par section dans /grim brands stats
@@ -220,23 +218,41 @@ exploit:
     # Cette option atténue le placement du joueur sur les ghostblocks en resynchronisant le joueur lorsque cela se produit.
     allow-building-on-ghostblocks: true
     distance-to-check-if-ghostblocks: 2
-    # Limites contre les exploits de crash et de lag, voir docs/EXPLOIT-CHECKS.md. -1 désactive une limite.
-    # Requêtes d'autocomplétion par seconde (CrashH)
+    # Le nombre maximal de requêtes d'autocomplétion qu'un joueur peut envoyer par seconde
+    # Les clients récents en envoient une à chaque touche pressée en tapant certaines commandes
+    # Pour désactiver, utilisez -1
     tab-completes-per-second: 100
-    # Plus grand paquet créatif/clic d'inventaire en octets et imbrication maximale d'objets (CrashB, ExploitE)
+    # La taille maximale en octets d'un paquet de clic d'inventaire ou d'inventaire créatif
+    # Pour désactiver, utilisez -1
     max-item-packet-bytes: 2097152
+    # La profondeur maximale d'imbrication des données d'un objet, en comptant les objets placés dans d'autres objets comme les boîtes de Shulker
+    # Pour désactiver, utilisez -1
     max-item-nbt-depth: 128
-    # Panneaux (ExploitC) : caractères par ligne, caractères au total, refuser les caractères de contrôle, refuser les codes §
+    # La longueur maximale d'une ligne de panneau et de toutes les lignes ensemble
+    # Les clients 1.8 ne sont pas vérifiés, car ils envoient les lignes des panneaux en texte JSON
+    # Pour désactiver, utilisez -1
     max-sign-line-length: 100
     max-sign-length: 256
+    # Faut-il annuler les modifications de panneaux contenant des caractères de contrôle ? Les clients vanilla ne peuvent pas les taper
     sign-block-control-characters: true
+    # Faut-il annuler les modifications de panneaux contenant des codes de formatage § ?
+    # Désactivé par défaut, car les plugins qui utilisent des panneaux pour la saisie de texte peuvent préremplir des lignes avec des codes §
     sign-block-format-codes: false
-    # Messages de plugin (ExploitD) : par seconde, taille maximale en octets, canaux bloqués ("nom" ou "préfixe*")
+    # Le nombre maximal de messages de plugin qu'un joueur peut envoyer par seconde
+    # Les proxys comme BungeeCord et Velocity envoient aussi des messages de plugin via la connexion du joueur
+    # Pour désactiver, utilisez -1
     payloads-per-second: 500
+    # La taille maximale d'un message de plugin en octets
+    # Pour désactiver, utilisez -1
     max-payload-bytes: 1048576
+    # Canaux de messages de plugin que les joueurs ne peuvent pas utiliser, par ex. "examplemod:main"
+    # Une entrée finissant par * bloque tous les canaux qui commencent ainsi, par ex. "examplemod:*"
     blocked-payload-channels: []
-    # Commandes (ChatE) : par seconde et commande la plus longue en caractères
+    # Le nombre maximal de commandes qu'un joueur peut envoyer par seconde
+    # Pour désactiver, utilisez -1
     commands-per-second: 20
+    # La longueur maximale d'une commande en caractères
+    # Pour désactiver, utilisez -1
     max-command-length: 2048
 
 # Activer l'enregistrement des plugins ayant injecté dans Netty lors de la connexion pour déboguer les problèmes de compatibilité

@@ -30,10 +30,6 @@ public class GeyserUtil {
         return isBedrockPlayer(uuid) || hasGeyserUuid(uuid);
     }
 
-    /**
-     * @return the Bedrock device OS and input mode, or null if the player isn't a
-     * Bedrock player or neither Floodgate nor Geyser can tell
-     */
     public static @Nullable BedrockDevice getBedrockDevice(UUID uuid) {
         try {
             if (floodgate) {
@@ -48,7 +44,7 @@ public class GeyserUtil {
                     return new BedrockDevice(String.valueOf(connection.platform()), String.valueOf(connection.inputMode()));
                 }
             }
-        } catch (RuntimeException | LinkageError e) {
+        } catch (RuntimeException | LinkageError ignored) {
             // Older Floodgate/Geyser API without these methods, or the API isn't initialized yet
         }
         return null;

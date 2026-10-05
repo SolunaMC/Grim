@@ -10,7 +10,6 @@ import ac.grim.grimac.platform.api.player.PlatformPlayer;
 import ac.grim.grimac.platform.api.sender.Sender;
 import ac.grim.grimac.player.GrimPlayer;
 import ac.grim.grimac.utils.anticheat.MessageUtil;
-import ac.grim.grimac.utils.clientdetection.ClientDetectionMessages;
 import ac.grim.grimac.utils.reflection.GeyserUtil;
 import net.kyori.adventure.text.Component;
 import org.incendo.cloud.CommandManager;
@@ -54,7 +53,7 @@ public class GrimProfile implements BuildableCommand {
 
         GrimPlayer grimPlayer = GrimAPI.INSTANCE.getPlayerDataManager().getPlayer(targetPlatformPlayer.getUniqueId());
         if (grimPlayer == null) {
-            // Bedrock players are exempt from Grim, but staff still want to know their device
+            // Bedrock players are exempt, but their device is still useful to know
             GeyserUtil.BedrockDevice device = GeyserUtil.getBedrockDevice(targetPlatformPlayer.getUniqueId());
             if (device != null) {
                 sendBedrockProfile(sender, targetPlatformPlayer, device);
@@ -66,10 +65,9 @@ public class GrimProfile implements BuildableCommand {
 
         ConfigManager config = GrimAPI.INSTANCE.getConfigManager().getConfig();
         List<String> profile = new ArrayList<>(config.getStringList("profile"));
-        // Only shown when something was detected, and only if the configured profile doesn't place %mods% itself
+        // Added before the closing line, unless the profile already contains %mods%
         if (!grimPlayer.checkManager.get(ClientBrand.class).getMods().isEmpty()
                 && profile.stream().noneMatch(line -> line.contains("%mods%"))) {
-            // Before the closing separator line of the default profile
             profile.add(Math.max(0, profile.size() - 1), config.getStringElse("client-brand.profile-mods-line", "&bMods: &f%mods%"));
         }
 
@@ -86,7 +84,7 @@ public class GrimProfile implements BuildableCommand {
                 "%bedrock_device%", device.os(),
                 "%bedrock_input%", device.inputMode());
         for (String line : lines) {
-            sender.sendMessage(ClientDetectionMessages.render(null, line, values));
+            sender.sendMessage(MessageUtil.replacePlaceholders(null, MessageUtil.miniMessage(line), values));
         }
     }
 }

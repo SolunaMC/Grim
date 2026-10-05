@@ -32,20 +32,18 @@ client-brand:
     # Grim va bloca anumite versiuni Forge care includ hackuri Reach integrate (Forge 1.18.2 până la 1.19.3).
     # Setarea acestei opțiuni la false va permite acestor clienți să se conecteze la server. Dezactivează pe propriul risc.
     disconnect-blacklisted-forge-versions: true
-    # Modurile sunt detectate după canalele de plugin pe care le înregistrează un client. Modurile pur client-side (Freecam,
-    # Sodium, majoritatea cheat-urilor) nu înregistrează nimic și nu pot fi detectate. Tratează detecțiile ca indicii, nu ca dovezi.
-    # Detalii și semnăturile integrate: docs/CLIENT-DETECTION.md pe GitHub
-    # Semnăturile tale proprii, "regex -> nume", verificate pe lângă cele integrate
+    # Modurile sunt detectate după canalele de plugin pe care le înregistrează un client. Modurile care nu înregistrează niciunul (Freecam, Sodium, majoritatea cheat-urilor) nu pot fi detectate.
+    # Un client își poate și ascunde sau falsifica canalele, așa că tratează modurile detectate ca un indiciu, nu ca o dovadă.
+    # Semnăturile tale proprii în formatul "regex -> nume", sunt verificate pe lângă cele integrate.
     mod-signatures: []
     #  - "^mymod: -> My Mod"
-    # Milisecundele pe care notificarea de brand le așteaptă după intrare, ca modurile înregistrate mai târziu să poată fi listate.
-    # 0 o trimite imediat
+    # Câte milisecunde așteaptă notificarea de brand după intrare, ca modurile înregistrate mai târziu să fie și ele listate. 0 o trimite imediat.
     notification-delay-ms: 1000
-    # Reguli pentru branduri sau moduri. Fiecare regulă acționează o singură dată per sesiune de jucător.
-    #   regex:   expresie regulată Java
-    #   type:    brand (brandul clientului) sau mod (numele modurilor detectate și numele brute ale canalelor)
-    #   action:  alert (mesaj către staff) sau kick
-    #   message: opțional, înlocuiește rule-alert-format / rule-kick-message din messages.yml
+    # Reguli care alertează staff-ul sau dau kick jucătorului când brandul lui sau un mod se potrivește. Fiecare regulă acționează o singură dată per sesiune.
+    #   regex: o expresie regulată Java
+    #   type: brand pentru brandul clientului, mod pentru numele modurilor detectate și numele canalelor
+    #   action: alert sau kick
+    #   message: opțional, înlocuiește rule-alert-format sau rule-kick-message din messages.yml
     rules: []
     #  - regex: "(?i)^wurst"
     #    type: brand
@@ -53,13 +51,13 @@ client-brand:
     #  - regex: "^Xaero's Minimap$"
     #    type: mod
     #    action: alert
-    # Verificarea brandului falsificat (BadPacketsT). Semnalează o singură dată per sesiune, așa că folosește un grup din
-    # punishments.yml cu un prag scăzut pentru ea, vezi docs/CLIENT-DETECTION.md
+    # Semnalează ca BadPacketsT clienții care mint despre brandul lor. Semnalează cel mult o dată per sesiune, așa că dă-i un prag scăzut în punishments.yml.
     spoof-check:
+        # Ar trebui activată verificarea brandului falsificat?
         enabled: false
-        # Clientul se prezintă ca "vanilla", dar înregistrează canale Fabric, Forge sau NeoForge
+        # Semnalează clienții care se prezintă ca "vanilla", dar înregistrează canale Fabric, Forge sau NeoForge
         vanilla-with-mod-loader: true
-        # Clientul trimite un alt brand mai târziu în sesiune. Proxy-urile și unele moduri îl retrimit
+        # Semnalează clienții care trimit un alt brand mai târziu în sesiune. Unele proxy-uri și moduri retrimit brandul, de aceea este dezactivat implicit.
         brand-change: false
     stats:
         # Numărul maxim de intrări per secțiune în /grim brands stats
@@ -224,23 +222,41 @@ exploit:
     # Această setare, influențată de booleanul de mai sus, definește distanța verificată pentru ghostblocks
     # Interval valid: 2 până la 4
     distance-to-check-if-ghostblocks: 2
-    # Limite împotriva exploit-urilor de crash și lag, vezi docs/EXPLOIT-CHECKS.md. -1 dezactivează o limită.
-    # Cereri de completare automată pe secundă (CrashH)
+    # Numărul maxim de cereri de completare automată pe care un jucător le poate trimite pe secundă
+    # Clienții moderni trimit una la fiecare apăsare de tastă când se scriu unele comenzi
+    # Pentru dezactivare, folosește -1
     tab-completes-per-second: 100
-    # Cel mai mare pachet creativ/clic în inventar în octeți și cea mai adâncă imbricare a obiectelor (CrashB, ExploitE)
+    # Dimensiunea maximă în octeți a unui pachet de clic în inventar sau în inventarul creativ
+    # Pentru dezactivare, folosește -1
     max-item-packet-bytes: 2097152
+    # Cât de adânc pot fi imbricate datele unui obiect, inclusiv obiectele din alte obiecte, cum ar fi shulker box-urile
+    # Pentru dezactivare, folosește -1
     max-item-nbt-depth: 128
-    # Plăcuțe (ExploitC): caractere pe linie, caractere în total, respinge caracterele de control, respinge codurile §
+    # Lungimea maximă a unei singure linii de plăcuță și a tuturor liniilor împreună
+    # Clienții 1.8 nu sunt verificați, deoarece trimit liniile plăcuțelor ca text JSON
+    # Pentru dezactivare, folosește -1
     max-sign-line-length: 100
     max-sign-length: 256
+    # Se anulează editările de plăcuțe cu caractere de control? Clienții vanilla nu le pot scrie
     sign-block-control-characters: true
+    # Se anulează editările de plăcuțe cu coduri de formatare §?
+    # Dezactivat implicit, deoarece pluginurile care folosesc plăcuțe pentru introducerea textului pot precompleta linii cu coduri §
     sign-block-format-codes: false
-    # Mesaje de plugin (ExploitD): pe secundă, dimensiunea maximă în octeți, canale blocate ("nume" sau "prefix*")
+    # Numărul maxim de mesaje de plugin pe care un jucător le poate trimite pe secundă
+    # Proxy-urile precum BungeeCord și Velocity trimit și ele mesaje de plugin prin conexiunea jucătorului
+    # Pentru dezactivare, folosește -1
     payloads-per-second: 500
+    # Dimensiunea maximă a unui mesaj de plugin în octeți
+    # Pentru dezactivare, folosește -1
     max-payload-bytes: 1048576
+    # Canale de mesaje de plugin pe care jucătorii nu le pot folosi, de ex. "examplemod:main"
+    # O intrare care se termină cu * blochează toate canalele care încep cu ea, de ex. "examplemod:*"
     blocked-payload-channels: []
-    # Comenzi (ChatE): pe secundă și cea mai lungă comandă în caractere
+    # Numărul maxim de comenzi pe care un jucător le poate trimite pe secundă
+    # Pentru dezactivare, folosește -1
     commands-per-second: 20
+    # Lungimea maximă a unei comenzi în caractere
+    # Pentru dezactivare, folosește -1
     max-command-length: 2048
 
 # Activează logarea pluginurilor care s-au injectat în netty la intrare pentru debugging de compatibilitate

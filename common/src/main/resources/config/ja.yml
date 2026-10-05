@@ -34,20 +34,18 @@ client-brand:
     # Grim will blacklist specific Forge versions which include built-in Reach hacks (Forge 1.18.2 to 1.19.3).
     # Setting this option to false will allow said clients to connect to the server. Disable this at your own risk.
     disconnect-blacklisted-forge-versions: true
-    # Mod はクライアントが登録するプラグインチャンネルから検出されます。完全にクライアント側だけの Mod (Freecam、
-    # Sodium、ほとんどのチート) は何も登録しないため検出できません。検出結果は証拠ではなく手がかりとして扱ってください。
-    # 詳細と組み込みのシグネチャ: GitHub の docs/CLIENT-DETECTION.md
-    # 独自のシグネチャ ("正規表現 -> 名前")。組み込みのシグネチャに加えてチェックされます。
+    # Mod はクライアントが登録するプラグインチャンネルから検出されます。何も登録しない Mod (Freecam、Sodium、ほとんどのチート) は検出できません。
+    # クライアントはチャンネルを隠したり偽装したりすることもできるため、検出された Mod は証拠ではなく手がかりとして扱ってください。
+    # 独自のシグネチャ ("正規表現 -> 名前" の形式)。組み込みのシグネチャに加えてチェックされます。
     mod-signatures: []
     #  - "^mymod: -> My Mod"
-    # 参加後、クライアントブランドの通知を送るまでの待機時間 (ミリ秒)。後から登録された Mod も表示できるようにします。
-    # 0 にすると即座に送信します。
+    # 参加後、ブランド通知を送るまでの待機時間 (ミリ秒)。後から登録された Mod も表示されるようにします。0 にすると即座に送信します。
     notification-delay-ms: 1000
-    # クライアントブランドまたは Mod に対するルール。各ルールはプレイヤーのセッションごとに 1 回だけ動作します。
-    #   regex:   Java の正規表現
-    #   type:    brand (クライアントブランド) または mod (検出された Mod 名と生のチャンネル名)
-    #   action:  alert (スタッフへのメッセージ) または kick
-    #   message: 任意。messages.yml の rule-alert-format / rule-kick-message の代わりに使われます。
+    # ブランドまたは Mod が一致したときにスタッフへ通知、またはプレイヤーをキックするルール。各ルールはセッションごとに 1 回だけ動作します。
+    #   regex: Java の正規表現
+    #   type: brand はクライアントブランド、mod は検出された Mod 名とチャンネル名に一致させます
+    #   action: alert または kick
+    #   message: 任意。messages.yml の rule-alert-format または rule-kick-message の代わりに使われます
     rules: []
     #  - regex: "(?i)^wurst"
     #    type: brand
@@ -55,13 +53,13 @@ client-brand:
     #  - regex: "^Xaero's Minimap$"
     #    type: mod
     #    action: alert
-    # ブランド偽装チェック (BadPacketsT)。セッションごとに 1 回しかフラグしないため、しきい値の低い
-    # punishments.yml のグループを使用してください。docs/CLIENT-DETECTION.md を参照
+    # ブランドを偽っているクライアントを BadPacketsT としてフラグします。セッションごとに最大 1 回しかフラグしないため、punishments.yml で低いしきい値を設定してください。
     spoof-check:
+        # ブランド偽装チェックを有効にするかどうか
         enabled: false
-        # クライアントが "vanilla" を名乗っているのに Fabric、Forge、NeoForge のチャンネルを登録している
+        # "vanilla" を名乗っているのに Fabric、Forge、NeoForge のチャンネルを登録しているクライアントをフラグします
         vanilla-with-mod-loader: true
-        # セッションの途中でクライアントが別のブランドを送信する。プロキシや一部の Mod は再送信します
+        # セッションの途中で別のブランドを送信したクライアントをフラグします。一部のプロキシや Mod はブランドを再送信するため、デフォルトでは無効です。
         brand-change: false
     stats:
         # /grim brands stats の各セクションに表示する最大件数
@@ -233,23 +231,41 @@ exploit:
     # 上記の設定に基づき、ゴーストブロックのチェック距離を定義します
     # 設定可能な範囲は2から4です
     distance-to-check-if-ghostblocks: 2
-    # クラッシュやラグを狙うエクスプロイトへの制限です。docs/EXPLOIT-CHECKS.md を参照してください。-1 で制限を無効にします。
-    # 1 秒あたりのタブ補完リクエスト数 (CrashH)
+    # プレイヤーが1秒間に送信できるタブ補完リクエストの最大数
+    # 最近のクライアントは、一部のコマンドの入力中にキーを押すたびにリクエストを送信します
+    # 無効にするには、-1を設定してください
     tab-completes-per-second: 100
-    # クリエイティブ/インベントリクリックパケットの最大バイト数とアイテムの最大入れ子の深さ (CrashB, ExploitE)
+    # インベントリクリックまたはクリエイティブインベントリのパケットの最大サイズ (バイト)
+    # 無効にするには、-1を設定してください
     max-item-packet-bytes: 2097152
+    # アイテムのデータを入れ子にできる深さ。シュルカーボックスなど、他のアイテムに入っているアイテムも数えます
+    # 無効にするには、-1を設定してください
     max-item-nbt-depth: 128
-    # 看板 (ExploitC): 1 行あたりの文字数、合計文字数、制御文字の拒否、§ コードの拒否
+    # 看板の1行の最大文字数と、全行の合計の最大文字数
+    # 1.8クライアントは看板の行をJSONテキストとして送信するため、チェックされません
+    # 無効にするには、-1を設定してください
     max-sign-line-length: 100
     max-sign-length: 256
+    # 制御文字を含む看板の編集をキャンセルしますか？ バニラのクライアントでは入力できません
     sign-block-control-characters: true
+    # §書式コードを含む看板の編集をキャンセルしますか？
+    # 看板をテキスト入力に使うプラグインが§コードで行を事前に埋めることがあるため、デフォルトでは無効です
     sign-block-format-codes: false
-    # プラグインメッセージ (ExploitD): 1 秒あたりの数、最大バイト数、ブロックするチャンネル ("name" または "prefix*")
+    # プレイヤーが1秒間に送信できるプラグインメッセージの最大数
+    # BungeeCordやVelocityなどのプロキシも、プレイヤーの接続を通じてプラグインメッセージを送信します
+    # 無効にするには、-1を設定してください
     payloads-per-second: 500
+    # プラグインメッセージの最大サイズ (バイト)
+    # 無効にするには、-1を設定してください
     max-payload-bytes: 1048576
+    # プレイヤーが使用できないプラグインメッセージのチャンネル。例: "examplemod:main"
+    # *で終わるエントリは、それで始まるすべてのチャンネルをブロックします。例: "examplemod:*"
     blocked-payload-channels: []
-    # コマンド (ChatE): 1 秒あたりの数と最長コマンドの文字数
+    # プレイヤーが1秒間に送信できるコマンドの最大数
+    # 無効にするには、-1を設定してください
     commands-per-second: 20
+    # コマンドの最大文字数
+    # 無効にするには、-1を設定してください
     max-command-length: 2048
 
 # Nettyに参加時にプラグインが注入された場合の互換性問題をデバッグするためにログを有効にします

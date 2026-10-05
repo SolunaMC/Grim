@@ -32,20 +32,18 @@ client-brand:
     # Grim umieści na czarnej liście konkretne wersje Forge, które zawierają wbudowane modyfikacje Reach (Forge 1.18.2 do 1.19.3).
     # Ustawienie tej opcji na fałsz umożliwi tym klientom połączenie się z serwerem. Wyłączasz tę opcję na własne ryzyko.
     disconnect-blacklisted-forge-versions: true
-    # Mody są wykrywane na podstawie kanałów pluginów rejestrowanych przez klienta. Mody działające wyłącznie po stronie klienta (Freecam,
-    # Sodium, większość cheatów) niczego nie rejestrują i nie mogą zostać wykryte. Traktuj wykrycia jako wskazówki, a nie dowody.
-    # Szczegóły i wbudowane sygnatury: docs/CLIENT-DETECTION.md na GitHubie
-    # Własne sygnatury, "regex -> nazwa", sprawdzane oprócz wbudowanych
+    # Mody są wykrywane na podstawie kanałów pluginów rejestrowanych przez klienta. Mody, które żadnych nie rejestrują (Freecam, Sodium, większość cheatów), nie mogą zostać wykryte.
+    # Klient może też ukryć lub podrobić swoje kanały, więc traktuj wykryte mody jako wskazówkę, a nie dowód.
+    # Własne sygnatury w formacie "regex -> nazwa", są sprawdzane oprócz wbudowanych.
     mod-signatures: []
     #  - "^mymod: -> My Mod"
-    # Liczba milisekund, przez którą powiadomienie o marce klienta czeka po dołączeniu, aby wymienić także mody zarejestrowane później.
-    # 0 wysyła je od razu
+    # Ile milisekund powiadomienie o marce klienta czeka po dołączeniu, aby wymienić także mody zarejestrowane później. 0 wysyła je od razu.
     notification-delay-ms: 1000
-    # Reguły dla marek lub modów. Każda reguła działa raz na sesję gracza.
-    #   regex:   wyrażenie regularne Javy
-    #   type:    brand (marka klienta) lub mod (nazwy wykrytych modów i surowe nazwy kanałów)
-    #   action:  alert (wiadomość do administracji) lub kick
-    #   message: opcjonalne, zastępuje rule-alert-format / rule-kick-message z messages.yml
+    # Reguły, które powiadamiają administrację lub wyrzucają gracza, gdy jego marka lub mod pasuje. Każda reguła działa raz na sesję.
+    #   regex: wyrażenie regularne Javy
+    #   type: brand sprawdza markę klienta, mod sprawdza nazwy wykrytych modów i nazwy kanałów
+    #   action: alert lub kick
+    #   message: opcjonalne, zastępuje rule-alert-format lub rule-kick-message z messages.yml
     rules: []
     #  - regex: "(?i)^wurst"
     #    type: brand
@@ -53,13 +51,13 @@ client-brand:
     #  - regex: "^Xaero's Minimap$"
     #    type: mod
     #    action: alert
-    # Sprawdzanie podrobionej marki (BadPacketsT). Flaguje tylko raz na sesję, więc użyj dla niego grupy w punishments.yml
-    # z niskim progiem, zobacz docs/CLIENT-DETECTION.md
+    # Flaguje jako BadPacketsT klientów, którzy kłamią co do swojej marki. Flaguje najwyżej raz na sesję, więc ustaw mu niski próg w punishments.yml.
     spoof-check:
+        # Czy sprawdzanie podrobionej marki ma być włączone?
         enabled: false
-        # Klient podaje się za "vanilla", ale rejestruje kanały Fabric, Forge lub NeoForge
+        # Flaguj klientów, którzy podają się za "vanilla", ale rejestrują kanały Fabric, Forge lub NeoForge
         vanilla-with-mod-loader: true
-        # Klient wysyła inną markę później w trakcie sesji. Proxy i niektóre mody wysyłają ją ponownie
+        # Flaguj klientów, którzy później w trakcie sesji wysyłają inną markę. Niektóre proxy i mody wysyłają markę ponownie, dlatego domyślnie jest to wyłączone.
         brand-change: false
     stats:
         # Maksymalna liczba wpisów na sekcję w /grim brands stats
@@ -224,23 +222,41 @@ exploit:
     # To ustawienie, zależne od powyższej wartości logicznej, określa dystans do sprawdzania ghostblocków.
     # Jego prawidłowy zakres jest ograniczony od 2 do 4.
     distance-to-check-if-ghostblocks: 2
-    # Limity przeciw exploitom powodującym crash i lag, zobacz docs/EXPLOIT-CHECKS.md. -1 wyłącza limit.
-    # Zapytania o autouzupełnianie na sekundę (CrashH)
+    # Maksymalna liczba zapytań o autouzupełnianie, które gracz może wysłać na sekundę.
+    # Nowoczesni klienci wysyłają je przy każdym naciśnięciu klawisza podczas wpisywania niektórych komend.
+    # Aby wyłączyć, użyj -1.
     tab-completes-per-second: 100
-    # Największy pakiet trybu kreatywnego/kliknięcia w ekwipunku w bajtach i najgłębsze zagnieżdżenie przedmiotu (CrashB, ExploitE)
+    # Maksymalny rozmiar w bajtach pakietu kliknięcia w ekwipunku lub w ekwipunku trybu kreatywnego.
+    # Aby wyłączyć, użyj -1.
     max-item-packet-bytes: 2097152
+    # Jak głęboko mogą być zagnieżdżone dane przedmiotu, wliczając przedmioty w innych przedmiotach, np. w shulkerach.
+    # Aby wyłączyć, użyj -1.
     max-item-nbt-depth: 128
-    # Tabliczki (ExploitC): znaki w linii, znaki łącznie, odrzucaj znaki sterujące, odrzucaj kody §
+    # Maksymalna długość pojedynczej linii tabliczki oraz wszystkich linii łącznie.
+    # Klienci 1.8 nie są sprawdzani, ponieważ wysyłają linie tabliczek jako tekst JSON.
+    # Aby wyłączyć, użyj -1.
     max-sign-line-length: 100
     max-sign-length: 256
+    # Czy anulować edycje tabliczek ze znakami sterującymi? Klienci vanilla nie mogą ich wpisać.
     sign-block-control-characters: true
+    # Czy anulować edycje tabliczek z kodami formatowania §?
+    # Domyślnie wyłączone, ponieważ pluginy używające tabliczek do wpisywania tekstu mogą wstępnie wypełniać linie kodami §.
     sign-block-format-codes: false
-    # Wiadomości pluginów (ExploitD): na sekundę, największy rozmiar w bajtach, zablokowane kanały ("nazwa" lub "prefiks*")
+    # Maksymalna liczba wiadomości pluginów, które gracz może wysłać na sekundę.
+    # Proxy takie jak BungeeCord i Velocity również wysyłają wiadomości pluginów przez połączenie gracza.
+    # Aby wyłączyć, użyj -1.
     payloads-per-second: 500
+    # Maksymalny rozmiar wiadomości pluginu w bajtach.
+    # Aby wyłączyć, użyj -1.
     max-payload-bytes: 1048576
+    # Kanały wiadomości pluginów, których gracze nie mogą używać, np. "examplemod:main".
+    # Wpis zakończony * blokuje wszystkie kanały, które się nim zaczynają, np. "examplemod:*".
     blocked-payload-channels: []
-    # Komendy (ChatE): na sekundę i najdłuższa komenda w znakach
+    # Maksymalna liczba komend, które gracz może wysłać na sekundę.
+    # Aby wyłączyć, użyj -1.
     commands-per-second: 20
+    # Maksymalna długość komendy w znakach.
+    # Aby wyłączyć, użyj -1.
     max-command-length: 2048
 
 # Włącz logowanie pluginów, które wstrzyknęły się do netty podczas dołączania gracza, w celu debugowania problemów z kompatybilnością.

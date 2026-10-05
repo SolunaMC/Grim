@@ -1,7 +1,8 @@
-package ac.grim.grimac.utils.clientdetection;
+package ac.grim.grimac.utils.data;
 
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,10 +11,14 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class ModSignaturesTest {
+class ModSignatureTest {
 
     private static List<String> detect(String... channels) {
-        return ModSignatures.detect(List.of(channels), ModSignatures.BUILT_IN);
+        return ModSignature.detect(List.of(channels), ModSignature.BUILT_IN);
+    }
+
+    private static List<String> read(String data, int limit) {
+        return ModSignature.readChannels(data.getBytes(StandardCharsets.UTF_8), limit);
     }
 
     @Test
@@ -71,27 +76,37 @@ class ModSignaturesTest {
         assertThrows(IllegalArgumentException.class, () -> ModSignature.parse("-> name"));
         assertThrows(IllegalArgumentException.class, () -> ModSignature.parse("^x: ->"));
         assertThrows(IllegalArgumentException.class, () -> ModSignature.parse("[unclosed -> Broken"));
-    }
 
-    @Test
-    void parseSkipsInvalidEntries() {
-        List<Object> errors = new ArrayList<>();
-        List<ModSignature> parsed = ModSignatures.parse(List.of("^a: -> A", "broken", 5, "(x -> X"),
-                (entry, reason) -> errors.add(entry));
-        assertEquals(1, parsed.size());
-        assertEquals("A", parsed.get(0).name());
-        assertEquals(List.of("broken", 5, "(x -> X"), errors);
-
-        List<ModSignature> signatures = new ArrayList<>(ModSignatures.BUILT_IN);
-        signatures.addAll(parsed);
-        assertEquals(List.of("Fabric API", "A"), ModSignatures.detect(List.of("a:b", "fabric:x"), signatures));
+        List<ModSignature> signatures = new ArrayList<>(ModSignature.BUILT_IN);
+        signatures.add(ModSignature.parse("^a: -> A"));
+        assertEquals(List.of("Fabric API", "A"), ModSignature.detect(List.of("a:b", "fabric:x"), signatures));
     }
 
     @Test
     void findsModLoaderChannels() {
-        assertEquals("fabric:recipe_sync", ModSignatures.findModLoaderChannel(List.of("voicechat:secret", "fabric:recipe_sync")));
-        assertEquals("neoforge:network", ModSignatures.findModLoaderChannel(List.of("c:register", "neoforge:network")));
-        assertEquals("FML|HS", ModSignatures.findModLoaderChannel(List.of("FML|HS")));
-        assertNull(ModSignatures.findModLoaderChannel(List.of("c:register", "c:version", "lunar:apollo", "voicechat:secret")));
+        assertEquals("fabric:recipe_sync", ModSignature.findModLoaderChannel(List.of("voicechat:secret", "fabric:recipe_sync")));
+        assertEquals("neoforge:network", ModSignature.findModLoaderChannel(List.of("c:register", "neoforge:network")));
+        assertEquals("forge:handshake", ModSignature.findModLoaderChannel(List.of("forge:handshake")));
+        assertEquals("FML|HS", ModSignature.findModLoaderChannel(List.of("FML|HS")));
+        assertNull(ModSignature.findModLoaderChannel(List.of("c:register", "c:version", "lunar:apollo", "voicechat:secret")));
+        assertNull(ModSignature.findModLoaderChannel(List.of()));
+    }
+
+    @Test
+    void readsRegisteredChannels() {
+        assertEquals(List.of("fabric:a", "voicechat:b"), read("fabric:a\0voicechat:b", 10));
+        // Forge terminates every entry, Fabric only separates them
+        assertEquals(List.of("forge:a", "forge:b"), read("forge:a\0forge:b\0", 10));
+        assertEquals(List.of("x:y"), read("\0\0x:y\0\0", 10));
+        assertEquals(List.of(), read("", 10));
+    }
+
+    @Test
+    void readChannelsHonoursLimits() {
+        assertEquals(List.of("a:1", "a:2"), read("a:1\0a:2\0a:3", 2));
+        assertEquals(List.of(), read("a:1", 0));
+
+        String tooLong = "a:" + "x".repeat(ModSignature.MAX_CHANNEL_LENGTH);
+        assertEquals(List.of("b:c"), read(tooLong + "\0b:c", 10));
     }
 }
