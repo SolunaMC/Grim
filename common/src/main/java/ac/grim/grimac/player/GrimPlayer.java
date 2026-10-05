@@ -49,8 +49,8 @@ import ac.grim.grimac.utils.nmsutil.Collisions;
 import ac.grim.grimac.utils.nmsutil.GetBoundingBox;
 import ac.grim.grimac.utils.nmsutil.Materials;
 import ac.grim.grimac.utils.nmsutil.StuckSpeed;
-import ac.grim.grimac.utils.viaversion.ViaVersionUtil;
 import ac.grim.grimac.utils.reflection.GeyserUtil;
+import ac.grim.grimac.utils.viaversion.ViaVersionUtil;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.manager.server.ServerVersion;
@@ -279,8 +279,7 @@ public class GrimPlayer implements GrimUser {
     // This variable is for support with test servers that want to be able to disable grim
     // Grim disabler 2022 still working!
     public boolean disableGrim;
-    // Bedrock players (only tracked with the experimental bedrock support) run in disabled mode;
-    // only checks listed in bedrock.checks may flag them, unless they also have grim.disabled
+    // Bedrock players are only tracked when bedrock.enabled is set, see Check#disabledForPlayer
     public final boolean bedrockPlayer;
     public boolean disabledByPermission;
     public final @NotNull ArrayDeque<@NotNull Movement> movementThisTick = new ArrayDeque<>(8);

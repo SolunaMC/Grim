@@ -25,7 +25,6 @@ public class BaseConfigManager {
     private ConfigManager config = null;
     @Getter
     private boolean printAlertsToConsole = false;
-    // Experimental: track Bedrock (Geyser/Floodgate) players instead of exempting them, see BEDROCK.md
     @Getter
     private volatile boolean bedrockEnabled = false;
     @Getter

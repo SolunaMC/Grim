@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 // Class from https://github.com/Tecnio/AntiCheatBase/blob/master/src/main/java/me/tecnio/anticheat/check/Check.java
 @Getter
 public class Check extends GrimProcessor implements AbstractCheck {
-    // Packet-level checks that don't depend on Java movement physics
+    // Packet checks that don't rely on Java movement
     private static final List<String> DEFAULT_BEDROCK_CHECKS = List.of("Crash", "Exploit");
 
     private static final FlagEvent.Channel FLAG_CHANNEL = GrimAPI.INSTANCE.getEventBus().get(FlagEvent.class);
@@ -51,10 +51,10 @@ public class Check extends GrimProcessor implements AbstractCheck {
     private double decay;
     private double setbackVL;
     @Setter private boolean isEnabled;
+    private boolean bedrockAllowed;
 
     // permissions
     private boolean exemptPermission;
-    private boolean bedrockAllowed;
     private boolean noSetbackPermission;
     private boolean noModifyPacketPermission;
 
@@ -104,7 +104,7 @@ public class Check extends GrimProcessor implements AbstractCheck {
         return true;
     }
 
-    // Bedrock players run in disabled mode, except for the checks allowed by bedrock.checks
+    // Bedrock players are tracked like disabled players, only the checks in bedrock.checks can flag them
     private boolean disabledForPlayer() {
         return player.disableGrim && !(bedrockAllowed && player.bedrockPlayer && !player.disabledByPermission);
     }
@@ -233,7 +233,7 @@ public class Check extends GrimProcessor implements AbstractCheck {
         if (checkName == null || !configuration.getBooleanElse("bedrock.enabled", false)) return false;
         String name = checkName.toLowerCase(Locale.ROOT);
         for (String allowed : configuration.getStringListElse("bedrock.checks", DEFAULT_BEDROCK_CHECKS)) {
-            // Same matching as punishments.yml: "Exploit" matches ExploitA, ExploitB, ...
+            // Same matching as punishments.yml, "Exploit" matches ExploitA, ExploitB, ...
             if (!allowed.isEmpty() && name.contains(allowed.toLowerCase(Locale.ROOT))) return true;
         }
         return false;

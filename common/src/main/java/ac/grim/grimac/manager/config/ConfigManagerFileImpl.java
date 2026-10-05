@@ -71,7 +71,6 @@ public class ConfigManagerFileImpl implements ConfigManager, BasicReloadable {
             config.addSource(GrimAPI.class, "config", getConfigFile("config.yml"));
             config.addSource(GrimAPI.class, "messages", getConfigFile("messages.yml"));
             config.addSource(GrimAPI.class, "discord", getConfigFile("discord.yml"));
-            // Experimental Bedrock support; keys are under a `bedrock:` wrapper like database.yml
             config.addSource(GrimAPI.class, "bedrock", getConfigFile("bedrock.yml"));
             config.addSource(GrimAPI.class, "punishments", getConfigFile("punishments.yml"));
             // database.yml + per-backend files load through here too; their

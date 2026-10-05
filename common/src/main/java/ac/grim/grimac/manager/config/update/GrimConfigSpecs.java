@@ -120,7 +120,6 @@ public final class GrimConfigSpecs {
                 .build();
     }
 
-    /** Experimental Bedrock support (top-level {@code bedrock:} wrapper), see BEDROCK.md. */
     public static @NotNull ConfigUpdater.Spec bedrock() {
         return ConfigUpdater.Spec.builder("/bedrock/", 1, ConfigUpdater.ConfigFlavor.V2)
                 .build();

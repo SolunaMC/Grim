@@ -68,10 +68,8 @@ public class PlayerDataManager {
         if (!ChannelHelper.isOpen(user.getChannel())) return false;
 
         if (user.getUUID() != null) {
-            // Bedrock players don't have Java movement. With the experimental bedrock support they are
-            // tracked like grim.disabled players and only the checks listed in bedrock.checks can flag.
-            boolean bedrockSupport = GrimAPI.INSTANCE.getConfigManager().isBedrockEnabled();
-            if (!bedrockSupport && GeyserUtil.isBedrock(user.getUUID())) {
+            // Bedrock players don't have Java movement
+            if (!GrimAPI.INSTANCE.getConfigManager().isBedrockEnabled() && GeyserUtil.isBedrock(user.getUUID())) {
                 exemptUser(user);
                 return false;
             }
