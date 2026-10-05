@@ -1,13 +1,12 @@
-# 実験的: Bedrock プレイヤー (Geyser/Floodgate) を除外せずにチェックします。
-# 下に記載したチェックのみが適用されます。BEDROCK.md を参照してください。
-
 bedrock:
-  enabled: false
-  # punishments.yml と同じ一致方法です: "Exploit" は ExploitA と ExploitB に一致します。
-  checks:
-    - Crash
-    - Exploit
+    # Bedrock プレイヤー (Geyser/Floodgate) は Java の移動を使用しないため、Grim はデフォルトで除外します。
+    # 有効にすると、代わりに下に記載したチェックで彼らをチェックします。この機能は実験的です。
+    enabled: false
+    # Bedrock プレイヤーをフラグできるのはこれらのチェックだけです。名前はそれを含むすべてのチェックに一致するため、"Exploit" は ExploitA と ExploitB に一致します。
+    checks:
+        - Crash
+        - Exploit
 
-# スキーママーカー — config.yml 冒頭のコメントを参照してください。
+# スキーマ用マーカー — config.yml のヘッダーコメントを参照。
 config-flavor: V2
 config-version: 1

@@ -1,13 +1,12 @@
-# Deneysel: Bedrock oyuncularını (Geyser/Floodgate) muaf tutmak yerine kontrol et.
-# Onlara yalnızca aşağıda listelenen kontroller uygulanır, bkz. BEDROCK.md.
-
 bedrock:
-  enabled: false
-  # Eşleşme punishments.yml ile aynıdır: "Exploit", ExploitA ve ExploitB ile eşleşir.
-  checks:
-    - Crash
-    - Exploit
+    # Bedrock oyuncuları (Geyser/Floodgate) Java hareketini kullanmaz, bu yüzden Grim onları varsayılan olarak muaf tutar.
+    # Bunun yerine onları aşağıda listelenen kontrollerle denetlemek için bunu etkinleştirin. Bu özellik deneyseldir.
+    enabled: false
+    # Bedrock oyuncularını yalnızca bu kontroller işaretleyebilir. Bir ad, onu içeren her kontrolle eşleşir, yani "Exploit" ExploitA ve ExploitB'yi kapsar.
+    checks:
+        - Crash
+        - Exploit
 
-# Şema işaretleri — config.yml başındaki açıklamaya bakın.
+# Şema işaretçileri — bkz. config.yml'deki başlık yorumu.
 config-flavor: V2
 config-version: 1

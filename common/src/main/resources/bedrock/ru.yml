@@ -1,13 +1,12 @@
-# Экспериментально: проверять игроков Bedrock (Geyser/Floodgate), а не исключать их.
-# К ним применяются только проверки из списка ниже, см. BEDROCK.md.
-
 bedrock:
-  enabled: false
-  # Сопоставление как в punishments.yml: "Exploit" подходит к ExploitA и ExploitB.
-  checks:
-    - Crash
-    - Exploit
+    # Игроки Bedrock (Geyser/Floodgate) не используют движение Java, поэтому Grim по умолчанию исключает их.
+    # Включите это, чтобы вместо этого проверять их проверками из списка ниже. Эта функция экспериментальная.
+    enabled: false
+    # Только эти проверки могут флагать игроков Bedrock. Имя совпадает с каждой проверкой, которая его содержит, поэтому "Exploit" охватывает ExploitA и ExploitB.
+    checks:
+        - Crash
+        - Exploit
 
-# Маркеры схемы — см. комментарий в начале config.yml.
+# Маркеры схемы — см. шапку config.yml.
 config-flavor: V2
 config-version: 1

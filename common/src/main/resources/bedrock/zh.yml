@@ -1,13 +1,12 @@
-# 实验性：检查基岩版玩家 (Geyser/Floodgate)，而不是将其豁免。
-# 只有下面列出的检查会作用于他们，参见 BEDROCK.md。
-
 bedrock:
-  enabled: false
-  # 匹配方式与 punishments.yml 相同："Exploit" 匹配 ExploitA 和 ExploitB。
-  checks:
-    - Crash
-    - Exploit
+    # 基岩版玩家 (Geyser/Floodgate) 不使用 Java 的移动方式，因此 Grim 默认会豁免他们。
+    # 启用此选项后，将改为使用下面列出的检查来检查他们。此功能是实验性的。
+    enabled: false
+    # 只有这些检查可以标记基岩版玩家。名称会匹配所有包含它的检查，因此 "Exploit" 涵盖 ExploitA 和 ExploitB。
+    checks:
+        - Crash
+        - Exploit
 
-# 架构标记 — 参见 config.yml 开头的注释。
+# 模式标记 — 参见 config.yml 顶部的注释。
 config-flavor: V2
 config-version: 1

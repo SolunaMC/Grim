@@ -1,12 +1,11 @@
-# Experimental: track Bedrock (Geyser/Floodgate) players instead of exempting them.
-# They are only checked by the checks listed below, see BEDROCK.md.
-
 bedrock:
-  enabled: false
-  # Matching works like punishments.yml: "Exploit" matches ExploitA and ExploitB.
-  checks:
-    - Crash
-    - Exploit
+    # Bedrock players (Geyser/Floodgate) don't use Java movement, so Grim exempts them by default.
+    # Enable this to check them with the checks listed below instead. This feature is experimental.
+    enabled: false
+    # Only these checks can flag Bedrock players. A name matches every check that contains it, so "Exploit" covers ExploitA and ExploitB.
+    checks:
+        - Crash
+        - Exploit
 
 # Schema markers — see header comment in config.yml.
 config-flavor: V2

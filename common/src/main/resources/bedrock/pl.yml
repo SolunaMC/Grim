@@ -1,13 +1,12 @@
-# Eksperymentalne: sprawdzaj graczy Bedrock (Geyser/Floodgate) zamiast ich pomijać.
-# Obejmują ich tylko checki wymienione poniżej, zobacz BEDROCK.md.
-
 bedrock:
-  enabled: false
-  # Dopasowanie jak w punishments.yml: "Exploit" pasuje do ExploitA i ExploitB.
-  checks:
-    - Crash
-    - Exploit
+    # Gracze Bedrock (Geyser/Floodgate) nie używają ruchu Javy, dlatego Grim domyślnie ich pomija.
+    # Włącz to, aby zamiast tego sprawdzać ich checkami wymienionymi poniżej. Ta funkcja jest eksperymentalna.
+    enabled: false
+    # Tylko te checki mogą flagować graczy Bedrock. Nazwa pasuje do każdego checka, który ją zawiera, więc "Exploit" obejmuje ExploitA i ExploitB.
+    checks:
+        - Crash
+        - Exploit
 
-# Znaczniki schematu — zobacz komentarz na początku config.yml.
+# Znaczniki schematu — zobacz komentarz nagłówkowy w config.yml.
 config-flavor: V2
 config-version: 1

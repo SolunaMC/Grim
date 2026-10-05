@@ -1,13 +1,12 @@
-# Expérimental : vérifier les joueurs Bedrock (Geyser/Floodgate) au lieu de les exempter.
-# Seuls les checks listés ci-dessous s'appliquent à eux, voir BEDROCK.md.
-
 bedrock:
-  enabled: false
-  # Même correspondance que punishments.yml : "Exploit" couvre ExploitA et ExploitB.
-  checks:
-    - Crash
-    - Exploit
+    # Les joueurs Bedrock (Geyser/Floodgate) n'utilisent pas le mouvement Java, Grim les exempte donc par défaut.
+    # Activez cette option pour les vérifier avec les checks listés ci-dessous. Cette fonctionnalité est expérimentale.
+    enabled: false
+    # Seuls ces checks peuvent signaler les joueurs Bedrock. Un nom correspond à chaque check qui le contient, "Exploit" couvre donc ExploitA et ExploitB.
+    checks:
+        - Crash
+        - Exploit
 
-# Marqueurs de schéma — voir le commentaire en tête de config.yml.
+# Marqueurs de schéma — voir le commentaire d'en-tête dans config.yml.
 config-flavor: V2
 config-version: 1
