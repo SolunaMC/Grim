@@ -135,9 +135,9 @@ grim-history-check-count: "&f%check_name%&7 x&c%count%"
 client-brand:
     # Mod が検出され、client-brand-format に %mods% が含まれない場合に末尾へ追加されます
     mods-suffix: " &7(Mod: &f%mods%&7)"
-    # Mod が検出された場合、プロファイルの最終行の前に追加されます
+    # Mod が検出され、プロファイルに %mods% が含まれない場合、最終行の前に追加されます
     profile-mods-line: "&bMod: &f%mods%"
-    # Bedrock プレイヤー用の /grim profile。%bedrock_device%, %bedrock_input%
+    # Bedrock プレイヤーに対して /grim profile が表示するプロファイル。使用できるプレースホルダー: %prefix% %player% %bedrock_device% %bedrock_input%
     bedrock-profile:
         - "&7======================"
         - "%prefix% &b%player% のプロファイル"
@@ -145,10 +145,11 @@ client-brand:
         - "&bデバイス: &f%bedrock_device%"
         - "&b入力方法: &f%bedrock_input%"
         - "&7======================"
-    # config.yml のクライアントルール。%match% は一致したブランド・Mod・チャンネル、%rule% は正規表現
+    # config.yml のクライアントルールに一致したときにスタッフへ送信されます。%rule% はルールの正規表現、%match% は一致したブランド・Mod・チャンネル
     rule-alert-format: "%prefix% &f%player% &bがクライアントルール &f%rule% &bに一致しました &7(%match%)"
+    # config.yml のクライアントルールによるキックメッセージ。使用できるプレースホルダー: %player% %rule% %match%
     rule-kick-message: "<red>お使いのクライアントまたは Mod の一部はこのサーバーで許可されていません。"
-    # /grim brands stats
+    # /grim brands stats の出力。使用できるプレースホルダー: header では %players%、entry では %name% %count% %percent%、more では %count%
     stats:
         header: "%prefix% &bオンラインプレイヤー &f%players% &b人のクライアント &7(オンラインのプレイヤーのみ)"
         brands: "&bブランド:"

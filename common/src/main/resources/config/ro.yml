@@ -32,20 +32,18 @@ client-brand:
     # Grim va bloca anumite versiuni Forge care includ hackuri Reach integrate (Forge 1.18.2 până la 1.19.3).
     # Setarea acestei opțiuni la false va permite acestor clienți să se conecteze la server. Dezactivează pe propriul risc.
     disconnect-blacklisted-forge-versions: true
-    # Modurile sunt detectate după canalele de plugin pe care le înregistrează un client. Modurile pur client-side (Freecam,
-    # Sodium, majoritatea cheat-urilor) nu înregistrează nimic și nu pot fi detectate. Tratează detecțiile ca indicii, nu ca dovezi.
-    # Detalii și semnăturile integrate: docs/CLIENT-DETECTION.md pe GitHub
-    # Semnăturile tale proprii, "regex -> nume", verificate pe lângă cele integrate
+    # Modurile sunt detectate după canalele de plugin pe care le înregistrează un client. Modurile care nu înregistrează niciunul (Freecam, Sodium, majoritatea cheat-urilor) nu pot fi detectate.
+    # Un client își poate și ascunde sau falsifica canalele, așa că tratează modurile detectate ca un indiciu, nu ca o dovadă.
+    # Semnăturile tale proprii în formatul "regex -> nume", sunt verificate pe lângă cele integrate.
     mod-signatures: []
     #  - "^mymod: -> My Mod"
-    # Milisecundele pe care notificarea de brand le așteaptă după intrare, ca modurile înregistrate mai târziu să poată fi listate.
-    # 0 o trimite imediat
+    # Câte milisecunde așteaptă notificarea de brand după intrare, ca modurile înregistrate mai târziu să fie și ele listate. 0 o trimite imediat.
     notification-delay-ms: 1000
-    # Reguli pentru branduri sau moduri. Fiecare regulă acționează o singură dată per sesiune de jucător.
-    #   regex:   expresie regulată Java
-    #   type:    brand (brandul clientului) sau mod (numele modurilor detectate și numele brute ale canalelor)
-    #   action:  alert (mesaj către staff) sau kick
-    #   message: opțional, înlocuiește rule-alert-format / rule-kick-message din messages.yml
+    # Reguli care alertează staff-ul sau dau kick jucătorului când brandul lui sau un mod se potrivește. Fiecare regulă acționează o singură dată per sesiune.
+    #   regex: o expresie regulată Java
+    #   type: brand pentru brandul clientului, mod pentru numele modurilor detectate și numele canalelor
+    #   action: alert sau kick
+    #   message: opțional, înlocuiește rule-alert-format sau rule-kick-message din messages.yml
     rules: []
     #  - regex: "(?i)^wurst"
     #    type: brand
@@ -53,13 +51,13 @@ client-brand:
     #  - regex: "^Xaero's Minimap$"
     #    type: mod
     #    action: alert
-    # Verificarea brandului falsificat (BadPacketsT). Semnalează o singură dată per sesiune, așa că folosește un grup din
-    # punishments.yml cu un prag scăzut pentru ea, vezi docs/CLIENT-DETECTION.md
+    # Semnalează ca BadPacketsT clienții care mint despre brandul lor. Semnalează cel mult o dată per sesiune, așa că dă-i un prag scăzut în punishments.yml.
     spoof-check:
+        # Ar trebui activată verificarea brandului falsificat?
         enabled: false
-        # Clientul se prezintă ca "vanilla", dar înregistrează canale Fabric, Forge sau NeoForge
+        # Semnalează clienții care se prezintă ca "vanilla", dar înregistrează canale Fabric, Forge sau NeoForge
         vanilla-with-mod-loader: true
-        # Clientul trimite un alt brand mai târziu în sesiune. Proxy-urile și unele moduri îl retrimit
+        # Semnalează clienții care trimit un alt brand mai târziu în sesiune. Unele proxy-uri și moduri retrimit brandul, de aceea este dezactivat implicit.
         brand-change: false
     stats:
         # Numărul maxim de intrări per secțiune în /grim brands stats

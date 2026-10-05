@@ -136,9 +136,9 @@ grim-history-check-count: "&f%check_name%&7 x&c%count%"
 client-brand:
     # Ajouté à client-brand-format lorsque des mods ont été détectés et que le format ne contient pas %mods%
     mods-suffix: " &7(mods : &f%mods%&7)"
-    # Ajouté au profil avant sa dernière ligne lorsque des mods ont été détectés
+    # Ajouté au profil avant sa dernière ligne lorsque des mods ont été détectés et que le profil ne contient pas %mods%
     profile-mods-line: "&bMods : &f%mods%"
-    # /grim profile pour les joueurs Bedrock. %bedrock_device%, %bedrock_input%
+    # Profil affiché par /grim profile pour les joueurs Bedrock, placeholders valides : %prefix% %player% %bedrock_device% %bedrock_input%
     bedrock-profile:
         - "&7======================"
         - "%prefix% &bProfil de &f%player%"
@@ -146,10 +146,11 @@ client-brand:
         - "&bAppareil : &f%bedrock_device%"
         - "&bContrôles : &f%bedrock_input%"
         - "&7======================"
-    # Règles client de config.yml. %match% est la nature du client, le mod ou le canal trouvé, %rule% la regex
+    # Envoyé au staff lorsqu'une règle client de config.yml correspond. %rule% est la regex de la règle, %match% la nature du client, le mod ou le canal trouvé
     rule-alert-format: "%prefix% &f%player% &bcorrespond à la règle client &f%rule% &7(%match%)"
+    # Message d'expulsion des règles client de config.yml, placeholders valides : %player% %rule% %match%
     rule-kick-message: "<red>Votre client ou l'un de vos mods n'est pas autorisé sur ce serveur."
-    # /grim brands stats
+    # Sortie de /grim brands stats, placeholders valides : %players% dans header, %name% %count% %percent% dans entry, %count% dans more
     stats:
         header: "%prefix% &bClients de &f%players% &bjoueurs en ligne &7(joueurs en ligne uniquement)"
         brands: "&bNatures du client :"

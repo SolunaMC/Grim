@@ -32,20 +32,18 @@ client-brand:
     # Grim will blacklist specific Forge versions which include built-in Reach hacks (Forge 1.18.2 to 1.19.3).
     # Setting this option to false will allow said clients to connect to the server. Disable this at your own risk.
     disconnect-blacklisted-forge-versions: true
-    # Modlar, clientin kaydettiği plugin kanallarından tespit edilir. Tamamen client tarafında çalışan modlar (Freecam,
-    # Sodium, çoğu hile) hiçbir şey kaydetmez ve tespit edilemez. Tespitleri kanıt değil, ipucu olarak değerlendirin.
-    # Ayrıntılar ve yerleşik imzalar: GitHub'daki docs/CLIENT-DETECTION.md
-    # Yerleşik imzalara ek olarak kontrol edilen kendi imzalarınız, "regex -> isim"
+    # Modlar, clientin kaydettiği plugin kanallarından tespit edilir. Hiç kanal kaydetmeyen modlar (Freecam, Sodium, çoğu hile) tespit edilemez.
+    # Bir client kanallarını gizleyebilir veya taklit edebilir, bu yüzden tespit edilen modları kanıt değil, ipucu olarak değerlendirin.
+    # "regex -> isim" biçimindeki kendi imzalarınız, yerleşik imzalara ek olarak kontrol edilir.
     mod-signatures: []
     #  - "^mymod: -> My Mod"
-    # Marka bildiriminin giriş yaptıktan sonra beklediği milisaniye, böylece sonradan kaydedilen modlar da listelenebilir.
-    # 0 bildirimi hemen gönderir
+    # Marka bildiriminin giriş yaptıktan sonra kaç milisaniye beklediği, böylece sonradan kaydedilen modlar da listelenir. 0 bildirimi hemen gönderir.
     notification-delay-ms: 1000
-    # Markalar veya modlar için kurallar. Her kural oyuncu oturumu başına bir kez uygulanır.
-    #   regex:   Java düzenli ifadesi (regex)
-    #   type:    brand (client markası) veya mod (tespit edilen mod isimleri ve ham kanal isimleri)
-    #   action:  alert (yetkililere mesaj) veya kick
-    #   message: isteğe bağlı, messages.yml'deki rule-alert-format / rule-kick-message yerine kullanılır
+    # Oyuncunun markası veya bir mod eşleştiğinde yetkilileri uyaran veya oyuncuyu atan kurallar. Her kural oturum başına bir kez uygulanır.
+    #   regex: bir Java düzenli ifadesi
+    #   type: brand client markasıyla, mod tespit edilen mod adları ve kanal adlarıyla eşleşir
+    #   action: alert veya kick
+    #   message: isteğe bağlı, messages.yml içindeki rule-alert-format veya rule-kick-message yerine kullanılır
     rules: []
     #  - regex: "(?i)^wurst"
     #    type: brand
@@ -53,13 +51,13 @@ client-brand:
     #  - regex: "^Xaero's Minimap$"
     #    type: mod
     #    action: alert
-    # Sahte marka kontrolü (BadPacketsT). Oturum başına yalnızca bir kez işaretler, bu yüzden bunun için düşük eşikli bir
-    # punishments.yml grubu kullanın, bkz. docs/CLIENT-DETECTION.md
+    # Markası hakkında yalan söyleyen clientleri BadPacketsT olarak işaretler. Oturum başına en fazla bir kez işaretler, bu yüzden punishments.yml içinde ona düşük bir eşik verin.
     spoof-check:
+        # Sahte marka kontrolü etkin olsun mu?
         enabled: false
-        # Client kendini "vanilla" olarak tanıtıyor ama Fabric, Forge veya NeoForge kanalları kaydediyor
+        # Kendini "vanilla" olarak tanıtan ama Fabric, Forge veya NeoForge kanalları kaydeden clientleri işaretle
         vanilla-with-mod-loader: true
-        # Client oturumun ilerleyen kısmında farklı bir marka gönderiyor. Proxy'ler ve bazı modlar markayı yeniden gönderir
+        # Oturumun ilerleyen kısmında farklı bir marka gönderen clientleri işaretle. Bazı proxy'ler ve modlar markayı yeniden gönderir, bu yüzden varsayılan olarak kapalıdır.
         brand-change: false
     stats:
         # /grim brands stats içinde bölüm başına en fazla girdi sayısı

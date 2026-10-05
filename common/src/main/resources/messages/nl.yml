@@ -136,9 +136,9 @@ grim-history-check-count: "&f%check_name%&7 x&c%count%"
 client-brand:
     # Wordt toegevoegd aan client-brand-format als er mods zijn herkend en het formaat geen %mods% bevat
     mods-suffix: " &7(mods: &f%mods%&7)"
-    # Wordt vóór de laatste regel aan het profiel toegevoegd als er mods zijn herkend
+    # Wordt vóór de laatste regel aan het profiel toegevoegd als er mods zijn herkend en het profiel geen %mods% bevat
     profile-mods-line: "&bMods: &f%mods%"
-    # /grim profile voor Bedrock-spelers. %bedrock_device%, %bedrock_input%
+    # Profiel dat /grim profile voor Bedrock-spelers toont, geldige placeholders: %prefix% %player% %bedrock_device% %bedrock_input%
     bedrock-profile:
         - "&7======================"
         - "%prefix% &bProfiel voor &f%player%"
@@ -146,10 +146,11 @@ client-brand:
         - "&bApparaat: &f%bedrock_device%"
         - "&bInvoer: &f%bedrock_input%"
         - "&7======================"
-    # Clientregels uit config.yml. %match% is het gevonden merk, de mod of het kanaal, %rule% de regex
+    # Wordt naar het team gestuurd als een clientregel uit config.yml overeenkomt. %rule% is de regex van de regel, %match% het gevonden merk, de mod of het kanaal
     rule-alert-format: "%prefix% &f%player% &bvoldoet aan clientregel &f%rule% &7(%match%)"
+    # Kickbericht van clientregels uit config.yml, geldige placeholders: %player% %rule% %match%
     rule-kick-message: "<red>Je client of een van je mods is niet toegestaan op deze server."
-    # /grim brands stats
+    # Uitvoer van /grim brands stats, geldige placeholders: %players% in header, %name% %count% %percent% in entry, %count% in more
     stats:
         header: "%prefix% &bClients van &f%players% &bonline spelers &7(alleen online spelers)"
         brands: "&bMerken:"

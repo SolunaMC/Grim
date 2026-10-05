@@ -134,9 +134,9 @@ grim-history-check-count: "&f%check_name%&7 x&c%count%"
 client-brand:
     # Adăugat la client-brand-format când au fost detectate moduri și formatul nu conține %mods%
     mods-suffix: " &7(moduri: &f%mods%&7)"
-    # Adăugat în profil înaintea ultimei linii când au fost detectate moduri
+    # Adăugat în profil înaintea ultimei linii când au fost detectate moduri și profilul nu conține %mods%
     profile-mods-line: "&bModuri: &f%mods%"
-    # /grim profile pentru jucătorii Bedrock. %bedrock_device%, %bedrock_input%
+    # Profilul afișat de /grim profile pentru jucătorii Bedrock, placeholdere valide: %prefix% %player% %bedrock_device% %bedrock_input%
     bedrock-profile:
         - "&7======================"
         - "%prefix% &bProfil pentru &f%player%"
@@ -144,10 +144,11 @@ client-brand:
         - "&bDispozitiv: &f%bedrock_device%"
         - "&bControl: &f%bedrock_input%"
         - "&7======================"
-    # Reguli de client din config.yml. %match% este brandul, modul sau canalul potrivit, %rule% este regex-ul
+    # Trimis staff-ului când se potrivește o regulă de client din config.yml. %rule% este regex-ul regulii, %match% brandul, modul sau canalul potrivit
     rule-alert-format: "%prefix% &f%player% &ba declanșat regula de client &f%rule% &7(%match%)"
+    # Mesajul de kick al regulilor de client din config.yml, placeholdere valide: %player% %rule% %match%
     rule-kick-message: "<red>Clientul tău sau unul dintre modurile tale nu este permis pe acest server."
-    # /grim brands stats
+    # Rezultatul /grim brands stats, placeholdere valide: %players% în header, %name% %count% %percent% în entry, %count% în more
     stats:
         header: "%prefix% &bClienții celor &f%players% &bjucători online &7(doar jucătorii online)"
         brands: "&bBranduri:"

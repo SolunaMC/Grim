@@ -131,9 +131,9 @@ grim-history-check-count: "&f%check_name%&7 x&c%count%"
 client-brand:
     # 检测到模组且 client-brand-format 中没有 %mods% 时，追加到其末尾
     mods-suffix: " &7(模组: &f%mods%&7)"
-    # 检测到模组时，添加到玩家信息的最后一行之前
+    # 检测到模组且玩家信息中没有 %mods% 时，添加到其最后一行之前
     profile-mods-line: "&b模组: &f%mods%"
-    # 基岩版玩家的 /grim profile。%bedrock_device%, %bedrock_input%
+    # /grim profile 为基岩版玩家显示的信息，可用占位符：%prefix% %player% %bedrock_device% %bedrock_input%
     bedrock-profile:
         - "&7======================"
         - "%prefix% &f%player% &b 的信息"
@@ -141,10 +141,11 @@ client-brand:
         - "&b设备: &f%bedrock_device%"
         - "&b输入方式: &f%bedrock_input%"
         - "&7======================"
-    # 来自 config.yml 的客户端规则。%match% 为匹配到的客户端型号、模组或频道，%rule% 为正则表达式
+    # config.yml 中的客户端规则匹配时发送给管理人员。%rule% 为规则的正则表达式，%match% 为匹配到的客户端型号、模组或频道
     rule-alert-format: "%prefix% &f%player% &b匹配了客户端规则 &f%rule% &7(%match%)"
+    # config.yml 中客户端规则的踢出消息，可用占位符：%player% %rule% %match%
     rule-kick-message: "<red>你的客户端或你的某个模组不允许在本服务器使用。"
-    # /grim brands stats
+    # /grim brands stats 的输出，可用占位符：header 中的 %players%，entry 中的 %name% %count% %percent%，more 中的 %count%
     stats:
         header: "%prefix% &f%players% &b名在线玩家的客户端 &7(仅统计在线玩家)"
         brands: "&b客户端型号:"

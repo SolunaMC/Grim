@@ -33,20 +33,18 @@ client-brand:
     # Grim 将把包含内置攻击距离修改功能的特定 Forge 版本列入黑名单（Forge 1.18.2 至 1.19.3） 可能会导致1.18.2-1.19.3的Forge版本玩家无法进入服务器。
     # 将此选项设置为 false 将允许上述客户端连接服务器。禁用此选项需自行承担风险（建议打开）。
     disconnect-blacklisted-forge-versions: true
-    # 通过客户端注册的插件频道来检测模组。纯客户端模组（Freecam、
-    # Sodium、大多数作弊端）不会注册任何频道，因此无法被检测。检测结果仅供参考，不能作为证据。
-    # 详情及内置特征：GitHub 上的 docs/CLIENT-DETECTION.md
-    # 自定义特征，格式为 "正则 -> 名称"，会在内置特征之外额外检查
+    # 通过客户端注册的插件频道来检测模组。不注册任何频道的模组（Freecam、Sodium、大多数作弊端）无法被检测。
+    # 客户端也可以隐藏或伪造自己的频道，因此检测到的模组仅供参考，不能作为证据。
+    # 自定义特征，格式为 "正则 -> 名称"，会在内置特征之外额外检查。
     mod-signatures: []
     #  - "^mymod: -> My Mod"
-    # 玩家进入后客户端型号通知等待的毫秒数，以便列出稍后注册的模组。
-    # 0 表示立即发送
+    # 玩家进入后客户端型号通知等待的毫秒数，以便同时列出稍后注册的模组。0 表示立即发送。
     notification-delay-ms: 1000
-    # 针对客户端型号或模组的规则。每条规则在每个玩家会话中只执行一次。
-    #   regex:   Java 正则表达式
-    #   type:    brand（客户端型号）或 mod（检测到的模组名称和原始频道名称）
-    #   action:  alert（向管理员发送消息）或 kick（踢出）
-    #   message: 可选，替换 messages.yml 中的 rule-alert-format / rule-kick-message
+    # 当客户端型号或模组匹配时提醒管理人员或踢出玩家的规则。每条规则在每个会话中只执行一次。
+    #   regex: Java 正则表达式
+    #   type: brand 匹配客户端型号，mod 匹配检测到的模组名称和频道名称
+    #   action: alert 或 kick
+    #   message: 可选，替代 messages.yml 中的 rule-alert-format 或 rule-kick-message
     rules: []
     #  - regex: "(?i)^wurst"
     #    type: brand
@@ -54,13 +52,13 @@ client-brand:
     #  - regex: "^Xaero's Minimap$"
     #    type: mod
     #    action: alert
-    # 客户端型号伪造检查（BadPacketsT）。每个会话只会标记一次，因此请在 punishments.yml 中为其使用
-    # 一个阈值较低的组，参见 docs/CLIENT-DETECTION.md
+    # 将谎报客户端型号的客户端标记为 BadPacketsT。每个会话最多只标记一次，因此请在 punishments.yml 中为其设置较低的阈值。
     spoof-check:
+        # 是否启用客户端型号伪造检查？
         enabled: false
-        # 客户端自称 "vanilla"，却注册了 Fabric、Forge 或 NeoForge 的频道
+        # 标记自称 "vanilla" 却注册了 Fabric、Forge 或 NeoForge 频道的客户端
         vanilla-with-mod-loader: true
-        # 客户端在会话后期发送了不同的型号。代理和部分模组会重新发送它
+        # 标记在会话后期发送了不同型号的客户端。部分代理和模组会重新发送型号，因此默认关闭。
         brand-change: false
     stats:
         # /grim brands stats 中每个分类最多显示的条目数
