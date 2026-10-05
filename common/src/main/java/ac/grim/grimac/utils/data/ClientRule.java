@@ -1,33 +1,20 @@
-package ac.grim.grimac.utils.clientdetection;
+package ac.grim.grimac.utils.data;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
-import java.util.function.BiConsumer;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-/**
- * An operator defined rule from {@code client-brand.rules}.
- *
- * @param pattern matched with {@link java.util.regex.Matcher#find()}
- * @param type    what the pattern is matched against
- * @param action  what happens on a match
- * @param message optional alert/kick message overriding the default one
- */
+// An entry of client-brand.rules
 public record ClientRule(@NotNull Pattern pattern, @NotNull Type type, @NotNull Action action, @Nullable String message) {
 
     public enum Type {
-        /** Matches the client brand. */
         BRAND,
-        /** Matches detected mod names and the raw registered channel names. */
-        MOD
+        MOD // detected mod names and the raw channel names
     }
 
     public enum Action {
@@ -35,17 +22,7 @@ public record ClientRule(@NotNull Pattern pattern, @NotNull Type type, @NotNull 
         KICK
     }
 
-    public ClientRule {
-        Objects.requireNonNull(pattern, "pattern");
-        Objects.requireNonNull(type, "type");
-        Objects.requireNonNull(action, "action");
-    }
-
-    /**
-     * Parses one entry of the form {@code {regex: "...", type: brand|mod, action: alert|kick, message: "..."}}.
-     *
-     * @throws IllegalArgumentException if the entry is malformed
-     */
+    // {regex: "...", type: brand|mod, action: alert|kick, message: "..."}
     public static @NotNull ClientRule parse(@Nullable Object entry) {
         if (!(entry instanceof Map<?, ?> map)) {
             throw new IllegalArgumentException("expected a section with regex, type and action");
@@ -64,29 +41,7 @@ public record ClientRule(@NotNull Pattern pattern, @NotNull Type type, @NotNull 
         return new ClientRule(pattern, type, action, message == null || message.isEmpty() ? null : message);
     }
 
-    /**
-     * Parses all entries, skipping invalid ones.
-     *
-     * @param onError receives the offending entry and the reason
-     */
-    public static @NotNull List<ClientRule> parseAll(@NotNull Collection<?> entries, @NotNull BiConsumer<Object, String> onError) {
-        List<ClientRule> rules = new ArrayList<>(entries.size());
-        for (Object entry : entries) {
-            try {
-                rules.add(parse(entry));
-            } catch (IllegalArgumentException e) {
-                onError.accept(entry, e.getMessage());
-            }
-        }
-        return List.copyOf(rules);
-    }
-
-    /**
-     * @param brand    the client brand, or null while it is unknown
-     * @param mods     detected mod names
-     * @param channels registered channel names
-     * @return the value that matched, or null if the rule doesn't match (yet)
-     */
+    // Returns the matching value, or null if the rule doesn't match (yet)
     public @Nullable String match(@Nullable String brand, @NotNull Collection<String> mods, @NotNull Collection<String> channels) {
         if (type == Type.BRAND) {
             return brand != null && pattern.matcher(brand).find() ? brand : null;

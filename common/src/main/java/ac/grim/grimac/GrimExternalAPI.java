@@ -15,7 +15,6 @@ import ac.grim.grimac.manager.init.start.StartableInitable;
 import ac.grim.grimac.player.GrimPlayer;
 import ac.grim.grimac.utils.anticheat.LogUtil;
 import ac.grim.grimac.utils.anticheat.MessageUtil;
-import ac.grim.grimac.utils.clientdetection.ClientDetectionMessages;
 import ac.grim.grimac.utils.common.ConfigReloadObserver;
 import ac.grim.grimac.utils.common.PropertiesUtil;
 import lombok.Getter;
@@ -23,6 +22,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
@@ -252,8 +252,10 @@ public class GrimExternalAPI implements GrimAbstractAPI, ConfigReloadObserver, S
         variableReplacements.putIfAbsent("%uuid%", user -> user.getUniqueId().toString());
         variableReplacements.putIfAbsent("%ping%", user -> user.getTransactionPing() + "");
         variableReplacements.putIfAbsent("%brand%", GrimUser::getBrand);
-        variableReplacements.putIfAbsent("%mods%", user -> user instanceof GrimPlayer grimPlayer
-                ? ClientDetectionMessages.joinMods(grimPlayer.checkManager.get(ClientBrand.class).getMods()) : "none");
+        variableReplacements.putIfAbsent("%mods%", user -> {
+            List<String> mods = user instanceof GrimPlayer grimPlayer ? grimPlayer.checkManager.get(ClientBrand.class).getMods() : List.of();
+            return mods.isEmpty() ? "none" : String.join(", ", mods);
+        });
         variableReplacements.putIfAbsent("%h_sensitivity%", user -> ((int) Math.round(user.getHorizontalSensitivity() * 200)) + "");
         variableReplacements.putIfAbsent("%v_sensitivity%", user -> ((int) Math.round(user.getVerticalSensitivity() * 200)) + "");
         variableReplacements.putIfAbsent("%fast_math%", user -> !user.isVanillaMath() + "");

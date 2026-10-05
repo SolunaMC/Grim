@@ -8,12 +8,8 @@ import ac.grim.grimac.checks.type.PacketReceiveListener;
 import ac.grim.grimac.player.GrimPlayer;
 import ac.grim.grimac.utils.anticheat.LogUtil;
 import ac.grim.grimac.utils.anticheat.MessageUtil;
-import ac.grim.grimac.utils.clientdetection.ChannelRegistration;
-import ac.grim.grimac.utils.clientdetection.ClientDetectionMessages;
-import ac.grim.grimac.utils.clientdetection.ClientDetectionSettings;
-import ac.grim.grimac.utils.clientdetection.ClientRule;
-import ac.grim.grimac.utils.clientdetection.ModSignature;
-import ac.grim.grimac.utils.clientdetection.ModSignatures;
+import ac.grim.grimac.utils.data.ClientRule;
+import ac.grim.grimac.utils.data.ModSignature;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketReceiveEvent;
 import com.github.retrooper.packetevents.manager.server.ServerVersion;
@@ -45,15 +41,16 @@ public class ClientBrand extends GrimProcessor implements PacketReceiveListener 
     @Getter
     private boolean hasBrand = false;
 
-    // Written on the netty thread, read by commands: replaced as a whole, never mutated
+    // Written on the netty thread and read by commands, so it is replaced instead of modified
     private volatile Set<String> channels = Set.of();
-    private volatile DetectedMods detectedMods = DetectedMods.EMPTY;
+    private volatile DetectedMods detectedMods;
 
-    // Netty thread only
     private @Nullable String firstValidBrand;
+    private long notificationDelay;
     private boolean notificationPending;
     private long notificationAt; // 0 while waiting for the play phase
-    private final Set<String> firedRules = new HashSet<>(); // keyed by ruleKey, survives reloads
+    // Keyed by the rule itself instead of its index so a reload doesn't fire the same rule again
+    private final Set<String> firedRules = new HashSet<>();
 
     public ClientBrand(GrimPlayer player) {
         super(player);
@@ -74,26 +71,20 @@ public class ClientBrand extends GrimProcessor implements PacketReceiveListener 
         }
     }
 
-    /** @return every channel the client registered this session (unregistrations are ignored) */
-    public @NotNull Set<String> getChannels() {
-        return channels;
-    }
-
-    /** @return names of the mods/clients detected from the registered channels */
     public @NotNull List<String> getMods() {
         Set<String> channels = this.channels;
-        List<ModSignature> signatures = GrimAPI.INSTANCE.getConfigManager().getClientDetection().signatures();
+        List<ModSignature> signatures = GrimAPI.INSTANCE.getConfigManager().getModSignatures();
         DetectedMods detected = detectedMods;
-        // Recomputed lazily after new registrations or a reload, benign race when called concurrently
-        if (detected.channels() != channels || detected.signatures() != signatures) {
-            detected = new DetectedMods(channels, signatures, ModSignatures.detect(channels, signatures));
+        // Recomputed after new registrations or a reload
+        if (detected == null || detected.channels() != channels || detected.signatures() != signatures) {
+            detected = new DetectedMods(channels, signatures, ModSignature.detect(channels, signatures));
             detectedMods = detected;
         }
         return detected.mods();
     }
 
     private void handle(String channel, byte[] data) {
-        if (ChannelRegistration.isRegisterChannel(channel)) {
+        if (channel.equals("minecraft:register") || channel.equals("REGISTER")) {
             handleRegister(data);
             return;
         }
@@ -107,7 +98,7 @@ public class ClientBrand extends GrimProcessor implements PacketReceiveListener 
             firstValidBrand = brand;
             if (!GrimAPI.INSTANCE.getConfigManager().isIgnoredClient(brand)) {
                 notificationPending = true;
-                if (GrimAPI.INSTANCE.getConfigManager().getClientDetection().notificationDelayMs() == 0) {
+                if (notificationDelay == 0) {
                     sendNotification();
                 }
             }
@@ -155,7 +146,7 @@ public class ClientBrand extends GrimProcessor implements PacketReceiveListener 
         Set<String> current = channels;
         if (current.size() >= MAX_CHANNELS) return;
 
-        List<String> registered = ChannelRegistration.parse(data, MAX_CHANNELS - current.size());
+        List<String> registered = ModSignature.readChannels(data, MAX_CHANNELS - current.size());
         if (current.containsAll(registered)) return;
 
         Set<String> updated = new LinkedHashSet<>(current);
@@ -164,20 +155,17 @@ public class ClientBrand extends GrimProcessor implements PacketReceiveListener 
         onClientInfoChanged();
     }
 
-    // Brand and registrations arrive in any order; re-evaluated whenever either changes
+    // The brand and the registrations arrive in any order
     private void onClientInfoChanged() {
         String knownBrand = hasBrand ? brand : null;
         player.checkManager.get(BadPacketsT.class).onClientInfo(knownBrand, channels);
-        evaluateRules(knownBrand);
-    }
 
-    private void evaluateRules(@Nullable String knownBrand) {
-        List<ClientRule> rules = GrimAPI.INSTANCE.getConfigManager().getClientDetection().rules();
+        List<ClientRule> rules = GrimAPI.INSTANCE.getConfigManager().getClientRules();
         if (rules.isEmpty()) return;
 
         List<String> mods = getMods();
         for (ClientRule rule : rules) {
-            String key = ruleKey(rule);
+            String key = rule.type() + ":" + rule.action() + ":" + rule.pattern().pattern();
             if (firedRules.contains(key)) continue;
             String match = rule.match(knownBrand, mods, channels);
             if (match == null) continue;
@@ -187,11 +175,7 @@ public class ClientBrand extends GrimProcessor implements PacketReceiveListener 
         }
     }
 
-    private static String ruleKey(ClientRule rule) {
-        return rule.type() + ":" + rule.action() + ":" + rule.pattern().pattern();
-    }
-
-    /** @return whether the player was kicked */
+    // Returns whether the player was kicked
     private boolean applyRule(ClientRule rule, String match) {
         Map<String, String> values = Map.of("%match%", match, "%rule%", rule.pattern().pattern());
         ConfigManager config = GrimAPI.INSTANCE.getConfigManager().getConfig();
@@ -200,21 +184,21 @@ public class ClientBrand extends GrimProcessor implements PacketReceiveListener 
                     : config.getStringElse("client-brand.rule-kick-message", "<red>Your client or one of your mods is not allowed on this server.");
             if (notificationPending) sendNotification(); // staff still see the brand of kicked players
             LogUtil.info(player.getName() + " was kicked by client-brand rule \"" + rule.pattern().pattern() + "\" (matched \"" + match + "\")");
-            player.disconnect(ClientDetectionMessages.render(player, message, values));
+            player.disconnect(MessageUtil.replacePlaceholders(player, MessageUtil.miniMessage(message), values));
             return true;
         }
 
         String message = rule.message() != null ? rule.message()
                 : config.getStringElse("client-brand.rule-alert-format", "%prefix% &f%player% &bmatched client rule &f%rule% &7(%match%)");
-        GrimAPI.INSTANCE.getAlertManager().sendAlert(ClientDetectionMessages.render(player, message, values), null);
+        GrimAPI.INSTANCE.getAlertManager().sendAlert(MessageUtil.replacePlaceholders(player, MessageUtil.miniMessage(message), values), null);
         return false;
     }
 
-    // The notification waits a moment in the play phase so mods registered after the brand can be listed
+    // Waits a moment in the play phase so mods that register after the brand are listed too
     private void tickNotification(PacketReceiveEvent event) {
         if (notificationAt == 0) {
             if (!(event.getPacketType() instanceof PacketType.Play.Client)) return;
-            notificationAt = System.currentTimeMillis() + GrimAPI.INSTANCE.getConfigManager().getClientDetection().notificationDelayMs();
+            notificationAt = System.currentTimeMillis() + notificationDelay;
         }
         if (System.currentTimeMillis() >= notificationAt) {
             sendNotification();
@@ -233,7 +217,10 @@ public class ClientBrand extends GrimProcessor implements PacketReceiveListener 
         GrimAPI.INSTANCE.getAlertManager().sendBrand(component, null);
     }
 
-    private record DetectedMods(Set<String> channels, List<ModSignature> signatures, List<String> mods) {
-        static final DetectedMods EMPTY = new DetectedMods(Set.of(), ClientDetectionSettings.DEFAULT.signatures(), List.of());
+    @Override
+    public void onReload(@NotNull ConfigManager config) {
+        notificationDelay = Math.max(0, config.getLongElse("client-brand.notification-delay-ms", 1000));
     }
+
+    private record DetectedMods(Set<String> channels, List<ModSignature> signatures, List<String> mods) {}
 }

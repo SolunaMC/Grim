@@ -1,8 +1,7 @@
-package ac.grim.grimac.utils.clientdetection;
+package ac.grim.grimac.utils.data;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,17 +44,6 @@ class ClientRuleTest {
         assertThrows(IllegalArgumentException.class, () -> ClientRule.parse(rule("x", "brand", "ban", null)));
         assertThrows(IllegalArgumentException.class, () -> ClientRule.parse(rule("x", null, "kick", null)));
         assertThrows(IllegalArgumentException.class, () -> ClientRule.parse(rule("x", "mod", null, null)));
-    }
-
-    @Test
-    void parseAllSkipsInvalidEntries() {
-        List<Object> errors = new ArrayList<>();
-        List<ClientRule> rules = ClientRule.parseAll(List.of(
-                rule("a", "brand", "alert", null),
-                rule("b", "nope", "alert", null),
-                "c"), (entry, reason) -> errors.add(entry));
-        assertEquals(1, rules.size());
-        assertEquals(2, errors.size());
     }
 
     @Test

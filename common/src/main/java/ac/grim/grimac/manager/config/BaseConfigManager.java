@@ -2,10 +2,12 @@ package ac.grim.grimac.manager.config;
 
 import ac.grim.grimac.api.config.ConfigManager;
 import ac.grim.grimac.utils.anticheat.LogUtil;
-import ac.grim.grimac.utils.clientdetection.ClientDetectionSettings;
+import ac.grim.grimac.utils.data.ClientRule;
+import ac.grim.grimac.utils.data.ModSignature;
 import lombok.Getter;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -16,11 +18,12 @@ import java.util.regex.PatternSyntaxException;
  */
 public class BaseConfigManager {
 
-    // Replaced as a whole on reload: netty threads iterate it in isIgnoredClient
+    // Replaced on reload, netty threads read these while handling plugin messages
     private volatile List<Pattern> ignoredClientPatterns = List.of();
-    // Replaced as a whole on reload: netty threads read it while handling plugin messages
     @Getter
-    private volatile ClientDetectionSettings clientDetection = ClientDetectionSettings.DEFAULT;
+    private volatile List<ModSignature> modSignatures = ModSignature.BUILT_IN;
+    @Getter
+    private volatile List<ClientRule> clientRules = List.of();
     @Getter
     private ConfigManager config = null;
     @Getter
@@ -71,7 +74,27 @@ public class BaseConfigManager {
             }
         }
         ignoredClientPatterns = List.copyOf(patterns);
-        clientDetection = ClientDetectionSettings.load(config);
+
+        List<ModSignature> signatures = new ArrayList<>(ModSignature.BUILT_IN);
+        for (Object entry : getList(config, "client-brand.mod-signatures")) {
+            try {
+                if (!(entry instanceof String string)) throw new IllegalArgumentException("expected \"regex -> name\"");
+                signatures.add(ModSignature.parse(string));
+            } catch (IllegalArgumentException e) {
+                LogUtil.warn("Skipping invalid client-brand.mod-signatures entry " + entry + ": " + e.getMessage());
+            }
+        }
+        modSignatures = List.copyOf(signatures);
+
+        List<ClientRule> rules = new ArrayList<>();
+        for (Object entry : getList(config, "client-brand.rules")) {
+            try {
+                rules.add(ClientRule.parse(entry));
+            } catch (IllegalArgumentException e) {
+                LogUtil.warn("Skipping invalid client-brand.rules entry " + entry + ": " + e.getMessage());
+            }
+        }
+        clientRules = List.copyOf(rules);
 
         printAlertsToConsole = config.getBooleanElse("alerts.print-to-console", true);
         prefix = config.getStringElse("prefix", "&bGrim &8»");
@@ -99,5 +122,10 @@ public class BaseConfigManager {
             if (pattern.matcher(brand).find()) return true;
         }
         return false;
+    }
+
+    private static Collection<?> getList(ConfigManager config, String key) {
+        // get() throws for missing keys
+        return config.getElse(key, null) instanceof Collection<?> collection ? collection : List.of();
     }
 }

@@ -1,23 +1,18 @@
 package ac.grim.grimac.checks.impl.badpackets;
 
-import ac.grim.grimac.GrimAPI;
+import ac.grim.grimac.api.config.ConfigManager;
 import ac.grim.grimac.api.storage.verbose.Verbose;
 import ac.grim.grimac.checks.Check;
 import ac.grim.grimac.checks.CheckData;
 import ac.grim.grimac.player.GrimPlayer;
-import ac.grim.grimac.utils.clientdetection.BrandSpoof;
-import ac.grim.grimac.utils.clientdetection.ClientDetectionSettings;
+import ac.grim.grimac.utils.data.ModSignature;
 import ac.grim.grimac.utils.reflection.GeyserUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 
-/**
- * Brand spoofing. Disabled unless {@code client-brand.spoof-check.enabled} is set,
- * fed by {@link ac.grim.grimac.checks.impl.misc.ClientBrand}; flags each condition
- * at most once per session.
- */
+// Fed by ClientBrand, flags each condition at most once per session
 @CheckData(name = "BadPacketsT", stableKey = "grim.badpackets.brand_spoof", description = "Client brand contradicts its registered channels or changed during the session")
 public class BadPacketsT extends Check {
     private static final int VANILLA_WITH_MOD_LOADER = 0;
@@ -25,6 +20,8 @@ public class BadPacketsT extends Check {
     private static final Verbose V = Verbose.of("brand={str}, channel={str}") // VANILLA_WITH_MOD_LOADER
             .or("first={str}, now={str}");                                     // BRAND_CHANGE
 
+    private boolean checkVanillaWithModLoader;
+    private boolean checkBrandChange;
     private boolean flaggedVanillaWithModLoader;
     private boolean flaggedBrandChange;
 
@@ -32,31 +29,32 @@ public class BadPacketsT extends Check {
         super(player);
     }
 
-    /** Called whenever the brand or the registered channels change. */
     public void onClientInfo(@Nullable String brand, @NotNull Collection<String> channels) {
-        if (flaggedVanillaWithModLoader) return;
-        ClientDetectionSettings settings = GrimAPI.INSTANCE.getConfigManager().getClientDetection();
-        if (!settings.spoofCheckEnabled() || !settings.spoofVanillaWithModLoader() || isBedrock()) return;
+        if (flaggedVanillaWithModLoader || !checkVanillaWithModLoader || isBedrock()) return;
+        // The vanilla client reports exactly "vanilla" and registers no mod loader channels
+        if (brand == null || !brand.equalsIgnoreCase("vanilla")) return;
 
-        String channel = BrandSpoof.vanillaWithModLoader(brand, channels);
+        String channel = ModSignature.findModLoaderChannel(channels);
         if (channel == null) return;
         flaggedVanillaWithModLoader = true;
         flag(V.write(verbose(), VANILLA_WITH_MOD_LOADER).str(brand).str(channel));
     }
 
-    /** Called for every valid brand payload after the first one. */
     public void onLaterBrand(@NotNull String first, @NotNull String next) {
-        if (flaggedBrandChange) return;
-        ClientDetectionSettings settings = GrimAPI.INSTANCE.getConfigManager().getClientDetection();
-        if (!settings.spoofCheckEnabled() || !settings.spoofBrandChange() || isBedrock()) return;
-
-        if (!BrandSpoof.isBrandChange(first, next)) return;
+        if (flaggedBrandChange || !checkBrandChange || isBedrock() || first.equals(next)) return;
         flaggedBrandChange = true;
         flag(V.write(verbose(), BRAND_CHANGE).str(first).str(next));
     }
 
-    // Bedrock players are normally exempt from Grim entirely; don't rely on it here
+    // Bedrock players are normally exempt from Grim entirely, don't rely on it here
     private boolean isBedrock() {
         return GeyserUtil.isBedrockPlayer(player.getUniqueId());
+    }
+
+    @Override
+    public void onReload(@NotNull ConfigManager config) {
+        boolean enabled = config.getBooleanElse("client-brand.spoof-check.enabled", false);
+        checkVanillaWithModLoader = enabled && config.getBooleanElse("client-brand.spoof-check.vanilla-with-mod-loader", true);
+        checkBrandChange = enabled && config.getBooleanElse("client-brand.spoof-check.brand-change", false);
     }
 }

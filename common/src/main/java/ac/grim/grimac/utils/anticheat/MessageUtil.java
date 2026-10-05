@@ -149,6 +149,20 @@ public class MessageUtil {
         return component.replaceText(safeReplacement);
     }
 
+    // Single pass, so values controlled by the client can't add formatting or expand into other placeholders
+    public @NotNull Component replacePlaceholders(@Nullable GrimPlayer player, @NotNull Component component, @NotNull Map<String, String> values) {
+        return component.replaceText(TextReplacementConfig.builder()
+                .match("%[a-zA-Z0-9_]+%")
+                .replacement(placeholder -> {
+                    String value = values.get(placeholder.content());
+                    if (value == null) {
+                        value = player == null ? placeholder.content() : replacePlaceholders(player, placeholder.content());
+                    }
+                    return Component.text(value);
+                })
+                .build());
+    }
+
     public @NotNull Component miniMessage(@NotNull String string) {
         return miniMessage(string, TagResolver.empty());
     }
