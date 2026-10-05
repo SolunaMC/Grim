@@ -9,10 +9,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-/**
- * A list of plugin channel names from the config. An entry is either an exact channel name or a
- * prefix ending in {@code *}, e.g. {@code "examplemod:*"}. Matching ignores case.
- */
+// Plugin channel names from the config, either exact ("examplemod:main") or a prefix ("examplemod:*"), ignoring case
 public final class ChannelPatterns {
     public static final ChannelPatterns EMPTY = new ChannelPatterns(Set.of(), new String[0]);
 

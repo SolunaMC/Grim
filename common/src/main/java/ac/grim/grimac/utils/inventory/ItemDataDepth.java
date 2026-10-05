@@ -14,19 +14,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-/**
- * Measures how deeply an item's data is nested: every NBT compound or list is one level, and so
- * is every item stored inside another item (shulker, bundle and crossbow contents). Walks the
- * already decoded item, so nothing is serialized again, and stops as soon as the limit is passed.
- */
+// Every NBT compound or list is one level, and so is every item stored inside another item
 public final class ItemDataDepth {
-    /** Never recurse deeper than this, whatever the config says. */
-    public static final int MAX_LIMIT = 1024;
+    private static final int MAX_LIMIT = 1024; // never recurse deeper than this, whatever the config says
 
     private ItemDataDepth() {
     }
 
-    /** Returns the depth of the item's data, or a value above {@code limit} as soon as it passes it. */
+    // Stops counting as soon as the depth goes above the limit
     public static int of(@Nullable ItemStack item, int limit) {
         return item(item, 0, Math.min(limit, MAX_LIMIT));
     }
@@ -72,7 +67,6 @@ public final class ItemDataDepth {
         return max;
     }
 
-    /** Deepest container level inside {@code tag}, where {@code tag} itself is at {@code level}. */
     private static int nbt(@Nullable NBT tag, int level, int limit) {
         if (tag instanceof NBTCompound compound) {
             int max = level;

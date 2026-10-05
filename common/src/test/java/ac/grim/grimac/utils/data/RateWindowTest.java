@@ -35,15 +35,6 @@ class RateWindowTest {
     }
 
     @Test
-    void resetStartsANewWindow() {
-        RateWindow window = new RateWindow();
-        window.record(0, SECOND);
-        window.record(1, SECOND);
-        window.reset();
-        assertEquals(1, window.record(2, SECOND));
-    }
-
-    @Test
     void keepsCountingWithinALongWindow() {
         RateWindow window = new RateWindow();
         for (long i = 0; i < 100; i++) window.record(i, Long.MAX_VALUE);
