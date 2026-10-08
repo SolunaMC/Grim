@@ -6,7 +6,7 @@ bedrock:
     checks:
         - Crash
         - Exploit
-    # Adăugat în fața numelui jucătorilor Bedrock în alerte prin placeholder-ul %platform%. Setează "" pentru a-l dezactiva.
+    # Textul placeholder-ului %platform% pentru jucătorii Bedrock, gol pentru jucătorii Java. Adaugă %platform% în alerts-format din messages.yml pentru a-l afișa în alerte.
     alert-tag: "&7[Bedrock] "
 
 # Markeri de schemă — vezi comentariul din antetul config.yml.

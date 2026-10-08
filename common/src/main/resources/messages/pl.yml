@@ -43,8 +43,8 @@ webhook-test-failed: "Test webhooka Discorda nie powiódł się!"
 # %experimental%
 # %vl% - naruszenia
 # %verbose% - dodatkowe informacje z kontroli, np. odchylenia; nie wszystkie kontrole je dodają
-alerts-format: "%prefix% %platform%&f%player% &bnie przeszedł <hover:show_text:\"&b%check_name%%experimental%\n&8Opis: &f%description%\">&f%check_name%%experimental%</hover> &f(x&c%vl%&f) &7%verbose%"
-alerts-format-proxy: "%prefix% &f[&cproxy&f] %platform%&f%player% &bnie przeszedł &f%check_name%%experimental% &f(x&c%vl%&f) &7%verbose%"
+alerts-format: "%prefix% &f%player% &bnie przeszedł <hover:show_text:\"&b%check_name%%experimental%\n&8Opis: &f%description%\">&f%check_name%%experimental%</hover> &f(x&c%vl%&f) &7%verbose%"
+alerts-format-proxy: "%prefix% &f[&cproxy&f] &f%player% &bnie przeszedł &f%check_name%%experimental% &f(x&c%vl%&f) &7%verbose%"
 experimental-symbol: "*"
 
 profile:

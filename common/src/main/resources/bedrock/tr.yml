@@ -6,7 +6,7 @@ bedrock:
     checks:
         - Crash
         - Exploit
-    # Uyarılarda %platform% yer tutucusu ile Bedrock oyuncularının adının önüne eklenir. Devre dışı bırakmak için "" yapın.
+    # Bedrock oyuncuları için %platform% yer tutucusunun metni, Java oyuncuları için boştur. Uyarılarda göstermek için messages.yml dosyasındaki alerts-format'a %platform% ekleyin.
     alert-tag: "&7[Bedrock] "
 
 # Şema işaretçileri — bkz. config.yml'deki başlık yorumu.

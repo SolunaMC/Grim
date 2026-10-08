@@ -43,8 +43,8 @@ webhook-test-failed: "Testul webhook-ului Discord a eșuat!"
 # %experimental%
 # %vl% - încălcări
 # %verbose% - informații suplimentare de la check, cum ar fi abaterile; nu toate check-urile adaugă informații
-alerts-format: "%prefix% %platform%&f%player% &ba picat <hover:show_text:\"&b%check_name%%experimental%\n&8Descriere: &f%description%\">&f%check_name%%experimental%</hover> &f(x&c%vl%&f) &7%verbose%"
-alerts-format-proxy: "%prefix% &f[&cproxy&f] %platform%&f%player% &ba picat &f%check_name%%experimental% &f(x&c%vl%&f) &7%verbose%"
+alerts-format: "%prefix% &f%player% &ba picat <hover:show_text:\"&b%check_name%%experimental%\n&8Descriere: &f%description%\">&f%check_name%%experimental%</hover> &f(x&c%vl%&f) &7%verbose%"
+alerts-format-proxy: "%prefix% &f[&cproxy&f] &f%player% &ba picat &f%check_name%%experimental% &f(x&c%vl%&f) &7%verbose%"
 experimental-symbol: "*"
 
 profile:
