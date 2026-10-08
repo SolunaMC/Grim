@@ -37,13 +37,14 @@ webhook-test-failed: "Discord webhook test failed!"
 # Geçerli placeholderlar:
 # %prefix%
 # %player%
+# %platform% - Bedrock oyuncuları için bedrock.yml'deki bedrock.alert-tag, Java oyuncuları için boş
 # %check_name%
 # %description%
 # %experimental%
 # %vl% - ihlal uyarıları
 # %verbose% - detaylı olarak verilen tüm uyarılar, checkler tüm bilgileri vermez
-alerts-format: "%prefix% &b%player% &fadlı oyuncuda &f(x&c%vl%&f) &fadet <hover:show_text:\"&b%check_name%%experimental%\n&8Açıklama: &f%description%\">&b%check_name%%experimental%</hover> &ftespit edildi: &7%verbose%"
-alerts-format-proxy: "%prefix% &f[&cproxy&f] &b%player% &fadlı oyuncuda &f(x&c%vl%&f) &fadet <hover:show_text:\"&b%check_name%%experimental%\n&8Açıklama: &f%description%\">&b%check_name%%experimental%</hover> &ftespit edildi: &7%verbose%"
+alerts-format: "%prefix% %platform%&b%player% &fadlı oyuncuda &f(x&c%vl%&f) &fadet <hover:show_text:\"&b%check_name%%experimental%\n&8Açıklama: &f%description%\">&b%check_name%%experimental%</hover> &ftespit edildi: &7%verbose%"
+alerts-format-proxy: "%prefix% &f[&cproxy&f] %platform%&b%player% &fadlı oyuncuda &f(x&c%vl%&f) &fadet <hover:show_text:\"&b%check_name%%experimental%\n&8Açıklama: &f%description%\">&b%check_name%%experimental%</hover> &ftespit edildi: &7%verbose%"
 experimental-symbol: "*"
 
 profile:

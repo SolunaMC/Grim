@@ -6,6 +6,8 @@ bedrock:
     checks:
         - Crash
         - Exploit
+    # Added in front of the name of Bedrock players in alerts through the %platform% placeholder. Set to "" to disable.
+    alert-tag: "&7[Bedrock] "
 
 # Schema markers — see header comment in config.yml.
 config-flavor: V2

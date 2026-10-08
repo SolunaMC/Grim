@@ -6,6 +6,8 @@ bedrock:
     checks:
         - Crash
         - Exploit
+    # 通过 %platform% 占位符在警报中添加到基岩版玩家名字前。设置为 "" 以禁用。
+    alert-tag: "&7[Bedrock] "
 
 # 模式标记 — 参见 config.yml 顶部的注释。
 config-flavor: V2

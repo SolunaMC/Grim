@@ -37,13 +37,14 @@ webhook-test-failed: "Discord webhook test failed!"
 # Placeholders validos:
 # %prefix%
 # %player%
+# %platform% - bedrock.alert-tag de bedrock.yml para jugadores de Bedrock, vacío para jugadores de Java
 # %check_name%
 # %description%
 # %experimental%
 # %vl% - violaciones
 # %verbose% - información extra de la comprobación como compensaciones. No todas añadirán informacion.
-alerts-format: "%prefix% &f%player% &bfalló <hover:show_text:\"&b%check_name%%experimental%\n&8Descripción: &f%description%\">&f%check_name%%experimental%</hover> &f(x&c%vl%&f) &7%verbose%"
-alerts-format-proxy: "%prefix% &f[&cproxy&f] &f%player% &bfailed <hover:show_text:\"&b%check_name%%experimental%\n&8Descripción: &f%description%\">&f%check_name%%experimental%</hover> &f(x&c%vl%&f) &7%verbose%"
+alerts-format: "%prefix% %platform%&f%player% &bfalló <hover:show_text:\"&b%check_name%%experimental%\n&8Descripción: &f%description%\">&f%check_name%%experimental%</hover> &f(x&c%vl%&f) &7%verbose%"
+alerts-format-proxy: "%prefix% &f[&cproxy&f] %platform%&f%player% &bfailed <hover:show_text:\"&b%check_name%%experimental%\n&8Descripción: &f%description%\">&f%check_name%%experimental%</hover> &f(x&c%vl%&f) &7%verbose%"
 experimental-symbol: "*"
 
 profile:

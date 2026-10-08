@@ -9,7 +9,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -22,6 +24,27 @@ class BedrockConfigUpdateTest {
                 assertNotNull(in, "missing /bedrock/" + lang + ".yml");
                 String content = new String(in.readAllBytes(), StandardCharsets.UTF_8);
                 assertTrue(content.contains("bedrock:") && content.contains("enabled: false"), lang);
+                assertTrue(content.contains("alert-tag: \"&7[Bedrock] \""), lang);
+            }
+        }
+    }
+
+    @Test
+    void alertFormatsPutThePlatformTagBeforeThePlayer() throws Exception {
+        // %platform% is empty for Java players, so it must not leave a space of its own
+        Pattern tagged = Pattern.compile("%platform%&[0-9a-f]%player%");
+        for (String lang : new String[]{"en", "de", "es", "fr", "it", "ja", "nl", "pl", "pt", "ro", "ru", "tr", "zh"}) {
+            try (InputStream in = ConfigUpdater.class.getResourceAsStream("/messages/" + lang + ".yml")) {
+                assertNotNull(in, "missing /messages/" + lang + ".yml");
+                String content = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+                int formats = 0;
+                for (String line : content.split("\n")) {
+                    if (line.startsWith("alerts-format:") || line.startsWith("alerts-format-proxy:")) {
+                        assertTrue(tagged.matcher(line).find(), lang + ": " + line);
+                        formats++;
+                    }
+                }
+                assertEquals(2, formats, lang);
             }
         }
     }

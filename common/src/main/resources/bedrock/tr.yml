@@ -6,6 +6,8 @@ bedrock:
     checks:
         - Crash
         - Exploit
+    # Uyarılarda %platform% yer tutucusu ile Bedrock oyuncularının adının önüne eklenir. Devre dışı bırakmak için "" yapın.
+    alert-tag: "&7[Bedrock] "
 
 # Şema işaretçileri — bkz. config.yml'deki başlık yorumu.
 config-flavor: V2

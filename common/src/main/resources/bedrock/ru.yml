@@ -6,6 +6,8 @@ bedrock:
     checks:
         - Crash
         - Exploit
+    # Добавляется перед именем игроков Bedrock в оповещениях через плейсхолдер %platform%. Установите "", чтобы отключить.
+    alert-tag: "&7[Bedrock] "
 
 # Маркеры схемы — см. шапку config.yml.
 config-flavor: V2

@@ -37,13 +37,14 @@ webhook-test-failed: "Discord webhook test failed!"
 # Допустимые заполнители:
 # %prefix%
 # %player%
+# %platform% - bedrock.alert-tag из bedrock.yml для игроков Bedrock, пусто для игроков Java
 # %check_name%
 # %description%
 # %experimental%
 # %vl% - нарушения
 # %verbose% - дополнительная информация от проверки, например, смещения, не все проверки добавляют информацию.
-alerts-format: "%prefix% &f%player% &bпровалил <hover:show_text:\"&b%check_name%%experimental%\n&8Описание: &f%description%\">&f%check_name%%experimental%</hover> &f(x&c%vl%&f) &7%verbose%"
-alerts-format-proxy: "%prefix% &f[&cproxy&f] &f%player% &bпровалил <hover:show_text:\"&b%check_name%%experimental%\n&8Описание: &f%description%\">&f%check_name%%experimental%</hover> &f(x&c%vl%&f) &7%verbose%"
+alerts-format: "%prefix% %platform%&f%player% &bпровалил <hover:show_text:\"&b%check_name%%experimental%\n&8Описание: &f%description%\">&f%check_name%%experimental%</hover> &f(x&c%vl%&f) &7%verbose%"
+alerts-format-proxy: "%prefix% &f[&cproxy&f] %platform%&f%player% &bпровалил <hover:show_text:\"&b%check_name%%experimental%\n&8Описание: &f%description%\">&f%check_name%%experimental%</hover> &f(x&c%vl%&f) &7%verbose%"
 experimental-symbol: "*"
 
 profile:
