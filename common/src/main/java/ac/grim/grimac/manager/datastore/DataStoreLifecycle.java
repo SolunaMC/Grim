@@ -110,8 +110,6 @@ public final class DataStoreLifecycle implements StartableInitable, StoppableIni
     private final Logger logger;
     private final BackendRegistry backendRegistry;
 
-    private static final long RETENTION_SWEEP_INITIAL_DELAY_MS = TimeUnit.MINUTES.toMillis(5);
-    private static final long RETENTION_SWEEP_INTERVAL_MS = TimeUnit.HOURS.toMillis(1);
 
     // Read off-thread (netty, ownership heartbeat, sweeps, async reload): volatile so swaps publish safely.
     private volatile DataStoreConfig config;
@@ -140,7 +138,6 @@ public final class DataStoreLifecycle implements StartableInitable, StoppableIni
     /** Guards the sweep executors only; never held while waiting on storage, so the lost-ownership path can take it. */
     private final Object sweepLock = new Object();
     private ScheduledExecutorService recoverySweepExecutor;
-    private ScheduledExecutorService retentionSweepExecutor;
     private volatile boolean stopped;
 
     @Getter
@@ -543,7 +540,6 @@ public final class DataStoreLifecycle implements StartableInitable, StoppableIni
         this.nameResolver = buildNameResolver(dataStore, config.nameResolutionChain(), playerIdentityRouted);
         this.violationSink = violationRouted ? new ViolationSinkImpl(dataStore) : null;
         this.retentionSweeper = new RetentionSweeper(dataStore, config.retention(), logger);
-        startRetentionSweep(retentionSweeper);
         if (sessionRouted) {
             this.sessionTracker = new SessionTrackerImpl(
                     dataStore, config.serverName(), config.session().heartbeatIntervalMs(), startupId);
@@ -834,38 +830,6 @@ public final class DataStoreLifecycle implements StartableInitable, StoppableIni
         }
     }
 
-    private void startRetentionSweep(@NotNull RetentionSweeper sweeper) {
-        synchronized (sweepLock) {
-            stopRetentionSweep();
-            retentionSweepExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
-                Thread t = new Thread(r, "grim-storage-retention-sweep");
-                t.setDaemon(true);
-                return t;
-            });
-            retentionSweepExecutor.scheduleWithFixedDelay(() -> runRetentionSweep(sweeper),
-                    RETENTION_SWEEP_INITIAL_DELAY_MS, RETENTION_SWEEP_INTERVAL_MS, TimeUnit.MILLISECONDS);
-        }
-    }
-
-    private void runRetentionSweep(@NotNull RetentionSweeper sweeper) {
-        if (!ownershipGate.allowWrites()) return;
-        try {
-            sweeper.sweepOnce();
-        } catch (RuntimeException e) {
-            // A throw would cancel the fixed-delay schedule; log and sweep again next interval.
-            logger.log(Level.WARNING, "[grim-datastore] retention sweep failed", e);
-        }
-    }
-
-    private void stopRetentionSweep() {
-        synchronized (sweepLock) {
-            if (retentionSweepExecutor != null) {
-                retentionSweepExecutor.shutdownNow();
-                retentionSweepExecutor = null;
-            }
-        }
-    }
-
     private long instanceHeartbeatIntervalMs() {
         long configured = config.session().heartbeatIntervalMs();
         return configured > 0L ? configured : 30_000L;
@@ -1141,7 +1105,6 @@ public final class DataStoreLifecycle implements StartableInitable, StoppableIni
     private synchronized void close() {
         stopDuplicateWarning();
         stopRecoverySweep();
-        stopRetentionSweep();
         if (!enabled) return;
         stopHeartbeatSchedulersForShutdown();
         PlayerToggleStore toggles = playerToggleStore;
@@ -1227,7 +1190,6 @@ public final class DataStoreLifecycle implements StartableInitable, StoppableIni
      */
     private void disablePersistenceAfterLostOwnership() {
         stopRecoverySweep();
-        stopRetentionSweep();
         sessionTracker = SessionTracker.NOOP;
         liveWriteHooks = LiveWriteHooks.NOOP;
         PlayerToggleStore toggles = playerToggleStore;
