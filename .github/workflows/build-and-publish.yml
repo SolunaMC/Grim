@@ -149,8 +149,9 @@ jobs:
             #------------------------------------------------------------------
             #  Generate/Prepare Changelog
             #------------------------------------------------------------------
+            # The changelog is only used for publishing; PR and dry-run builds skip it
             - name: Determine changelog range
-              if: ${{ !inputs.is-release-build }}
+              if: ${{ inputs.publish-artifacts && !inputs.is-release-build }}
               id: cliff_range
               env:
                   MODRINTH_ID: ${{ secrets.MODRINTH_ID }}
@@ -214,7 +215,7 @@ jobs:
                   echo "range_args=$RANGE" >> "$GITHUB_OUTPUT"
 
             - name: Generate Changelog with git-cliff (for Dev Builds)
-              if: ${{ !inputs.is-release-build }}
+              if: ${{ inputs.publish-artifacts && !inputs.is-release-build }}
               id: git-cliff
               uses: orhun/git-cliff-action@v4
               with:
@@ -224,6 +225,7 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # git-cliff needs a token
 
             - name: Prepare Final Changelog
+              if: ${{ inputs.publish-artifacts }}
               id: changelog
               # Add this 'env' block to safely load the changelogs as environment variables
               env:
