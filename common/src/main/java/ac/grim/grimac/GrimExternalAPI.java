@@ -253,7 +253,7 @@ public class GrimExternalAPI implements GrimAbstractAPI, ConfigReloadObserver, S
         variableReplacements.putIfAbsent("%ping%", user -> user.getTransactionPing() + "");
         variableReplacements.putIfAbsent("%brand%", GrimUser::getBrand);
         variableReplacements.putIfAbsent("%platform%", user -> user instanceof GrimPlayer grimPlayer && grimPlayer.bedrockPlayer
-                && GrimAPI.INSTANCE.getConfigManager().isBedrockEnabled() ? GrimAPI.INSTANCE.getConfigManager().getBedrockAlertTag() : "");
+                ? GrimAPI.INSTANCE.getConfigManager().getBedrockAlertTag() : "");
         variableReplacements.putIfAbsent("%mods%", user -> {
             List<String> mods = user instanceof GrimPlayer grimPlayer ? grimPlayer.checkManager.get(ClientBrand.class).getMods() : List.of();
             return mods.isEmpty() ? "none" : String.join(", ", mods);
