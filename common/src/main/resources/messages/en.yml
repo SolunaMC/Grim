@@ -145,7 +145,7 @@ client-brand:
         - "&bDevice: &f%bedrock_device%"
         - "&bInput: &f%bedrock_input%"
         - "&7======================"
-    # Profile shown by /grim profile for Bedrock players when bedrock.enabled is on, valid placeholders: %prefix% %player% %bedrock_device% %bedrock_input% %ping% %version% %brand%
+    # Profile shown by /grim profile for Bedrock players when bedrock.enabled is on, valid placeholders: %prefix% %player% %bedrock_device% %bedrock_input% %ping% %bedrock_version% %brand%
     bedrock-profile-checked:
         - "&7======================"
         - "%prefix% &bProfile for &f%player%"
@@ -153,7 +153,7 @@ client-brand:
         - "&bDevice: &f%bedrock_device%"
         - "&bInput: &f%bedrock_input%"
         - "&bPing: &f%ping%"
-        - "&bVersion: &f%version%"
+        - "&bVersion: &f%bedrock_version%"
         - "&bClient Brand: &f%brand%"
         - "&7======================"
     # Sent to staff when a client rule from config.yml matches. %rule% is the regex of the rule, %match% the matched brand, mod or channel

@@ -37,7 +37,7 @@ public class GrimProfile implements BuildableCommand {
             "&bDevice: &f%bedrock_device%",
             "&bInput: &f%bedrock_input%",
             "&bPing: &f%ping%",
-            "&bVersion: &f%version%",
+            "&bVersion: &f%bedrock_version%",
             "&bClient Brand: &f%brand%",
             "&7======================");
     // Geyser UUID without the Floodgate or Geyser API to ask for the device
@@ -107,7 +107,8 @@ public class GrimProfile implements BuildableCommand {
         Map<String, String> values = Map.of(
                 "%player%", target.getName(),
                 "%bedrock_device%", device.os(),
-                "%bedrock_input%", device.inputMode());
+                "%bedrock_input%", device.inputMode(),
+                "%bedrock_version%", Objects.requireNonNullElse(GeyserUtil.getBedrockVersion(target.getUniqueId()), "UNKNOWN"));
         for (String line : lines) {
             sender.sendMessage(MessageUtil.replacePlaceholders(player, MessageUtil.miniMessage(line), values));
         }

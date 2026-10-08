@@ -50,6 +50,22 @@ public class GeyserUtil {
         return null;
     }
 
+    public static @Nullable String getBedrockVersion(UUID uuid) {
+        try {
+            if (floodgate) {
+                FloodgatePlayer player = FloodgateApi.getInstance().getPlayer(uuid);
+                if (player != null) return player.getVersion();
+            }
+            if (geyser) {
+                Connection connection = Geyser.api().connectionByUuid(uuid);
+                if (connection != null) return connection.version();
+            }
+        } catch (RuntimeException | LinkageError e) {
+            // Older Floodgate/Geyser API without these methods, or the API isn't initialized yet
+        }
+        return null;
+    }
+
     public record BedrockDevice(String os, String inputMode) {
     }
 }

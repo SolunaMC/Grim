@@ -145,7 +145,7 @@ client-brand:
         - "&bDispozitiv: &f%bedrock_device%"
         - "&bControl: &f%bedrock_input%"
         - "&7======================"
-    # Profilul afișat de /grim profile pentru jucătorii Bedrock când bedrock.enabled este activat, placeholdere valide: %prefix% %player% %bedrock_device% %bedrock_input% %ping% %version% %brand%
+    # Profilul afișat de /grim profile pentru jucătorii Bedrock când bedrock.enabled este activat, placeholdere valide: %prefix% %player% %bedrock_device% %bedrock_input% %ping% %bedrock_version% %brand%
     bedrock-profile-checked:
         - "&7======================"
         - "%prefix% &bProfil pentru &f%player%"
@@ -153,7 +153,7 @@ client-brand:
         - "&bDispozitiv: &f%bedrock_device%"
         - "&bControl: &f%bedrock_input%"
         - "&bPing: &f%ping%"
-        - "&bVersiune: &f%version%"
+        - "&bVersiune: &f%bedrock_version%"
         - "&bBrand client: &f%brand%"
         - "&7======================"
     # Trimis staff-ului când se potrivește o regulă de client din config.yml. %rule% este regex-ul regulii, %match% brandul, modul sau canalul potrivit
