@@ -146,6 +146,17 @@ client-brand:
         - "&bУстройство: &f%bedrock_device%"
         - "&bСпособ ввода: &f%bedrock_input%"
         - "&7======================"
+    # Профиль, который /grim profile показывает для игроков Bedrock, когда включён bedrock.enabled, доступные плейсхолдеры: %prefix% %player% %bedrock_device% %bedrock_input% %ping% %version% %brand%
+    bedrock-profile-checked:
+        - "&7======================"
+        - "%prefix% &bПрофиль для &f%player%"
+        - "&bИгрок Bedrock &7(проверяется Bedrock-проверками)"
+        - "&bУстройство: &f%bedrock_device%"
+        - "&bСпособ ввода: &f%bedrock_input%"
+        - "&bПинг: &f%ping%"
+        - "&bВерсия: &f%version%"
+        - "&bБренд клиента: &f%brand%"
+        - "&7======================"
     # Отправляется персоналу, когда срабатывает правило клиентов из config.yml. %rule% — регулярное выражение правила, %match% — совпавший бренд, мод или канал
     rule-alert-format: "%prefix% &f%player% &bсовпал с правилом клиента &f%rule% &7(%match%)"
     # Сообщение при кике по правилам клиентов из config.yml, доступные плейсхолдеры: %player% %rule% %match%

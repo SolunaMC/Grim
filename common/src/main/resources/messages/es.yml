@@ -146,6 +146,17 @@ client-brand:
         - "&bDispositivo: &f%bedrock_device%"
         - "&bEntrada: &f%bedrock_input%"
         - "&7======================"
+    # Perfil que muestra /grim profile para jugadores de Bedrock cuando bedrock.enabled está activado, placeholders válidos: %prefix% %player% %bedrock_device% %bedrock_input% %ping% %version% %brand%
+    bedrock-profile-checked:
+        - "&7======================"
+        - "%prefix% &bPerfil de &f%player%"
+        - "&bJugador de Bedrock &7(revisado por los checks de Bedrock)"
+        - "&bDispositivo: &f%bedrock_device%"
+        - "&bEntrada: &f%bedrock_input%"
+        - "&bPing: &f%ping%"
+        - "&bVersión: &f%version%"
+        - "&bMarca del cliente: &f%brand%"
+        - "&7======================"
     # Se envía al staff cuando coincide una regla de cliente de config.yml. %rule% es el regex de la regla, %match% la marca, mod o canal coincidente
     rule-alert-format: "%prefix% &f%player% &bcoincide con la regla de cliente &f%rule% &7(%match%)"
     # Mensaje de expulsión de las reglas de cliente de config.yml, placeholders válidos: %player% %rule% %match%

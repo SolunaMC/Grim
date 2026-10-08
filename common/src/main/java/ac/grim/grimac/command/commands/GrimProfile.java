@@ -15,6 +15,7 @@ import net.kyori.adventure.text.Component;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.context.CommandContext;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,18 @@ public class GrimProfile implements BuildableCommand {
             "&bDevice: &f%bedrock_device%",
             "&bInput: &f%bedrock_input%",
             "&7======================");
+    private static final List<String> DEFAULT_CHECKED_BEDROCK_PROFILE = List.of(
+            "&7======================",
+            "%prefix% &bProfile for &f%player%",
+            "&bBedrock player &7(checked by the Bedrock checks)",
+            "&bDevice: &f%bedrock_device%",
+            "&bInput: &f%bedrock_input%",
+            "&bPing: &f%ping%",
+            "&bVersion: &f%version%",
+            "&bClient Brand: &f%brand%",
+            "&7======================");
+    // Geyser UUID without the Floodgate or Geyser API to ask for the device
+    private static final GeyserUtil.BedrockDevice UNKNOWN_DEVICE = new GeyserUtil.BedrockDevice("UNKNOWN", "UNKNOWN");
 
     @Override
     public void register(CommandManager<Sender> commandManager, CloudPlatformCommandArguments arguments) {
@@ -56,10 +69,22 @@ public class GrimProfile implements BuildableCommand {
             // Bedrock players are exempt, but their device is still useful to know
             GeyserUtil.BedrockDevice device = GeyserUtil.getBedrockDevice(targetPlatformPlayer.getUniqueId());
             if (device != null) {
-                sendBedrockProfile(sender, targetPlatformPlayer, device);
+                sendBedrockProfile(sender, null, targetPlatformPlayer, device, "client-brand.bedrock-profile", DEFAULT_BEDROCK_PROFILE);
                 return;
             }
             sender.sendMessage(MessageUtil.getParsedComponent(sender, "player-not-found", "%prefix% &cPlayer is exempt or offline!"));
+            return;
+        }
+
+        // Sensitivity and FastMath mean nothing for Bedrock clients
+        if (grimPlayer.bedrockPlayer) {
+            GeyserUtil.BedrockDevice device = Objects.requireNonNullElse(GeyserUtil.getBedrockDevice(targetPlatformPlayer.getUniqueId()), UNKNOWN_DEVICE);
+            // Turning bedrock.enabled off with a reload exempts players that are already tracked
+            if (GrimAPI.INSTANCE.getConfigManager().isBedrockEnabled()) {
+                sendBedrockProfile(sender, grimPlayer, targetPlatformPlayer, device, "client-brand.bedrock-profile-checked", DEFAULT_CHECKED_BEDROCK_PROFILE);
+            } else {
+                sendBedrockProfile(sender, grimPlayer, targetPlatformPlayer, device, "client-brand.bedrock-profile", DEFAULT_BEDROCK_PROFILE);
+            }
             return;
         }
 
@@ -77,14 +102,14 @@ public class GrimProfile implements BuildableCommand {
         }
     }
 
-    private void sendBedrockProfile(Sender sender, PlatformPlayer target, GeyserUtil.BedrockDevice device) {
-        List<String> lines = GrimAPI.INSTANCE.getConfigManager().getConfig().getStringListElse("client-brand.bedrock-profile", DEFAULT_BEDROCK_PROFILE);
+    private void sendBedrockProfile(Sender sender, @Nullable GrimPlayer player, PlatformPlayer target, GeyserUtil.BedrockDevice device, String key, List<String> defaults) {
+        List<String> lines = GrimAPI.INSTANCE.getConfigManager().getConfig().getStringListElse(key, defaults);
         Map<String, String> values = Map.of(
                 "%player%", target.getName(),
                 "%bedrock_device%", device.os(),
                 "%bedrock_input%", device.inputMode());
         for (String line : lines) {
-            sender.sendMessage(MessageUtil.replacePlaceholders(null, MessageUtil.miniMessage(line), values));
+            sender.sendMessage(MessageUtil.replacePlaceholders(player, MessageUtil.miniMessage(line), values));
         }
     }
 }

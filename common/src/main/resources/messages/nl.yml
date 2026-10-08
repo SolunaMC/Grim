@@ -146,6 +146,17 @@ client-brand:
         - "&bApparaat: &f%bedrock_device%"
         - "&bInvoer: &f%bedrock_input%"
         - "&7======================"
+    # Profiel dat /grim profile voor Bedrock-spelers toont als bedrock.enabled aan staat, geldige placeholders: %prefix% %player% %bedrock_device% %bedrock_input% %ping% %version% %brand%
+    bedrock-profile-checked:
+        - "&7======================"
+        - "%prefix% &bProfiel voor &f%player%"
+        - "&bBedrock-speler &7(gecontroleerd door de Bedrock-checks)"
+        - "&bApparaat: &f%bedrock_device%"
+        - "&bInvoer: &f%bedrock_input%"
+        - "&bPing: &f%ping%"
+        - "&bVersie: &f%version%"
+        - "&bClient Merk: &f%brand%"
+        - "&7======================"
     # Wordt naar het team gestuurd als een clientregel uit config.yml overeenkomt. %rule% is de regex van de regel, %match% het gevonden merk, de mod of het kanaal
     rule-alert-format: "%prefix% &f%player% &bvoldoet aan clientregel &f%rule% &7(%match%)"
     # Kickbericht van clientregels uit config.yml, geldige placeholders: %player% %rule% %match%

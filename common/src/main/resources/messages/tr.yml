@@ -145,6 +145,17 @@ client-brand:
         - "&bCihaz: &f%bedrock_device%"
         - "&bKontrol Yöntemi: &f%bedrock_input%"
         - "&7======================"
+    # bedrock.enabled açıkken /grim profile komutunun Bedrock oyuncuları için gösterdiği profil, geçerli yer tutucular: %prefix% %player% %bedrock_device% %bedrock_input% %ping% %version% %brand%
+    bedrock-profile-checked:
+        - "&7======================"
+        - "%prefix% &f%player% &badlı oyuncunun profili:"
+        - "&bBedrock oyuncusu &7(Bedrock kontrolleriyle denetleniyor)"
+        - "&bCihaz: &f%bedrock_device%"
+        - "&bKontrol Yöntemi: &f%bedrock_input%"
+        - "&bGecikme: &f%ping%"
+        - "&bVersiyon: &f%version%"
+        - "&bKullanılan Client: &f%brand%"
+        - "&7======================"
     # config.yml'deki bir client kuralı eşleştiğinde yetkililere gönderilir. %rule% kuralın regex'i, %match% eşleşen marka, mod veya kanaldır
     rule-alert-format: "%prefix% &f%player% &badlı oyuncu &f%rule% &bclient kuralıyla eşleşti &7(%match%)"
     # config.yml'deki client kurallarının atma mesajı, geçerli yer tutucular: %player% %rule% %match%

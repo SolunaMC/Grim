@@ -145,6 +145,17 @@ client-brand:
         - "&bデバイス: &f%bedrock_device%"
         - "&b入力方法: &f%bedrock_input%"
         - "&7======================"
+    # bedrock.enabled が有効なときに Bedrock プレイヤーに対して /grim profile が表示するプロファイル。使用できるプレースホルダー: %prefix% %player% %bedrock_device% %bedrock_input% %ping% %version% %brand%
+    bedrock-profile-checked:
+        - "&7======================"
+        - "%prefix% &b%player% のプロファイル"
+        - "&bBedrock プレイヤー &7(Bedrock 用チェックの対象)"
+        - "&bデバイス: &f%bedrock_device%"
+        - "&b入力方法: &f%bedrock_input%"
+        - "&bPing: &f%ping%"
+        - "&bバージョン: &f%version%"
+        - "&bクライアントブランド: &f%brand%"
+        - "&7======================"
     # config.yml のクライアントルールに一致したときにスタッフへ送信されます。%rule% はルールの正規表現、%match% は一致したブランド・Mod・チャンネル
     rule-alert-format: "%prefix% &f%player% &bがクライアントルール &f%rule% &bに一致しました &7(%match%)"
     # config.yml のクライアントルールによるキックメッセージ。使用できるプレースホルダー: %player% %rule% %match%

@@ -141,6 +141,17 @@ client-brand:
         - "&b设备: &f%bedrock_device%"
         - "&b输入方式: &f%bedrock_input%"
         - "&7======================"
+    # 启用 bedrock.enabled 时 /grim profile 为基岩版玩家显示的信息，可用占位符：%prefix% %player% %bedrock_device% %bedrock_input% %ping% %version% %brand%
+    bedrock-profile-checked:
+        - "&7======================"
+        - "%prefix% &f%player% &b 的信息"
+        - "&b基岩版玩家 &7(受基岩版检查)"
+        - "&b设备: &f%bedrock_device%"
+        - "&b输入方式: &f%bedrock_input%"
+        - "&b延迟: &f%ping%"
+        - "&b版本: &f%version%"
+        - "&b客户端型号: &f%brand%"
+        - "&7======================"
     # config.yml 中的客户端规则匹配时发送给管理人员。%rule% 为规则的正则表达式，%match% 为匹配到的客户端型号、模组或频道
     rule-alert-format: "%prefix% &f%player% &b匹配了客户端规则 &f%rule% &7(%match%)"
     # config.yml 中客户端规则的踢出消息，可用占位符：%player% %rule% %match%
