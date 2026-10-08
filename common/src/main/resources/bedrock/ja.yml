@@ -6,8 +6,6 @@ bedrock:
     checks:
         - Crash
         - Exploit
-    # Bedrock プレイヤー用の %platform% プレースホルダーの文字列です。Java プレイヤーでは空になります。アラートに表示するには messages.yml の alerts-format に %platform% を追加してください。
-    alert-tag: "&7[Bedrock] "
 
 # スキーマ用マーカー — config.yml のヘッダーコメントを参照。
 config-flavor: V2

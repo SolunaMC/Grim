@@ -37,7 +37,7 @@ webhook-test-failed: "Discord webhook test failed!"
 # 使用可能なプレースホルダー:
 # %prefix%
 # %player%
-# %platform% - Bedrock プレイヤーには bedrock.yml の bedrock.alert-tag、Java プレイヤーには空
+# %platform% - Java または Bedrock
 # %check_name%
 # %description%
 # %experimental%

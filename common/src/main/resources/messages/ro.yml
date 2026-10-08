@@ -37,7 +37,7 @@ webhook-test-failed: "Testul webhook-ului Discord a eșuat!"
 # Placeholdere valide:
 # %prefix%
 # %player%
-# %platform% - bedrock.alert-tag din bedrock.yml pentru jucătorii Bedrock, gol pentru jucătorii Java
+# %platform% - Java sau Bedrock
 # %check_name%
 # %description%
 # %experimental%

@@ -22,7 +22,6 @@ class BedrockConfigUpdateTest {
                 assertNotNull(in, "missing /bedrock/" + lang + ".yml");
                 String content = new String(in.readAllBytes(), StandardCharsets.UTF_8);
                 assertTrue(content.contains("bedrock:") && content.contains("enabled: false"), lang);
-                assertTrue(content.contains("alert-tag: \"&7[Bedrock] \""), lang);
             }
         }
     }

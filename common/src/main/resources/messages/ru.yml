@@ -37,7 +37,7 @@ webhook-test-failed: "Discord webhook test failed!"
 # Допустимые заполнители:
 # %prefix%
 # %player%
-# %platform% - bedrock.alert-tag из bedrock.yml для игроков Bedrock, пусто для игроков Java
+# %platform% - Java или Bedrock
 # %check_name%
 # %description%
 # %experimental%

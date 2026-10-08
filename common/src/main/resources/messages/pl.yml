@@ -37,7 +37,7 @@ webhook-test-failed: "Test webhooka Discorda nie powiódł się!"
 # Dostępne placeholdery:
 # %prefix%
 # %player%
-# %platform% - bedrock.alert-tag z bedrock.yml dla graczy Bedrock, pusty dla graczy Javy
+# %platform% - Java lub Bedrock
 # %check_name%
 # %description%
 # %experimental%

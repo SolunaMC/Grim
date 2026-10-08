@@ -6,8 +6,6 @@ bedrock:
     checks:
         - Crash
         - Exploit
-    # 基岩版玩家的 %platform% 占位符文本，Java 版玩家为空。在 messages.yml 的 alerts-format 中加入 %platform% 即可在警报中显示。
-    alert-tag: "&7[Bedrock] "
 
 # 模式标记 — 参见 config.yml 顶部的注释。
 config-flavor: V2

@@ -6,8 +6,6 @@ bedrock:
     checks:
         - Crash
         - Exploit
-    # Tekst placeholdera %platform% dla graczy Bedrock, pusty dla graczy Javy. Dodaj %platform% do alerts-format w messages.yml, aby pokazać go w alertach.
-    alert-tag: "&7[Bedrock] "
 
 # Znaczniki schematu — zobacz komentarz nagłówkowy w config.yml.
 config-flavor: V2

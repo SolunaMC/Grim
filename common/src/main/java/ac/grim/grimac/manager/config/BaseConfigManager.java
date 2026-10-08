@@ -31,8 +31,6 @@ public class BaseConfigManager {
     @Getter
     private volatile boolean bedrockEnabled = false;
     @Getter
-    private volatile String bedrockAlertTag = "&7[Bedrock] ";
-    @Getter
     private String prefix = "&bGrim &8»";
     @Getter
     private String webhookNotEnabled;
@@ -102,7 +100,6 @@ public class BaseConfigManager {
 
         printAlertsToConsole = config.getBooleanElse("alerts.print-to-console", true);
         bedrockEnabled = config.getBooleanElse("bedrock.enabled", false);
-        bedrockAlertTag = config.getStringElse("bedrock.alert-tag", "&7[Bedrock] ");
         prefix = config.getStringElse("prefix", "&bGrim &8»");
 
         webhookNotEnabled = config.getStringElse("webhook-not-enabled", "Discord webhooks are not enabled!");
